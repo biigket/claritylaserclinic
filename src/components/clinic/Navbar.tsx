@@ -1,6 +1,7 @@
 import { useLanguage } from "@/i18n/LanguageContext";
 import translations from "@/i18n/translations";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import logoImage from "@/assets/logo-clarity.jpeg";
 
 const Navbar = () => {
   const { lang, setLang, t } = useLanguage();
@@ -28,8 +29,12 @@ const Navbar = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between h-16 md:h-20">
-        <a href="#" className="font-display text-lg md:text-xl tracking-wider text-foreground">
-          CLARITY CLINIC
+        <a href="#" className="flex items-center">
+          <img 
+            src={logoImage} 
+            alt="Clarity Laser & Aesthetic" 
+            className="h-10 md:h-12 w-auto object-contain rounded-sm"
+          />
         </a>
 
         {/* Desktop nav */}
