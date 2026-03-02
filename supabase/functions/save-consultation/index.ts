@@ -27,14 +27,31 @@ Deno.serve(async (req) => {
       );
     }
 
+    const payload = { name, concern, phone: phone && phone !== "-" ? `'${phone}` : "-", note: note || "" };
+
+    // Send to Google Sheets
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, concern, phone: phone && phone !== "-" ? `'${phone}` : "-", note: note || "" }),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
       throw new Error(`Google Sheets responded with ${response.status}`);
+    }
+
+    // Send to additional webhook
+    const formWebhookUrl = Deno.env.get("FORM_WEBHOOK_URL");
+    if (formWebhookUrl) {
+      try {
+        await fetch(formWebhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+      } catch (e) {
+        console.error("Additional webhook failed:", e);
+      }
     }
 
     return new Response(
