@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, concern, phone: phone || "-", note: note || "" }),
+      body: JSON.stringify({ name, concern, phone: phone && phone !== "-" ? `'${phone}` : "-", note: note || "" }),
     });
 
     if (!response.ok) {
