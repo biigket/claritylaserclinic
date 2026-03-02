@@ -117,9 +117,9 @@ const SpeakerSection = () => {
                     <img
                       src={slide.image}
                       alt={slide.title.en}
-                      className={`w-full h-full object-cover object-center transition-transform duration-700 ease-out ${
-                        isActive ? "scale-[1.03]" : "scale-100"
-                      }`}
+                      className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
+                        i === 2 ? "object-[50%_25%]" : "object-center"
+                      } ${isActive ? "scale-[1.03]" : "scale-100"}`}
                     />
                     {/* Gradient overlay */}
                     <div className={`absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-500 ${
