@@ -134,31 +134,94 @@ const translations = {
     ],
   },
   treatment: {
-    label: { th: "แนวทางการรักษา", en: "Treatment Approach" },
+    label: { th: "แนวทางการรักษาแบบครบทุกชั้นผิว", en: "All-Layer Treatment Approach" },
     title: {
-      th: "การรักษาแบบทุกชั้นผิว",
-      en: "All-Layer Treatment",
+      th: "ฟื้นฟูผิวจากต้นเหตุ ไม่ใช่แค่รักษาที่ผิวด้านบน",
+      en: "Restore skin from the root cause, not just the surface",
+    },
+    subtitle: {
+      th: "ผิวที่ดูดีจริง ต้องได้รับการดูแล \"ทุกชั้น\"",
+      en: "Truly beautiful skin requires care at \"every layer\"",
+    },
+    subtitleDesc: {
+      th: "เราออกแบบการรักษาให้ทำงานตั้งแต่ผิวชั้นบน ไปจนถึงโครงสร้างใบหน้า เพื่อผลลัพธ์ที่ดูเป็นธรรมชาติและยาวนาน",
+      en: "We design treatments that work from the surface layer down to the facial structure, for results that look natural and last",
+    },
+    closing: {
+      th: "เพราะผิวไม่ได้มีแค่ชั้นเดียว",
+      en: "Because skin isn't just one layer",
+    },
+    closingDesc: {
+      th: "เราจึงรักษาแบบครบทุกระดับ เพื่อผลลัพธ์ที่ดูดีจริงในระยะยาว",
+      en: "We treat at every level, for results that truly look great long-term",
     },
     layers: [
       {
-        name: { th: "ชั้นลึก (SMAS / ไขมัน)", en: "Deep Layer (SMAS / Fat)" },
-        desc: {
-          th: "ตัดพังผืดใต้หลุม ยกระดับโครงสร้าง ปรับรูปหน้า",
-          en: "Fibrous band release, structural elevation, contour refinement",
+        icon: "✨",
+        name: { th: "ชั้นผิวด้านบน (Surface Skin)", en: "Surface Skin" },
+        tagline: {
+          th: "ปรับผิวให้เรียบเนียน กระจ่างใส",
+          en: "Smooth and brighten the skin surface",
+        },
+        points: [
+          { th: "ลดจุดด่างดำ รอยแดง และความหมองคล้ำ", en: "Reduce dark spots, redness, and dullness" },
+          { th: "ปรับสีผิวให้สม่ำเสมอ", en: "Even out skin tone" },
+          { th: "ฟื้นฟูผิวให้ดูสดใส สุขภาพดี", en: "Restore a fresh, healthy glow" },
+        ],
+        result: {
+          th: "ผิวดูใสขึ้นตั้งแต่ครั้งแรกที่เริ่มดูแล",
+          en: "Visibly brighter skin from the very first session",
         },
       },
       {
-        name: { th: "ชั้นกลาง (หนังแท้)", en: "Mid Layer (Dermis)" },
-        desc: {
-          th: "กระตุ้นคอลลาเจน เติมเนื้อเยื่อ ลดหลุมสิว",
-          en: "Collagen stimulation, tissue remodeling, scar depth reduction",
+        icon: "💧",
+        name: { th: "ชั้นผิวกลาง (Skin Quality Layer)", en: "Skin Quality Layer" },
+        tagline: {
+          th: "ซ่อมแซมผิวและกระตุ้นคอลลาเจน",
+          en: "Repair skin and stimulate collagen",
+        },
+        points: [
+          { th: "กระตุ้นการสร้างคอลลาเจนใหม่", en: "Stimulate new collagen production" },
+          { th: "ลดหลุมสิวและรูขุมขน", en: "Reduce acne scars and pores" },
+          { th: "เพิ่มความแน่นและความยืดหยุ่นของผิว", en: "Improve skin firmness and elasticity" },
+        ],
+        result: {
+          th: "ผิวแข็งแรงขึ้นจากภายใน",
+          en: "Stronger skin from within",
         },
       },
       {
-        name: { th: "ชั้นตื้น (หนังกำพร้า)", en: "Surface Layer (Epidermis)" },
-        desc: {
-          th: "ปรับสีผิว ลดจุดด่างดำ ฟื้นฟูความสม่ำเสมอ",
-          en: "Tone correction, pigment reduction, uniformity restoration",
+        icon: "🔥",
+        name: { th: "ชั้นผิวลึก (Lifting Layer)", en: "Lifting Layer" },
+        tagline: {
+          th: "ยกกระชับและแก้ปัญหาที่ต้นเหตุ",
+          en: "Lift and address the root cause",
+        },
+        points: [
+          { th: "คลายพังผืดใต้หลุมสิว", en: "Release fibrous bands under scars" },
+          { th: "ยกกระชับชั้นลึกของผิว", en: "Deep-layer skin lifting" },
+          { th: "ปรับกรอบหน้าให้ดูได้รูปมากขึ้น", en: "Refine facial contour" },
+        ],
+        result: {
+          th: "ใบหน้าดูยกกระชับโดยไม่ต้องผ่าตัด",
+          en: "A lifted look without surgery",
+        },
+      },
+      {
+        icon: "🦴",
+        name: { th: "ชั้นโครงสร้างใบหน้า (Foundation Layer)", en: "Foundation Layer" },
+        tagline: {
+          th: "เสริมฐานโครงหน้าให้สมดุล",
+          en: "Strengthen and balance the facial foundation",
+        },
+        points: [
+          { th: "ฟื้นฟูการรองรับของโครงหน้า", en: "Restore facial structural support" },
+          { th: "ลดความหย่อนคล้อยจากการยุบตัวตามวัย", en: "Reduce sagging from age-related volume loss" },
+          { th: "ทำให้ผลลัพธ์ดูเป็นธรรมชาติและอยู่ได้นานขึ้น", en: "Ensure natural-looking and longer-lasting results" },
+        ],
+        result: {
+          th: "ความสวยที่เริ่มจาก \"โครงสร้างที่แข็งแรง\"",
+          en: "Beauty that starts from \"a strong foundation\"",
         },
       },
     ],
