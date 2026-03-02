@@ -166,25 +166,43 @@ const translations = {
   technology: {
     label: { th: "เทคโนโลยี", en: "Technology Intelligence" },
     title: {
-      th: "ครอบคลุมทุกกลุ่มพลังงานสำหรับผลลัพธ์ที่ครบถ้วน",
-      en: "Complete energy spectrum for comprehensive results",
+      th: "เราไม่ได้เลือกเครื่อง — เราเลือกพลังงานที่เหมาะกับชั้นผิว",
+      en: "We don't choose machines — we choose the right energy for each skin layer",
+    },
+    subtitle: {
+      th: "เทคโนโลยีของเราถูกจัดกลุ่มตามหน้าที่ต่อผิว ไม่ใช่ตามชื่อเครื่อง",
+      en: "Our technologies are classified by skin function, not by device name",
     },
     categories: [
       {
-        name: { th: "พลังงานแสง", en: "Light Energy" },
-        desc: { th: "IPL, Laser Toning, Pico Laser", en: "IPL, Laser Toning, Pico Laser" },
+        name: { th: "Surface Renewal", en: "Surface Renewal" },
+        tagline: { th: "ฟื้นฟูผิวชั้นบน ปรับผิวเรียบ ลดหลุมสิว รูขุมขน", en: "Surface renewal & controlled skin regeneration" },
+        devices: { th: "Erbium Glass • Thulium • CO₂ • Er:YAG", en: "Erbium Glass • Thulium • CO₂ • Er:YAG" },
+        layer: { th: "Epidermis + Superficial Dermis", en: "Epidermis + Superficial Dermis" },
       },
       {
-        name: { th: "พลังงานความร้อน", en: "Thermal Energy" },
-        desc: { th: "Fractional CO₂, Erbium Laser", en: "Fractional CO₂, Erbium Laser" },
+        name: { th: "Pigment Precision", en: "Pigment Precision" },
+        tagline: { th: "ปรับสีผิว ลดจุดด่างดำ ฝ้า กระ เพิ่มความกระจ่างใส", en: "Precision pigment targeting technology" },
+        devices: { th: "Picosecond Laser • Thulium", en: "Picosecond Laser • Thulium" },
+        layer: { th: "Epidermis — Melanin Target", en: "Epidermis — Melanin Target" },
       },
       {
-        name: { th: "คลื่นความถี่วิทยุ", en: "Radiofrequency" },
-        desc: { th: "RF Microneedling, Monopolar RF", en: "RF Microneedling, Monopolar RF" },
+        name: { th: "Redness & Vascular Control", en: "Redness & Vascular Control" },
+        tagline: { th: "ลดรอยแดง เส้นเลือดฝอย ควบคุมการอักเสบ", en: "Vascular balance & redness management" },
+        devices: { th: "Long Pulse Nd:YAG • Long Pulse KTP", en: "Long Pulse Nd:YAG • Long Pulse KTP" },
+        layer: { th: "Dermis — Hemoglobin Target", en: "Dermis — Hemoglobin Target" },
       },
       {
-        name: { th: "อัลตราซาวด์", en: "Ultrasound" },
-        desc: { th: "HIFU, Micro-focused Ultrasound", en: "HIFU, Micro-focused Ultrasound" },
+        name: { th: "Deep Skin Remodeling", en: "Deep Skin Remodeling" },
+        tagline: { th: "รักษาหลุมสิวชั้นลึก กระตุ้น collagen remodeling", en: "Deep dermal regeneration technology" },
+        devices: { th: "Microneedle RF (MNRF)", en: "Microneedle RF (MNRF)" },
+        layer: { th: "Deep Dermis", en: "Deep Dermis" },
+      },
+      {
+        name: { th: "Structural Lifting", en: "Structural Lifting" },
+        tagline: { th: "ยกกระชับโครงสร้างผิว ชั้น SMAS และ Dermis", en: "Structural lifting & collagen tightening" },
+        devices: { th: "MFU • Monopolar RF", en: "MFU • Monopolar RF" },
+        layer: { th: "SMAS + Deep Dermis", en: "SMAS + Deep Dermis" },
       },
     ],
   },
