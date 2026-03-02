@@ -14,16 +14,175 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      promotions: {
+        Row: {
+          alt_text_en: string | null
+          alt_text_th: string | null
+          badge_text_en: string | null
+          badge_text_th: string | null
+          compare_at_price: number | null
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          cta_form_id: string | null
+          cta_label_en: string | null
+          cta_label_th: string | null
+          cta_link: string | null
+          cta_type: string | null
+          end_at: string | null
+          gallery_image_urls: Json | null
+          id: string
+          is_featured: boolean
+          notes_en: string | null
+          notes_th: string | null
+          objective_en: string | null
+          objective_th: string | null
+          order_index: number
+          price: number | null
+          price_unit_en: string | null
+          price_unit_th: string | null
+          slug: string
+          start_at: string | null
+          status: string
+          suitable_for_en: string | null
+          suitable_for_th: string | null
+          tech_stack_en: string | null
+          tech_stack_th: string | null
+          title_en: string | null
+          title_th: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          alt_text_en?: string | null
+          alt_text_th?: string | null
+          badge_text_en?: string | null
+          badge_text_th?: string | null
+          compare_at_price?: number | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          cta_form_id?: string | null
+          cta_label_en?: string | null
+          cta_label_th?: string | null
+          cta_link?: string | null
+          cta_type?: string | null
+          end_at?: string | null
+          gallery_image_urls?: Json | null
+          id?: string
+          is_featured?: boolean
+          notes_en?: string | null
+          notes_th?: string | null
+          objective_en?: string | null
+          objective_th?: string | null
+          order_index?: number
+          price?: number | null
+          price_unit_en?: string | null
+          price_unit_th?: string | null
+          slug: string
+          start_at?: string | null
+          status?: string
+          suitable_for_en?: string | null
+          suitable_for_th?: string | null
+          tech_stack_en?: string | null
+          tech_stack_th?: string | null
+          title_en?: string | null
+          title_th?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          alt_text_en?: string | null
+          alt_text_th?: string | null
+          badge_text_en?: string | null
+          badge_text_th?: string | null
+          compare_at_price?: number | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          cta_form_id?: string | null
+          cta_label_en?: string | null
+          cta_label_th?: string | null
+          cta_link?: string | null
+          cta_type?: string | null
+          end_at?: string | null
+          gallery_image_urls?: Json | null
+          id?: string
+          is_featured?: boolean
+          notes_en?: string | null
+          notes_th?: string | null
+          objective_en?: string | null
+          objective_th?: string | null
+          order_index?: number
+          price?: number | null
+          price_unit_en?: string | null
+          price_unit_th?: string | null
+          slug?: string
+          start_at?: string | null
+          status?: string
+          suitable_for_en?: string | null
+          suitable_for_th?: string | null
+          tech_stack_en?: string | null
+          tech_stack_th?: string | null
+          title_en?: string | null
+          title_th?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_admin_or_editor: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "editor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +309,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "editor"],
+    },
   },
 } as const
