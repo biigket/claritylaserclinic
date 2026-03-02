@@ -68,7 +68,7 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Prompt', sans-serif;
     font-weight: 200;
-    letter-spacing: 0.02em;
+    letter-spacing: 0;
   }
 }
 
