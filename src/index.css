@@ -67,16 +67,15 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Prompt', sans-serif;
-    font-weight: 300;
-    letter-spacing: -0.01em;
+    font-weight: 200;
+    letter-spacing: 0.02em;
   }
 }
 
 @layer utilities {
   .font-display {
     font-family: 'Prompt', sans-serif;
-    font-weight: 300;
-    letter-spacing: -0.01em;
+    font-weight: 200;
   }
 
   .font-body {

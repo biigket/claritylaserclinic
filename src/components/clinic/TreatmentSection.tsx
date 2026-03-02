@@ -9,7 +9,7 @@ const TreatmentSection = () => {
   return (
     <section className="section-padding">
       <div ref={ref} className="max-w-4xl mx-auto opacity-0 animate-reveal">
-        <p className="font-body text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6 text-center">
+        <p className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground mb-6 text-center">
           {t(translations.treatment.label)}
         </p>
         <h2 className="font-display text-2xl md:text-4xl font-light text-foreground text-center mb-16">

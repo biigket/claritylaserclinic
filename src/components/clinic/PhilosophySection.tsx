@@ -12,7 +12,7 @@ const PhilosophySection = () => {
       <div ref={ref} className="max-w-6xl mx-auto opacity-0 animate-reveal">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div className="text-center lg:text-left">
-            <p className="font-body text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
+            <p className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground mb-6">
               {t(translations.philosophy.label)}
             </p>
             <h2 className="font-display text-2xl md:text-4xl font-light leading-snug text-foreground">
