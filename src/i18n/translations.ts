@@ -225,6 +225,83 @@ const translations = {
       },
     ],
   },
+  reviews: {
+    label: { th: "รีวิวจากผู้ใช้บริการ", en: "Patient Reviews" },
+    items: [
+      {
+        name: "Toei",
+        avatar: "T",
+        badge: "",
+        text: {
+          th: "ทำโปรแกรม doublo ยกกระชับ+สลายไขมัน เห็นผลชัดขนาดนี้ครั้งแรก! พนักงานดูแลดีมาก คุณหมอใจดี ถามตลอดว่าเจ็บมั้ย จะเป็นคลินิกประจำตลอดไป",
+          en: "Had the Doublo lifting + fat reduction program. First time seeing such clear results! Staff was amazing, doctor was so kind. Will be my go-to clinic forever.",
+        },
+      },
+      {
+        name: "RUECHYY",
+        avatar: "",
+        badge: "Local Guide",
+        text: {
+          th: "เลเซอร์แม่นยำมาก เครื่องครบทุกความยาวคลื่น หมอเลือกสิ่งที่เหมาะกับผิวเรา อธิบายทุกขั้นตอนก่อนทำ ไม่มี downtime คุณภาพระดับโรงพยาบาลในราคาคลินิก",
+          en: "Hospital-level laser quality with clear explanations and minimal downtime. The doctor chose exactly what was right for my skin. Truly comparable to top-tier hospitals.",
+        },
+      },
+      {
+        name: "Petra Bollhalder",
+        avatar: "P",
+        badge: "",
+        text: {
+          th: "คุณหมอและผู้ช่วยอธิบายทุกอย่างละเอียด เป็นมืออาชีพและอดทนมาก รู้สึกได้รับการดูแลเป็นอย่างดีตลอดการรักษา ตั้งตารอที่จะกลับมาอีก",
+          en: "The doctor and assistant explained everything in detail, professional and patient. I felt well taken care of throughout the treatment. Can't wait to come back!",
+        },
+      },
+      {
+        name: "Jirawat Laosuphap",
+        avatar: "",
+        badge: "Local Guide",
+        text: {
+          th: "ไปครั้งแรกประทับใจมาก คุณหมอละเอียดสุด อธิบายเข้าใจง่าย แนะนำสิ่งที่เหมาะกับหน้าเรา มีบริการแถมหน้าด้วย ทีมงานดูแลดีมาก เดินทางง่าย ลงลิฟต์ไปชั้น B เจอเลย",
+          en: "Impressed from the first visit! Doctor was thorough and explained everything clearly. Staff was wonderful. Easy to find — just take the lift to floor B.",
+        },
+      },
+      {
+        name: "เบญจภา พัน",
+        avatar: "",
+        badge: "",
+        text: {
+          th: "ประทับใจที่สุดในชีวิต คุณหมอวิเคราะห์ละเอียดและให้คำแนะนำดีมากๆ ตัวจริงสวยมากด้วย พนักงานน่ารักและ nice ทุกคนเลย แนะนำมากๆค่ะ",
+          en: "Most impressive clinic experience ever. The doctor's analysis was detailed with great recommendations. Staff was lovely and nice. Highly recommended!",
+        },
+      },
+      {
+        name: "Chonruthai Khowto",
+        avatar: "C",
+        badge: "",
+        text: {
+          th: "ชอบที่คลินิกมีเครื่อง scan ผิว คุณหมอ communicate ได้เข้าใจง่ายดี informative มาก แนะนำเลยค่ะ มารอบ 2 แล้ว ไว้มาอีกแน่นอน",
+          en: "Love the skin scanning device! The doctor communicates clearly and is very informative. Already came for a second visit, will definitely be back!",
+        },
+      },
+      {
+        name: "N G",
+        avatar: "N",
+        badge: "",
+        text: {
+          th: "พนักงานเป็นมืออาชีพมาก มีเลเซอร์หลายชนิดสำหรับปัญหาผิวต่างๆ รวมหลายการรักษาในเซสชันเดียวได้ ราคาสมเหตุสมผลกับคุณภาพ ให้ 100/10!",
+          en: "Exceptionally professional staff. Wide range of laser machines with the option to combine treatments. Pricing is very reasonable for the quality. 100/10!",
+        },
+      },
+      {
+        name: "Nichapa Pipatthanapokin",
+        avatar: "N",
+        badge: "",
+        text: {
+          th: "ประทับใจเครื่องวิเคราะห์ผิว ทำให้ได้โปรแกรมที่เหมาะกับเรา ผู้เชี่ยวชาญอธิบายชัดเจนและปรับการรักษาตามความต้องการ ผลลัพธ์ดีมาก แนะนำเลย!",
+          en: "Impressed with the innovative skin analysis machine for a personalized program. Experts explained everything clearly. Great results, highly recommended!",
+        },
+      },
+    ],
+  },
   cta: {
     title: {
       th: "พร้อมเริ่มต้นเส้นทางสู่ผิวที่ดีกว่า",
