@@ -18,18 +18,13 @@ const DoctorSection = () => {
         </h2>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="relative overflow-hidden mx-auto lg:mx-0 max-w-md group">
+          <div className="relative overflow-hidden mx-auto lg:mx-0 max-w-md">
             <img
               src={doctorImage}
               alt="นพ.ฐิติคมน์ – Clarity Clinic"
               className="w-full h-auto object-cover grayscale-[15%] brightness-105 contrast-[0.95]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
-            {/* Animated pop-up badge */}
-            <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm border border-border px-4 py-2.5 rounded-lg shadow-lg animate-[scale-in_0.6s_ease-out_0.5s_both]">
-              <p className="font-display text-sm font-medium text-foreground">นพ.ฐิติคมน์</p>
-              <p className="font-body text-[10px] tracking-widest text-muted-foreground">ว.61395</p>
-            </div>
           </div>
 
           <div className="text-center lg:text-left">
