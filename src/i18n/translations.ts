@@ -11,12 +11,12 @@ const translations = {
   },
   hero: {
     headline: {
-      th: "สถาบันเฉพาะทางด้านหลุมสิวและคุณภาพผิว",
-      en: "Specialist Institute for Acne Scars & Skin Quality",
+      th: "หลุมสิวดีขึ้นได้ เมื่อรักษาถูกชั้นผิว",
+      en: "Acne Scars Can Improve When Treated at the Right Skin Layer",
     },
     sub: {
-      th: "การรักษาเชิงลึกแบบหลายระดับชั้น ด้วยเทคโนโลยีที่คัดสรรอย่างแม่นยำ",
-      en: "Multi-layered precision treatment with intelligently selected technologies",
+      th: "รวมหลายเครื่องและเทคนิค เพื่อผลลัพธ์ที่ชัดเจนยิ่งขึ้น ในราคาเดียว",
+      en: "Combining multiple devices and techniques for clearer results, all in one price",
     },
     cta: { th: "นัดปรึกษาแพทย์", en: "Book a Consultation" },
   },
