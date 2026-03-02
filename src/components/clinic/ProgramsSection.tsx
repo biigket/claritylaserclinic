@@ -17,9 +17,6 @@ const ProgramsSection = () => {
           <p className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground mb-6">
             {t(translations.programs.label)}
           </p>
-          <p className="font-body text-sm font-light text-muted-foreground max-w-xl mx-auto">
-            {t(translations.programs.subtitle)}
-          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
