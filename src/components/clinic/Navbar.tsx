@@ -19,7 +19,6 @@ const Navbar = ({ onBook }: NavbarProps) => {
   }, []);
 
   const links = [
-    { href: "#philosophy", label: t(translations.nav.philosophy) },
     { href: "#programs", label: t(translations.nav.programs) },
     { href: "#technology", label: t(translations.nav.technology) },
     { href: "#philosophy", label: t(translations.nav.doctor) },
