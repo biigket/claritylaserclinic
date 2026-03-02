@@ -1,6 +1,6 @@
 import { useLanguage } from "@/i18n/LanguageContext";
 import translations from "@/i18n/translations";
-import heroImage from "@/assets/clinic-reception.jpeg";
+import heroImage from "@/assets/hero-clinic.jpg";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
 const HeroSection = () => {
@@ -13,8 +13,8 @@ const HeroSection = () => {
       <div className="absolute inset-0">
         <img
           src={heroImage}
-          alt="Clarity Clinic reception"
-          className="w-full h-full object-cover"
+          alt="Clarity Laser & Aesthetic reception"
+          className="w-full h-full object-cover object-center md:object-[center_40%]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/20" />
       </div>
