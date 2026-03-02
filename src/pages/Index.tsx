@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Navbar from "@/components/clinic/Navbar";
 import HeroSection from "@/components/clinic/HeroSection";
 import PhilosophySection from "@/components/clinic/PhilosophySection";
@@ -12,12 +13,16 @@ import JourneySection from "@/components/clinic/JourneySection";
 import CtaSection from "@/components/clinic/CtaSection";
 import FooterSection from "@/components/clinic/FooterSection";
 import FloatingButton from "@/components/clinic/FloatingButton";
+import ConsultationPopup from "@/components/clinic/ConsultationPopup";
 
 const Index = () => {
+  const [popupOpen, setPopupOpen] = useState(false);
+  const openPopup = () => setPopupOpen(true);
+
   return (
     <div className="min-h-screen">
-      <Navbar />
-      <HeroSection />
+      <Navbar onBook={openPopup} />
+      <HeroSection onBook={openPopup} />
       <PhilosophySection />
       <SpeakerSection />
       <WhyClaritySection />
@@ -27,9 +32,10 @@ const Index = () => {
       <TechnologySection />
       <DoctorSection />
       <JourneySection />
-      <CtaSection />
+      <CtaSection onBook={openPopup} />
       <FooterSection />
       <FloatingButton />
+      <ConsultationPopup open={popupOpen} onClose={() => setPopupOpen(false)} />
     </div>
   );
 };
