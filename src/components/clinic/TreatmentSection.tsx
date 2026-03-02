@@ -19,12 +19,9 @@ const TreatmentSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border">
           {translations.treatment.layers.map((layer, i) => (
             <div key={i} className="bg-background p-8 md:p-12">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-2xl">{layer.icon}</span>
-                <span className="font-body text-xs tracking-[0.1em] text-gold/80">
-                  {layer.num}
-                </span>
-              </div>
+              <span className="font-body text-xs tracking-[0.1em] text-gold/80 mb-4 block">
+                {layer.num}
+              </span>
               <h3 className="font-display text-xl md:text-2xl font-light text-foreground mb-4">
                 {t(layer.name)}
               </h3>
