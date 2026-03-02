@@ -9,7 +9,7 @@ const JourneySection = () => {
   return (
     <section className="section-padding bg-card">
       <div ref={ref} className="max-w-4xl mx-auto opacity-0 animate-reveal">
-        <p className="font-body text-xs tracking-[0.3em] uppercase text-muted-foreground mb-16 text-center">
+        <p className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground mb-16 text-center">
           {t(translations.journey.label)}
         </p>
 

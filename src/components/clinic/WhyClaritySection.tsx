@@ -9,7 +9,7 @@ const WhyClaritySection = () => {
   return (
     <section className="section-padding">
       <div ref={ref} className="max-w-6xl mx-auto opacity-0 animate-reveal">
-        <p className="font-body text-xs tracking-[0.3em] uppercase text-muted-foreground mb-16 text-center">
+        <p className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground mb-16 text-center">
           {t(translations.whyClarity.label)}
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-border">

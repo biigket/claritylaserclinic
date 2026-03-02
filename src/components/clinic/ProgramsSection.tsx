@@ -14,7 +14,7 @@ const ProgramsSection = () => {
     <section id="programs" className="section-padding bg-card">
       <div ref={ref} className="max-w-6xl mx-auto opacity-0 animate-reveal">
         <div className="text-center mb-16">
-          <p className="font-body text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6">
+          <p className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground mb-6">
             {t(translations.programs.label)}
           </p>
           <p className="font-body text-sm font-light text-muted-foreground max-w-xl mx-auto">

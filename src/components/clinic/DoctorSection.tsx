@@ -10,7 +10,7 @@ const DoctorSection = () => {
   return (
     <section id="doctor" className="section-padding">
       <div ref={ref} className="max-w-6xl mx-auto opacity-0 animate-reveal">
-        <p className="font-body text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6 text-center">
+        <p className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground mb-6 text-center">
           {t(translations.doctor.label)}
         </p>
         <h2 className="font-display text-2xl md:text-3xl font-light text-foreground mb-16 text-center">

@@ -84,7 +84,7 @@ const SpeakerSection = () => {
     <section className="section-padding bg-background overflow-hidden">
       <div ref={sectionRef} className="max-w-6xl mx-auto opacity-0 animate-reveal">
         {/* Header */}
-        <p className="font-body text-xs tracking-[0.3em] uppercase text-muted-foreground mb-6 text-center">
+        <p className="font-body text-xs tracking-[0.15em] uppercase text-muted-foreground mb-6 text-center">
           {t({ th: "ผลงานวิชาการ", en: "Scientific Activities" })}
         </p>
         <h2 className="font-display text-2xl md:text-3xl font-light text-foreground text-center mb-4 max-w-3xl mx-auto">
