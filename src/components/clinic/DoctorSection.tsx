@@ -28,7 +28,7 @@ const DoctorSection = () => {
             {/* Animated pop-up badge */}
             <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm border border-border px-4 py-2.5 rounded-lg shadow-lg animate-[scale-in_0.6s_ease-out_0.5s_both]">
               <p className="font-display text-sm font-medium text-foreground">นพ.ฐิติคมน์</p>
-              <p className="font-body text-[10px] tracking-widest text-muted-foreground">ว.61396</p>
+              <p className="font-body text-[10px] tracking-widest text-muted-foreground">ว.61395</p>
             </div>
           </div>
 
