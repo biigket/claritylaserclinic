@@ -60,7 +60,7 @@ const Navbar = () => {
 
           <a
             href="#contact"
-            className="hidden md:block font-body text-xs tracking-widest uppercase bg-foreground text-background px-5 py-2 hover:bg-foreground/90 transition-colors duration-300"
+            className="hidden md:block font-body text-xs tracking-widest uppercase bg-primary text-primary-foreground px-5 py-2 hover:bg-primary/90 transition-colors duration-300"
           >
             {t(translations.nav.book)}
           </a>
@@ -94,7 +94,7 @@ const Navbar = () => {
             <a
               href="#contact"
               onClick={() => setMenuOpen(false)}
-              className="font-body text-sm tracking-widest uppercase bg-foreground text-background px-5 py-3 text-center"
+              className="font-body text-sm tracking-widest uppercase bg-primary text-primary-foreground px-5 py-3 text-center"
             >
               {t(translations.nav.book)}
             </a>

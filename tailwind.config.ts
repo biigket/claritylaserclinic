@@ -52,6 +52,10 @@ export default {
           mid: "hsl(var(--warm-mid))",
           deep: "hsl(var(--warm-deep))",
         },
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          light: "hsl(var(--gold-light))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -64,8 +68,8 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Cormorant Garamond"', 'serif'],
-        body: ['"Outfit"', 'sans-serif'],
+        display: ['"Prompt"', 'sans-serif'],
+        body: ['"Prompt"', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",

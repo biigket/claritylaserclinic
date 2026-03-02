@@ -29,7 +29,7 @@ const HeroSection = () => {
           </p>
           <a
             href="#contact"
-            className="inline-block mt-10 font-body text-xs tracking-widest uppercase bg-foreground text-background px-8 py-3.5 hover:bg-foreground/90 transition-colors duration-300 animate-reveal animate-reveal-delay-2"
+            className="inline-block mt-10 font-body text-xs tracking-widest uppercase bg-primary text-primary-foreground px-8 py-3.5 hover:bg-primary/90 transition-colors duration-300 animate-reveal animate-reveal-delay-2"
           >
             {t(translations.hero.cta)}
           </a>
