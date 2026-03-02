@@ -139,85 +139,41 @@ const translations = {
       th: "ฟื้นฟูจากต้นเหตุ ไม่ใช่แค่ผิวด้านบน",
       en: "Restore from the root, not just the surface",
     },
-    subtitle: {
-      th: "ผิวที่ดูดีจริง ต้องดูแล \"ทุกชั้น\"",
-      en: "Great skin needs care at \"every layer\"",
-    },
-    subtitleDesc: {
-      th: "เราออกแบบการรักษาตั้งแต่ผิวชั้นบนถึงโครงสร้างใบหน้า เพื่อผลลัพธ์ที่เป็นธรรมชาติและยาวนาน",
-      en: "We treat from surface to structure, for natural and lasting results",
-    },
-    closing: {
-      th: "ผิวไม่ได้มีแค่ชั้นเดียว",
-      en: "Skin isn't just one layer",
-    },
-    closingDesc: {
-      th: "เราจึงรักษาครบทุกระดับ เพื่อผลลัพธ์ที่ดูดีจริงในระยะยาว",
-      en: "So we treat every level for long-lasting results",
-    },
     layers: [
       {
         icon: "✨",
+        num: "01",
         name: { th: "ผิวชั้นบน (Surface)", en: "Surface Skin" },
-        tagline: {
-          th: "ปรับผิวเรียบเนียน กระจ่างใส",
-          en: "Smooth and brighten",
-        },
-        points: [
-          { th: "ลดจุดด่างดำ รอยแดง ความหมองคล้ำ", en: "Reduce spots, redness, dullness" },
-          { th: "ปรับสีผิวสม่ำเสมอ ดูสดใส", en: "Even tone, healthy glow" },
-        ],
-        result: {
-          th: "เห็นผิวใสขึ้นตั้งแต่ครั้งแรก",
-          en: "Brighter skin from session one",
+        desc: {
+          th: "ลดจุดด่างดำ รอยแดง ปรับสีผิวสม่ำเสมอ เห็นผลตั้งแต่ครั้งแรก",
+          en: "Reduce spots, redness, even tone — visible from session one",
         },
       },
       {
         icon: "💧",
+        num: "02",
         name: { th: "ผิวชั้นกลาง (Dermal)", en: "Skin Quality" },
-        tagline: {
-          th: "ซ่อมแซมผิว กระตุ้นคอลลาเจน",
-          en: "Repair and boost collagen",
-        },
-        points: [
-          { th: "กระตุ้นคอลลาเจนใหม่ ลดหลุมสิว", en: "New collagen, reduced scars" },
-          { th: "เพิ่มความแน่นและยืดหยุ่นของผิว", en: "Firmer, more elastic skin" },
-        ],
-        result: {
-          th: "ผิวแข็งแรงขึ้นจากภายใน",
-          en: "Stronger skin from within",
+        desc: {
+          th: "กระตุ้นคอลลาเจนใหม่ ลดหลุมสิว เพิ่มความแน่นยืดหยุ่น",
+          en: "Boost collagen, reduce scars, firmer elastic skin",
         },
       },
       {
         icon: "🔥",
+        num: "03",
         name: { th: "ผิวชั้นลึก (Lifting)", en: "Lifting Layer" },
-        tagline: {
-          th: "ยกกระชับ แก้ที่ต้นเหตุ",
-          en: "Lift and treat the root cause",
-        },
-        points: [
-          { th: "คลายพังผืดใต้หลุมสิว ยกกระชับชั้นลึก", en: "Release scar bands, deep lifting" },
-          { th: "ปรับกรอบหน้าให้ได้รูป", en: "Refine facial contour" },
-        ],
-        result: {
-          th: "หน้ากระชับโดยไม่ต้องผ่าตัด",
-          en: "Lifted look without surgery",
+        desc: {
+          th: "คลายพังผืด ยกกระชับชั้นลึก ปรับกรอบหน้าโดยไม่ต้องผ่าตัด",
+          en: "Release scar bands, deep lift, contour without surgery",
         },
       },
       {
         icon: "🦴",
+        num: "04",
         name: { th: "โครงสร้างใบหน้า (Foundation)", en: "Foundation Layer" },
-        tagline: {
-          th: "เสริมฐานโครงหน้าให้สมดุล",
-          en: "Balance the facial foundation",
-        },
-        points: [
-          { th: "ฟื้นฟูโครงหน้า ลดหย่อนคล้อยตามวัย", en: "Restore structure, reduce sagging" },
-          { th: "ผลลัพธ์เป็นธรรมชาติ อยู่ได้นาน", en: "Natural, long-lasting results" },
-        ],
-        result: {
-          th: "สวยจาก \"โครงสร้างที่แข็งแรง\"",
-          en: "Beauty from \"a strong foundation\"",
+        desc: {
+          th: "ฟื้นฟูโครงหน้า ลดหย่อนคล้อย ผลลัพธ์เป็นธรรมชาติและยาวนาน",
+          en: "Restore structure, reduce sagging, natural lasting results",
         },
       },
     ],
