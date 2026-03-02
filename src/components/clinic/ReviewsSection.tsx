@@ -1,6 +1,6 @@
 import { useLanguage } from "@/i18n/LanguageContext";
 import translations from "@/i18n/translations";
-import { Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Star, ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -77,9 +77,24 @@ const ReviewsSection = () => {
               <span className="text-lg font-medium text-foreground">Google Reviews</span>
               <span className="text-sm text-muted-foreground ml-1">5.0 ★</span>
             </div>
-            <p className="text-muted-foreground text-sm">
-              {t({ th: "รีวิวจริงจากผู้ใช้บริการ", en: "Real reviews from our patients" })}
-            </p>
+            <div className="flex items-center gap-3">
+              <p className="text-muted-foreground text-sm">
+                {t({ th: "รีวิวจริงจากผู้ใช้บริการ", en: "Real reviews from our patients" })}
+              </p>
+              <a
+                href="https://maps.app.goo.gl/YourGoogleMapsLink"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors underline underline-offset-2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.open("https://www.google.com/search?q=%E0%B8%A3%E0%B8%B5%E0%B8%A7%E0%B8%B4%E0%B8%A7+clarity+clinic+%E0%B9%80%E0%B8%A5%E0%B9%80%E0%B8%8B%E0%B8%AD%E0%B8%A3%E0%B9%8C%E0%B8%AB%E0%B8%A5%E0%B8%B8%E0%B8%A1%E0%B8%AA%E0%B8%B4%E0%B8%A7%E0%B9%81%E0%B8%A5%E0%B8%B0%E0%B8%A2%E0%B8%81%E0%B8%81%E0%B8%A3%E0%B8%B0%E0%B8%8A%E0%B8%B1%E0%B8%9A+%E0%B9%80%E0%B8%82%E0%B8%95%E0%B8%A3%E0%B8%B2%E0%B8%8A%E0%B9%80%E0%B8%97%E0%B8%A7%E0%B8%B5#lrd=0x30e29ed751e1fcc1:0xd9b3e75e3de50ee0,1,,,,", "_blank");
+                }}
+              >
+                {t({ th: "ดูรีวิวทั้งหมด", en: "See all reviews" })}
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
           <div className="hidden md:flex gap-2">
             <button
