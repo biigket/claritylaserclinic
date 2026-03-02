@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { X, Check } from "lucide-react";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ConsultationPopupProps {
   open: boolean;
@@ -30,6 +31,7 @@ const ConsultationPopup = ({ open, onClose }: ConsultationPopupProps) => {
   const [budget, setBudget] = useState("");
   const [note, setNote] = useState("");
   const [errors, setErrors] = useState<{ name?: boolean; concern?: boolean }>({});
+  const [submitting, setSubmitting] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
 
   // Lock body scroll & auto-focus
@@ -43,7 +45,7 @@ const ConsultationPopup = ({ open, onClose }: ConsultationPopupProps) => {
     return () => { document.body.style.overflow = ""; };
   }, [open]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors: { name?: boolean; concern?: boolean } = {};
     if (!name.trim()) newErrors.name = true;
     if (!concern) newErrors.concern = true;
@@ -52,17 +54,22 @@ const ConsultationPopup = ({ open, onClose }: ConsultationPopupProps) => {
       return;
     }
     setErrors({});
+    setSubmitting(true);
 
     const concernLabel = concerns.find(c => c.value === concern)?.[lang] || concern;
     const budgetLabel = budgets.find(b => b.value === budget)?.label || "-";
 
-    const message = encodeURIComponent(
-      `สวัสดีค่ะ ต้องการปรึกษาจากเว็บไซต์ Clarity Clinic\n\nชื่อ: ${name.trim()}\nปัญหาที่สนใจ: ${concernLabel}\nงบประมาณ: ${budgetLabel}${note.trim() ? `\nหมายเหตุ: ${note.trim()}` : ""}`
-    );
-
-    const lineUrl = `https://lin.ee/Ez76erL`;
+    // Save to Google Sheets via edge function
+    try {
+      await supabase.functions.invoke("save-consultation", {
+        body: { name: name.trim(), concern: concernLabel, budget: budgetLabel, note: note.trim() },
+      });
+    } catch (e) {
+      console.error("Failed to save consultation:", e);
+    }
 
     // Open LINE
+    const lineUrl = `https://lin.ee/Ez76erL`;
     window.open(lineUrl, "_blank");
 
     // Reset & close
@@ -71,6 +78,7 @@ const ConsultationPopup = ({ open, onClose }: ConsultationPopupProps) => {
       setConcern("");
       setBudget("");
       setNote("");
+      setSubmitting(false);
       onClose();
     }, 500);
   };
@@ -199,9 +207,10 @@ const ConsultationPopup = ({ open, onClose }: ConsultationPopupProps) => {
           {/* Submit */}
           <button
             onClick={handleSubmit}
-            className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-body text-sm tracking-wide hover:bg-primary/90 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98]"
+            disabled={submitting}
+            className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-body text-sm tracking-wide hover:bg-primary/90 transition-all duration-300 shadow-md hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98] disabled:opacity-60 disabled:pointer-events-none"
           >
-            {t("คุยกับผู้เชี่ยวชาญทาง LINE", "Get Recommendation via LINE")}
+            {submitting ? t("กำลังส่ง...", "Sending...") : t("คุยกับผู้เชี่ยวชาญทาง LINE", "Get Recommendation via LINE")}
           </button>
 
           {/* Trust elements */}
