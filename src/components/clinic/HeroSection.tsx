@@ -3,13 +3,16 @@ import translations from "@/i18n/translations";
 import heroImage from "@/assets/hero-clinic.jpg";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  onBook?: () => void;
+}
+
+const HeroSection = ({ onBook }: HeroSectionProps) => {
   const { t } = useLanguage();
   const ref = useScrollReveal();
 
   return (
     <section className="relative min-h-screen flex items-end pb-20 md:pb-32">
-      {/* Background image */}
       <div className="absolute inset-0">
         <img
           src={heroImage}
@@ -27,12 +30,12 @@ const HeroSection = () => {
           <p className="mt-6 font-body text-sm md:text-base font-light text-muted-foreground leading-relaxed max-w-lg animate-reveal animate-reveal-delay-1">
             {t(translations.hero.sub)}
           </p>
-          <a
-            href="#contact"
+          <button
+            onClick={onBook}
             className="inline-block mt-10 font-body text-xs tracking-widest uppercase bg-primary text-primary-foreground px-8 py-3.5 hover:bg-primary/90 transition-colors duration-300 animate-reveal animate-reveal-delay-2"
           >
             {t(translations.hero.cta)}
-          </a>
+          </button>
         </div>
       </div>
     </section>

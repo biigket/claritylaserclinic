@@ -2,7 +2,11 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import translations from "@/i18n/translations";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
-const CtaSection = () => {
+interface CtaSectionProps {
+  onBook?: () => void;
+}
+
+const CtaSection = ({ onBook }: CtaSectionProps) => {
   const { t } = useLanguage();
   const ref = useScrollReveal();
 
@@ -15,12 +19,12 @@ const CtaSection = () => {
         <p className="font-body text-sm font-light text-muted-foreground mb-10">
           {t(translations.cta.desc)}
         </p>
-        <a
-          href="#contact"
+        <button
+          onClick={onBook}
           className="inline-block font-body text-xs tracking-widest uppercase bg-primary text-primary-foreground px-10 py-4 hover:bg-primary/90 transition-colors duration-300"
         >
           {t(translations.cta.button)}
-        </a>
+        </button>
       </div>
     </section>
   );

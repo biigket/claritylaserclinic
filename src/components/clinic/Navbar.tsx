@@ -3,7 +3,11 @@ import translations from "@/i18n/translations";
 import { useEffect, useState } from "react";
 import logoImage from "@/assets/logo-clarity.jpeg";
 
-const Navbar = () => {
+interface NavbarProps {
+  onBook?: () => void;
+}
+
+const Navbar = ({ onBook }: NavbarProps) => {
   const { lang, setLang, t } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -58,12 +62,12 @@ const Navbar = () => {
             {lang === "th" ? "EN" : "TH"}
           </button>
 
-          <a
-            href="#contact"
+          <button
+            onClick={onBook}
             className="hidden md:block font-body text-xs tracking-widest uppercase bg-primary text-primary-foreground px-5 py-2 hover:bg-primary/90 transition-colors duration-300"
           >
             {t(translations.nav.book)}
-          </a>
+          </button>
 
           {/* Mobile menu button */}
           <button
@@ -91,13 +95,12 @@ const Navbar = () => {
                 {link.label}
               </a>
             ))}
-            <a
-              href="#contact"
-              onClick={() => setMenuOpen(false)}
+            <button
+              onClick={() => { setMenuOpen(false); onBook?.(); }}
               className="font-body text-sm tracking-widest uppercase bg-primary text-primary-foreground px-5 py-3 text-center"
             >
               {t(translations.nav.book)}
-            </a>
+            </button>
           </div>
         </div>
       )}
