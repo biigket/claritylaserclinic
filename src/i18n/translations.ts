@@ -102,8 +102,8 @@ const translations = {
           en: "Those seeking deep skin nourishment, radiance restoration and elasticity improvement",
         },
         concept: {
-          th: "DermaV + Picohi + CO₂ + Er bump",
-          en: "DermaV + Picohi + CO₂ + Er bump",
+          th: "DermaV + Picohi + CO₂ + Fotona",
+          en: "DermaV + Picohi + CO₂ + Fotona",
         },
         price: { th: "6,990 บาท / ครั้ง", en: "6,990 THB / session" },
         benefit: {
