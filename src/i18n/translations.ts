@@ -105,7 +105,7 @@ const translations = {
           th: "DermaV + Picohi + CO₂ + Er bump",
           en: "DermaV + Picohi + CO₂ + Er bump",
         },
-        price: { th: "4,990 บาท / ครั้ง", en: "4,990 THB / session" },
+        price: { th: "6,990 บาท / ครั้ง", en: "6,990 THB / session" },
         benefit: {
           th: "ซื้อ 5 ครั้ง รับสิทธิ์ Red Light Therapy เพิ่มเติม",
           en: "Purchase 5 sessions to receive complimentary Red Light Therapy",
