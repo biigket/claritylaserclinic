@@ -242,9 +242,9 @@ const translations = {
       th: "สถาบันเฉพาะทางด้านหลุมสิวและคุณภาพผิว",
       en: "Specialist Acne Scar & Skin Quality Institute",
     },
-    hours: { th: "เปิดทุกวัน 10:00 – 19:00", en: "Open Daily 10:00 AM – 7:00 PM" },
+    hours: { th: "จ.-ศ. 11:00–19:00 | ส.-อา. 11:00–18:00 | ปิดทุกวันอังคาร", en: "Mon-Fri 11:00–19:00 | Sat-Sun 11:00–18:00 | Closed Tuesdays" },
     line: { th: "LINE: @clarityclinic", en: "LINE: @clarityclinic" },
-    phone: { th: "โทร: 02-XXX-XXXX", en: "Tel: 02-XXX-XXXX" },
+    phone: { th: "โทร: 064-964-5859", en: "Tel: 064-964-5859" },
     disclaimer: {
       th: "ผลลัพธ์อาจแตกต่างกันในแต่ละบุคคล การรักษาทุกครั้งต้องผ่านการประเมินจากแพทย์",
       en: "Results may vary. All treatments require physician assessment.",
