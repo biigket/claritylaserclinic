@@ -22,7 +22,7 @@ const Navbar = ({ onBook }: NavbarProps) => {
     { href: "#philosophy", label: t(translations.nav.philosophy) },
     { href: "#programs", label: t(translations.nav.programs) },
     { href: "#technology", label: t(translations.nav.technology) },
-    { href: "#doctor", label: t(translations.nav.doctor) },
+    { href: "#philosophy", label: t(translations.nav.doctor) },
     { href: "#contact", label: t(translations.nav.contact) },
   ];
 
