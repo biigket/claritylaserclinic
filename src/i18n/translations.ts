@@ -1,0 +1,259 @@
+export type Lang = "th" | "en";
+
+const translations = {
+  nav: {
+    philosophy: { th: "ปรัชญา", en: "Philosophy" },
+    programs: { th: "โปรแกรม", en: "Programs" },
+    technology: { th: "เทคโนโลยี", en: "Technology" },
+    doctor: { th: "แพทย์ผู้เชี่ยวชาญ", en: "Our Doctor" },
+    contact: { th: "ติดต่อเรา", en: "Contact" },
+    book: { th: "นัดปรึกษา", en: "Book Consultation" },
+  },
+  hero: {
+    headline: {
+      th: "สถาบันเฉพาะทางด้านหลุมสิวและคุณภาพผิว",
+      en: "Specialist Institute for Acne Scars & Skin Quality",
+    },
+    sub: {
+      th: "การรักษาเชิงลึกแบบหลายระดับชั้น ด้วยเทคโนโลยีที่คัดสรรอย่างแม่นยำ",
+      en: "Multi-layered precision treatment with intelligently selected technologies",
+    },
+    cta: { th: "นัดปรึกษาแพทย์", en: "Book a Consultation" },
+  },
+  philosophy: {
+    label: { th: "ปรัชญาของเรา", en: "Our Philosophy" },
+    title: {
+      th: "ปัญหาผิวมีหลายระดับชั้น การรักษาจึงต้องผสานหลายเทคโนโลยีอย่างชาญฉลาด",
+      en: "Skin concerns exist in multiple layers — treatment must intelligently combine multiple technologies",
+    },
+    desc: {
+      th: "Clarity Clinic เชื่อว่าการรักษาที่มีประสิทธิภาพสูงสุดคือการเข้าใจโครงสร้างผิวแต่ละชั้น และออกแบบแผนการรักษาที่ตรงจุดด้วยเทคโนโลยีที่เหมาะสมกับแต่ละปัญหา",
+      en: "Clarity Clinic believes the most effective treatment comes from understanding each layer of skin structure and designing precise treatment plans with the right technology for each concern.",
+    },
+  },
+  whyClarity: {
+    label: { th: "ทำไมต้อง Clarity Clinic", en: "Why Clarity Clinic" },
+    cards: [
+      {
+        title: { th: "เชี่ยวชาญเฉพาะทาง", en: "Specialist Focus" },
+        desc: {
+          th: "มุ่งเน้นการรักษาหลุมสิวและปัญหาผิวเชิงลึกโดยเฉพาะ",
+          en: "Dedicated exclusively to acne scar treatment and deep skin concerns",
+        },
+      },
+      {
+        title: { th: "การรักษาแบบผสมผสาน", en: "Combination Therapy" },
+        desc: {
+          th: "ใช้หลายเทคโนโลยีร่วมกันเพื่อผลลัพธ์ที่ครอบคลุมทุกชั้นผิว",
+          en: "Multiple technologies work in synergy for results that address every skin layer",
+        },
+      },
+      {
+        title: { th: "บุฟเฟ่ต์ที่เข้าใจง่าย", en: "Buffet Simplicity" },
+        desc: {
+          th: "ระบบโปรแกรมบุฟเฟ่ต์ที่รวมทุกเทคโนโลยีที่จำเป็นในราคาเดียว",
+          en: "All-inclusive buffet programs combining essential technologies in one transparent price",
+        },
+      },
+      {
+        title: { th: "เทคโนโลยีหลายพลังงาน", en: "Multi-Energy Technology" },
+        desc: {
+          th: "ครอบคลุมทุกกลุ่มพลังงาน ตั้งแต่เลเซอร์ คลื่นความถี่วิทยุ จนถึงอัลตราซาวด์",
+          en: "Covering all energy modalities from laser and radiofrequency to ultrasound",
+        },
+      },
+    ],
+  },
+  programs: {
+    label: { th: "โปรแกรมการรักษา", en: "Clinical Programs" },
+    subtitle: {
+      th: "โปรแกรมที่ออกแบบโดยแพทย์ผู้เชี่ยวชาญ เพื่อผลลัพธ์ที่ตรงจุดและยั่งยืน",
+      en: "Physician-designed programs for precise and lasting results",
+    },
+    items: [
+      {
+        name: { th: "Acne Scar Buffet Program", en: "Acne Scar Buffet Program" },
+        purpose: {
+          th: "โปรแกรมรักษาหลุมสิวแบบครบวงจร ผสานเทคโนโลยีหลายชนิดในหนึ่งเซสชัน",
+          en: "Comprehensive acne scar treatment combining multiple technologies in a single session",
+        },
+        suitable: {
+          th: "ผู้ที่มีหลุมสิวหลายประเภท ต้องการรักษาแบบเข้มข้นและครอบคลุม",
+          en: "Those with multiple scar types seeking intensive and comprehensive treatment",
+        },
+        concept: {
+          th: "เลเซอร์ + RF Microneedling + Subcision + เทคโนโลยีเสริม",
+          en: "Laser + RF Microneedling + Subcision + Adjunct technologies",
+        },
+        price: { th: "9,990 บาท / เซสชัน", en: "9,990 THB / session" },
+        benefit: {
+          th: "ซื้อ 5 ครั้ง รับสิทธิ์ Subcision เพิ่มเติม (แพทย์ประเมินก่อนทำ)",
+          en: "Purchase 5 sessions to receive complimentary Subcision (physician assessment required)",
+        },
+      },
+      {
+        name: { th: "Skin Quality Buffet Program", en: "Skin Quality Buffet Program" },
+        purpose: {
+          th: "โปรแกรมฟื้นฟูและยกระดับคุณภาพผิวโดยรวม",
+          en: "Skin restoration and quality enhancement protocol",
+        },
+        suitable: {
+          th: "ผู้ที่ต้องการบำรุงผิวเชิงลึก ฟื้นฟูความกระจ่างใสและความยืดหยุ่น",
+          en: "Those seeking deep skin nourishment, radiance restoration and elasticity improvement",
+        },
+        concept: {
+          th: "IPL + Laser Toning + LED Therapy + สารบำรุงผิว",
+          en: "IPL + Laser Toning + LED Therapy + Skin nutrients",
+        },
+        price: { th: "4,990 บาท / เซสชัน", en: "4,990 THB / session" },
+        benefit: {
+          th: "ซื้อ 5 ครั้ง รับสิทธิ์ Red Light Therapy เพิ่มเติม",
+          en: "Purchase 5 sessions to receive complimentary Red Light Therapy",
+        },
+      },
+      {
+        name: { th: "Dual-Energy Lifting Program", en: "Dual-Energy Lifting Program" },
+        purpose: {
+          th: "โปรแกรมยกกระชับด้วยพลังงานคู่ สำหรับโครงสร้างใบหน้าที่คมชัดขึ้น",
+          en: "Dual-energy structural lifting for enhanced facial definition",
+        },
+        suitable: {
+          th: "ผู้ที่ต้องการยกกระชับ ลดริ้วรอย และปรับรูปหน้าให้ดูเรียวขึ้น",
+          en: "Those seeking lifting, wrinkle reduction, and refined facial contours",
+        },
+        concept: {
+          th: "HIFU + RF Lifting + Botox จุดริ้วรอย",
+          en: "HIFU + RF Lifting + Targeted wrinkle Botox",
+        },
+        price: { th: "9,990 บาท", en: "9,990 THB" },
+        benefit: {
+          th: "รับสิทธิ์ Botox จุดริ้วรอย เพิ่มเติม",
+          en: "Complimentary wrinkle Botox treatment included",
+        },
+      },
+    ],
+  },
+  treatment: {
+    label: { th: "แนวทางการรักษา", en: "Treatment Approach" },
+    title: {
+      th: "การรักษาแบบ Layer-Based",
+      en: "Layer-Based Treatment",
+    },
+    layers: [
+      {
+        name: { th: "ชั้นผิวหนังกำพร้า", en: "Epidermis Layer" },
+        desc: {
+          th: "ปรับสีผิว ลดจุดด่างดำ ฟื้นฟูความสม่ำเสมอ",
+          en: "Tone correction, pigment reduction, uniformity restoration",
+        },
+      },
+      {
+        name: { th: "ชั้นหนังแท้", en: "Dermis Layer" },
+        desc: {
+          th: "กระตุ้นคอลลาเจน เติมเนื้อเยื่อ ลดหลุมสิว",
+          en: "Collagen stimulation, tissue remodeling, scar depth reduction",
+        },
+      },
+      {
+        name: { th: "ชั้นใต้ผิวลึก", en: "Subcutaneous Layer" },
+        desc: {
+          th: "ตัดพังผืดใต้หลุม ยกระดับโครงสร้าง ปรับรูปหน้า",
+          en: "Fibrous band release, structural elevation, contour refinement",
+        },
+      },
+    ],
+  },
+  technology: {
+    label: { th: "เทคโนโลยี", en: "Technology Intelligence" },
+    title: {
+      th: "ครอบคลุมทุกกลุ่มพลังงานสำหรับผลลัพธ์ที่ครบถ้วน",
+      en: "Complete energy spectrum for comprehensive results",
+    },
+    categories: [
+      {
+        name: { th: "พลังงานแสง", en: "Light Energy" },
+        desc: { th: "IPL, Laser Toning, Pico Laser", en: "IPL, Laser Toning, Pico Laser" },
+      },
+      {
+        name: { th: "พลังงานความร้อน", en: "Thermal Energy" },
+        desc: { th: "Fractional CO₂, Erbium Laser", en: "Fractional CO₂, Erbium Laser" },
+      },
+      {
+        name: { th: "คลื่นความถี่วิทยุ", en: "Radiofrequency" },
+        desc: { th: "RF Microneedling, Monopolar RF", en: "RF Microneedling, Monopolar RF" },
+      },
+      {
+        name: { th: "อัลตราซาวด์", en: "Ultrasound" },
+        desc: { th: "HIFU, Micro-focused Ultrasound", en: "HIFU, Micro-focused Ultrasound" },
+      },
+    ],
+  },
+  doctor: {
+    label: { th: "แพทย์ผู้เชี่ยวชาญ", en: "Our Doctor" },
+    title: {
+      th: "การรักษาทุกครั้งอยู่ภายใต้การดูแลของแพทย์ผู้เชี่ยวชาญ",
+      en: "Every treatment is supervised by our specialist physician",
+    },
+    philosophy: {
+      th: "\"ผมเชื่อว่าผลลัพธ์ที่ดีที่สุดมาจากการเข้าใจปัญหาผิวอย่างแท้จริง ไม่ใช่แค่การใช้เครื่องมือที่แพงที่สุด แต่คือการเลือกเทคโนโลยีที่ใช่ ในจังหวะที่ใช่ สำหรับผิวแต่ละคน\"",
+      en: "\"I believe the best results come from truly understanding skin concerns — not using the most expensive devices, but choosing the right technology at the right time for each individual's skin.\"",
+    },
+  },
+  journey: {
+    label: { th: "ขั้นตอนการรักษา", en: "Patient Journey" },
+    steps: [
+      {
+        title: { th: "ปรึกษาแพทย์", en: "Consultation" },
+        desc: {
+          th: "วิเคราะห์ปัญหาผิวอย่างละเอียด วางแผนการรักษาเฉพาะบุคคล",
+          en: "Detailed skin analysis and personalized treatment planning",
+        },
+      },
+      {
+        title: { th: "รักษา", en: "Treatment" },
+        desc: {
+          th: "ดำเนินการรักษาด้วยเทคโนโลยีที่เลือกสรรภายใต้การดูแลของแพทย์",
+          en: "Precision treatment with selected technologies under physician supervision",
+        },
+      },
+      {
+        title: { th: "ติดตามผล", en: "Follow-up" },
+        desc: {
+          th: "ประเมินผลและปรับแผนการรักษาเพื่อผลลัพธ์สูงสุด",
+          en: "Progress evaluation and treatment plan optimization for maximum results",
+        },
+      },
+    ],
+  },
+  cta: {
+    title: {
+      th: "พร้อมเริ่มต้นเส้นทางสู่ผิวที่ดีกว่า",
+      en: "Ready to begin your journey to better skin",
+    },
+    desc: {
+      th: "นัดปรึกษาแพทย์ผู้เชี่ยวชาญเพื่อวิเคราะห์ปัญหาผิวของคุณ",
+      en: "Schedule a consultation with our specialist to analyze your skin concerns",
+    },
+    button: { th: "นัดปรึกษาแพทย์", en: "Book a Consultation" },
+  },
+  footer: {
+    clinic: { th: "Clarity Clinic – Skin & Laser", en: "Clarity Clinic – Skin & Laser" },
+    tagline: {
+      th: "สถาบันเฉพาะทางด้านหลุมสิวและคุณภาพผิว",
+      en: "Specialist Acne Scar & Skin Quality Institute",
+    },
+    hours: { th: "เปิดทุกวัน 10:00 – 19:00", en: "Open Daily 10:00 AM – 7:00 PM" },
+    line: { th: "LINE: @clarityclinic", en: "LINE: @clarityclinic" },
+    phone: { th: "โทร: 02-XXX-XXXX", en: "Tel: 02-XXX-XXXX" },
+    disclaimer: {
+      th: "ผลลัพธ์อาจแตกต่างกันในแต่ละบุคคล การรักษาทุกครั้งต้องผ่านการประเมินจากแพทย์",
+      en: "Results may vary. All treatments require physician assessment.",
+    },
+    rights: {
+      th: "© 2026 Clarity Clinic. สงวนลิขสิทธิ์.",
+      en: "© 2026 Clarity Clinic. All rights reserved.",
+    },
+  },
+} as const;
+
+export default translations;
