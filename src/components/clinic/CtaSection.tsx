@@ -17,7 +17,7 @@ const CtaSection = () => {
         </p>
         <a
           href="#contact"
-          className="inline-block font-body text-xs tracking-widest uppercase bg-foreground text-background px-10 py-4 hover:bg-foreground/90 transition-colors duration-300"
+          className="inline-block font-body text-xs tracking-widest uppercase bg-primary text-primary-foreground px-10 py-4 hover:bg-primary/90 transition-colors duration-300"
         >
           {t(translations.cta.button)}
         </a>

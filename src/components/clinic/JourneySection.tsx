@@ -16,7 +16,7 @@ const JourneySection = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {translations.journey.steps.map((step, i) => (
             <div key={i} className="text-center">
-              <span className="font-display text-3xl font-light text-primary/50">
+              <span className="font-display text-3xl font-light text-gold/50">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <h3 className="font-display text-xl font-light text-foreground mt-4 mb-3">

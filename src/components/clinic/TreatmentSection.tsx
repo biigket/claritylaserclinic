@@ -22,7 +22,7 @@ const TreatmentSection = () => {
               key={i}
               className="flex items-start gap-8 py-8 border-b border-border last:border-b-0"
             >
-              <span className="font-display text-4xl md:text-5xl font-light text-primary/60 shrink-0 w-12 text-right">
+              <span className="font-display text-4xl md:text-5xl font-light text-gold/60 shrink-0 w-12 text-right">
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div>
