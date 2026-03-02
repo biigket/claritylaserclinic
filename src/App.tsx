@@ -6,6 +6,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/i18n/LanguageContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import AdminLogin from "./pages/admin/AdminLogin";
+import AdminLayout from "./components/admin/AdminLayout";
+import PromotionsList from "./pages/admin/PromotionsList";
+import PromotionEditor from "./pages/admin/PromotionEditor";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +22,12 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="promotions" element={<PromotionsList />} />
+              <Route path="promotions/new" element={<PromotionEditor />} />
+              <Route path="promotions/:id" element={<PromotionEditor />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
