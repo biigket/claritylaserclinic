@@ -54,6 +54,32 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Send LINE push message to admin
+    const lineToken = Deno.env.get("LINE_CHANNEL_ACCESS_TOKEN");
+    const lineAdminId = Deno.env.get("LINE_ADMIN_USER_ID");
+    if (lineToken && lineAdminId) {
+      try {
+        const lineMessage = `📋 แจ้งเตือนปรึกษาใหม่\n👤 ชื่อ: ${name}\n🔍 ปัญหา: ${concern}\n📱 เบอร์: ${payload.phone}\n📝 หมายเหตุ: ${payload.note || "-"}`;
+        const lineRes = await fetch("https://api.line.me/v2/bot/message/push", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${lineToken}`,
+          },
+          body: JSON.stringify({
+            to: lineAdminId,
+            messages: [{ type: "text", text: lineMessage }],
+          }),
+        });
+        if (!lineRes.ok) {
+          const errBody = await lineRes.text();
+          console.error(`LINE API error [${lineRes.status}]: ${errBody}`);
+        }
+      } catch (e) {
+        console.error("LINE push message failed:", e);
+      }
+    }
+
     return new Response(
       JSON.stringify({ success: true }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
