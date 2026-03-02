@@ -35,7 +35,7 @@ const translations = {
     label: { th: "ทำไมต้อง Clarity Clinic", en: "Why Clarity Clinic" },
     cards: [
       {
-        title: { th: "เชี่ยวชาญเฉพาะทาง", en: "Specialist Focus" },
+        title: { th: "เชี่ยวชาญด้านหลุมสิว", en: "Acne Scar Expertise" },
         desc: {
           th: "มุ่งเน้นการรักษาหลุมสิวและปัญหาผิวเชิงลึกโดยเฉพาะ",
           en: "Dedicated exclusively to acne scar treatment and deep skin concerns",
@@ -49,17 +49,17 @@ const translations = {
         },
       },
       {
-        title: { th: "บุฟเฟ่ต์ที่เข้าใจง่าย", en: "Buffet Simplicity" },
+        title: { th: "บุฟเฟ่ต์ที่คุ้มค่าในราคาเดียว", en: "All-Inclusive Buffet Value" },
         desc: {
           th: "ระบบโปรแกรมบุฟเฟ่ต์ที่รวมทุกเทคโนโลยีที่จำเป็นในราคาเดียว",
           en: "All-inclusive buffet programs combining essential technologies in one transparent price",
         },
       },
       {
-        title: { th: "เทคโนโลยีหลายพลังงาน", en: "Multi-Energy Technology" },
+        title: { th: "ผลลัพธ์ที่เห็นชัดตั้งแต่ครั้งแรก", en: "Visible Results from First Session" },
         desc: {
-          th: "ครอบคลุมทุกกลุ่มพลังงาน ตั้งแต่เลเซอร์ คลื่นความถี่วิทยุ จนถึงอัลตราซาวด์",
-          en: "Covering all energy modalities from laser and radiofrequency to ultrasound",
+          th: "เห็นความเปลี่ยนแปลงได้ตั้งแต่การรักษาครั้งแรก ด้วยเทคโนโลยีที่ตรงจุด",
+          en: "See noticeable improvement from your very first treatment with precisely targeted technology",
         },
       },
     ],
@@ -78,14 +78,14 @@ const translations = {
           en: "Comprehensive acne scar treatment combining multiple technologies in a single session",
         },
         suitable: {
-          th: "ผู้ที่มีหลุมสิวหลายประเภท ต้องการรักษาแบบเข้มข้นและครอบคลุม",
-          en: "Those with multiple scar types seeking intensive and comprehensive treatment",
+          th: "ผู้ที่มีหลุมสิวทุกประเภท เห็นผลชัดเจนตั้งแต่ครั้งแรก",
+          en: "Those with all types of acne scars — visible results from the very first session",
         },
         concept: {
-          th: "เลเซอร์ + RF Microneedling + Subcision + เทคโนโลยีเสริม",
-          en: "Laser + RF Microneedling + Subcision + Adjunct technologies",
+          th: "Subcision + Microneedle RF + Er:Glass + Picohi + Er:YAG + CO₂",
+          en: "Subcision + Microneedle RF + Er:Glass + Picohi + Er:YAG + CO₂",
         },
-        price: { th: "9,990 บาท / เซสชัน", en: "9,990 THB / session" },
+        price: { th: "9,990 บาท / ครั้ง", en: "9,990 THB / session" },
         benefit: {
           th: "ซื้อ 5 ครั้ง รับสิทธิ์ Subcision เพิ่มเติม (แพทย์ประเมินก่อนทำ)",
           en: "Purchase 5 sessions to receive complimentary Subcision (physician assessment required)",
@@ -102,10 +102,10 @@ const translations = {
           en: "Those seeking deep skin nourishment, radiance restoration and elasticity improvement",
         },
         concept: {
-          th: "IPL + Laser Toning + LED Therapy + สารบำรุงผิว",
-          en: "IPL + Laser Toning + LED Therapy + Skin nutrients",
+          th: "DermaV + Picohi + CO₂ + Er bump",
+          en: "DermaV + Picohi + CO₂ + Er bump",
         },
-        price: { th: "4,990 บาท / เซสชัน", en: "4,990 THB / session" },
+        price: { th: "4,990 บาท / ครั้ง", en: "4,990 THB / session" },
         benefit: {
           th: "ซื้อ 5 ครั้ง รับสิทธิ์ Red Light Therapy เพิ่มเติม",
           en: "Purchase 5 sessions to receive complimentary Red Light Therapy",
@@ -136,29 +136,29 @@ const translations = {
   treatment: {
     label: { th: "แนวทางการรักษา", en: "Treatment Approach" },
     title: {
-      th: "การรักษาแบบ Layer-Based",
-      en: "Layer-Based Treatment",
+      th: "การรักษาแบบทุกชั้นผิว",
+      en: "All-Layer Treatment",
     },
     layers: [
       {
-        name: { th: "ชั้นผิวหนังกำพร้า", en: "Epidermis Layer" },
+        name: { th: "ชั้นลึก (SMAS / ไขมัน)", en: "Deep Layer (SMAS / Fat)" },
         desc: {
-          th: "ปรับสีผิว ลดจุดด่างดำ ฟื้นฟูความสม่ำเสมอ",
-          en: "Tone correction, pigment reduction, uniformity restoration",
+          th: "ตัดพังผืดใต้หลุม ยกระดับโครงสร้าง ปรับรูปหน้า",
+          en: "Fibrous band release, structural elevation, contour refinement",
         },
       },
       {
-        name: { th: "ชั้นหนังแท้", en: "Dermis Layer" },
+        name: { th: "ชั้นกลาง (หนังแท้)", en: "Mid Layer (Dermis)" },
         desc: {
           th: "กระตุ้นคอลลาเจน เติมเนื้อเยื่อ ลดหลุมสิว",
           en: "Collagen stimulation, tissue remodeling, scar depth reduction",
         },
       },
       {
-        name: { th: "ชั้นใต้ผิวลึก", en: "Subcutaneous Layer" },
+        name: { th: "ชั้นตื้น (หนังกำพร้า)", en: "Surface Layer (Epidermis)" },
         desc: {
-          th: "ตัดพังผืดใต้หลุม ยกระดับโครงสร้าง ปรับรูปหน้า",
-          en: "Fibrous band release, structural elevation, contour refinement",
+          th: "ปรับสีผิว ลดจุดด่างดำ ฟื้นฟูความสม่ำเสมอ",
+          en: "Tone correction, pigment reduction, uniformity restoration",
         },
       },
     ],
