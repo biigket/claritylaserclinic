@@ -17,18 +17,12 @@ const concerns = [
   { value: "not_sure", th: "ยังไม่แน่ใจ (ต้องการคำแนะนำ)", en: "Not sure (Need advice)" },
 ];
 
-const budgets = [
-  { value: "3000-5000", label: "3,000 – 5,000 THB" },
-  { value: "5000-10000", label: "5,000 – 10,000 THB" },
-  { value: "10000-20000", label: "10,000 – 20,000 THB" },
-  { value: "20000+", label: "20,000+ THB" },
-];
 
 const ConsultationPopup = ({ open, onClose }: ConsultationPopupProps) => {
   const { lang } = useLanguage();
   const [name, setName] = useState("");
   const [concern, setConcern] = useState("");
-  const [budget, setBudget] = useState("");
+  const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
   const [errors, setErrors] = useState<{ name?: boolean; concern?: boolean }>({});
   const [submitting, setSubmitting] = useState(false);
@@ -57,12 +51,10 @@ const ConsultationPopup = ({ open, onClose }: ConsultationPopupProps) => {
     setSubmitting(true);
 
     const concernLabel = concerns.find(c => c.value === concern)?.[lang] || concern;
-    const budgetLabel = budgets.find(b => b.value === budget)?.label || "-";
-
     // Save to Google Sheets via edge function
     try {
       await supabase.functions.invoke("save-consultation", {
-        body: { name: name.trim(), concern: concernLabel, budget: budgetLabel, note: note.trim() },
+        body: { name: name.trim(), concern: concernLabel, phone: phone.trim(), note: note.trim() },
       });
     } catch (e) {
       console.error("Failed to save consultation:", e);
@@ -76,7 +68,7 @@ const ConsultationPopup = ({ open, onClose }: ConsultationPopupProps) => {
     setTimeout(() => {
       setName("");
       setConcern("");
-      setBudget("");
+      setPhone("");
       setNote("");
       setSubmitting(false);
       onClose();
@@ -166,27 +158,19 @@ const ConsultationPopup = ({ open, onClose }: ConsultationPopupProps) => {
             )}
           </div>
 
-          {/* Budget */}
+          {/* Phone */}
           <div className="mb-5">
             <label className="block font-body text-xs text-muted-foreground mb-1.5 tracking-wide uppercase">
-              {t("งบประมาณ", "Budget Range")}
+              {t("เบอร์โทรศัพท์", "Phone Number")}
             </label>
-            <div className="flex flex-wrap gap-2">
-              {budgets.map((b) => (
-                <button
-                  key={b.value}
-                  type="button"
-                  onClick={() => setBudget(budget === b.value ? "" : b.value)}
-                  className={`px-3 py-2 rounded-full border text-xs font-body transition-all duration-200 ${
-                    budget === b.value
-                      ? "border-primary bg-primary/5 text-foreground ring-1 ring-primary/20"
-                      : "border-border text-muted-foreground hover:border-primary/40"
-                  }`}
-                >
-                  {b.label}
-                </button>
-              ))}
-            </div>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder={t("0xx-xxx-xxxx", "0xx-xxx-xxxx")}
+              maxLength={15}
+              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-sm font-body transition-all duration-200 outline-none focus:ring-2 focus:ring-primary/30"
+            />
           </div>
 
           {/* Note */}

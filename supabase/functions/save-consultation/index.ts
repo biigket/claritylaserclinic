@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { name, concern, budget, note } = body;
+    const { name, concern, phone, note } = body;
 
     if (!name || !concern) {
       return new Response(
@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, concern, budget: budget || "-", note: note || "" }),
+      body: JSON.stringify({ name, concern, phone: phone || "-", note: note || "" }),
     });
 
     if (!response.ok) {
