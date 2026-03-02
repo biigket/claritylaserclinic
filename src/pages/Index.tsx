@@ -8,7 +8,7 @@ import ProgramsSection from "@/components/clinic/ProgramsSection";
 import ReviewsSection from "@/components/clinic/ReviewsSection";
 import TreatmentSection from "@/components/clinic/TreatmentSection";
 import TechnologySection from "@/components/clinic/TechnologySection";
-import DoctorSection from "@/components/clinic/DoctorSection";
+
 import JourneySection from "@/components/clinic/JourneySection";
 import CtaSection from "@/components/clinic/CtaSection";
 import FooterSection from "@/components/clinic/FooterSection";
@@ -30,7 +30,7 @@ const Index = () => {
       <ReviewsSection />
       <TreatmentSection />
       <TechnologySection />
-      <DoctorSection />
+      
       <JourneySection />
       <CtaSection onBook={openPopup} />
       <FooterSection />
