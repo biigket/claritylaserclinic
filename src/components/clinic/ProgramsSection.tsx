@@ -30,13 +30,12 @@ const ProgramsSection = () => {
             >
               {/* Program image */}
               {programImages[i] && (
-                <div className="relative overflow-hidden h-48 md:h-56">
+                <div className="relative overflow-hidden aspect-square">
                   <img
                     src={programImages[i]!}
                     alt={t(program.name)}
-                    className="w-full h-full object-cover object-top grayscale-[10%] brightness-105 saturate-[0.9]"
+                    className="w-full h-full object-cover object-center"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent" />
                 </div>
               )}
 
