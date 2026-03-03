@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      blog_articles: {
+        Row: {
+          content_en: string | null
+          content_th: string
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          excerpt_en: string | null
+          excerpt_th: string | null
+          id: string
+          meta_description_en: string | null
+          meta_description_th: string | null
+          meta_title_en: string | null
+          meta_title_th: string | null
+          published_at: string | null
+          slug: string
+          status: string
+          tags: string[] | null
+          title_en: string | null
+          title_th: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          content_en?: string | null
+          content_th: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          excerpt_en?: string | null
+          excerpt_th?: string | null
+          id?: string
+          meta_description_en?: string | null
+          meta_description_th?: string | null
+          meta_title_en?: string | null
+          meta_title_th?: string | null
+          published_at?: string | null
+          slug: string
+          status?: string
+          tags?: string[] | null
+          title_en?: string | null
+          title_th: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          content_en?: string | null
+          content_th?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          excerpt_en?: string | null
+          excerpt_th?: string | null
+          id?: string
+          meta_description_en?: string | null
+          meta_description_th?: string | null
+          meta_title_en?: string | null
+          meta_title_th?: string | null
+          published_at?: string | null
+          slug?: string
+          status?: string
+          tags?: string[] | null
+          title_en?: string | null
+          title_th?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

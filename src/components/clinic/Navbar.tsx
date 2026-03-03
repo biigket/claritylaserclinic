@@ -1,4 +1,5 @@
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useNavigate } from "react-router-dom";
 import translations from "@/i18n/translations";
 import { useEffect, useState } from "react";
 import logoImage from "@/assets/logo-clarity.jpeg";
@@ -9,6 +10,7 @@ interface NavbarProps {
 
 const Navbar = ({ onBook }: NavbarProps) => {
   const { lang, setLang, t } = useLanguage();
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -22,6 +24,7 @@ const Navbar = ({ onBook }: NavbarProps) => {
     { href: "#programs", label: t(translations.nav.programs) },
     { href: "#technology", label: t(translations.nav.technology) },
     { href: "#philosophy", label: t(translations.nav.doctor) },
+    { href: "/blog", label: lang === "th" ? "บทความ" : "Blog", isRoute: true },
     { href: "#contact", label: t(translations.nav.contact) },
   ];
 
@@ -42,15 +45,25 @@ const Navbar = ({ onBook }: NavbarProps) => {
 
         {/* Desktop nav */}
         <div className="hidden lg:flex items-center gap-8">
-          {links.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              className="font-body text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors duration-300"
-            >
-              {link.label}
-            </a>
-          ))}
+          {links.map((link) =>
+            (link as any).isRoute ? (
+              <button
+                key={link.href}
+                onClick={() => navigate(link.href)}
+                className="font-body text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors duration-300"
+              >
+                {link.label}
+              </button>
+            ) : (
+              <a
+                key={link.href}
+                href={link.href}
+                className="font-body text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors duration-300"
+              >
+                {link.label}
+              </a>
+            )
+          )}
         </div>
 
         <div className="flex items-center gap-4">
@@ -84,16 +97,26 @@ const Navbar = ({ onBook }: NavbarProps) => {
       {menuOpen && (
         <div className="lg:hidden bg-background/95 backdrop-blur-md border-t border-border">
           <div className="px-6 py-8 flex flex-col gap-6">
-            {links.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className="font-body text-sm tracking-widest uppercase text-muted-foreground"
-              >
-                {link.label}
-              </a>
-            ))}
+            {links.map((link) =>
+              (link as any).isRoute ? (
+                <button
+                  key={link.href}
+                  onClick={() => { setMenuOpen(false); navigate(link.href); }}
+                  className="font-body text-sm tracking-widest uppercase text-muted-foreground text-left"
+                >
+                  {link.label}
+                </button>
+              ) : (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="font-body text-sm tracking-widest uppercase text-muted-foreground"
+                >
+                  {link.label}
+                </a>
+              )
+            )}
             <button
               onClick={() => { setMenuOpen(false); onBook?.(); }}
               className="font-body text-sm tracking-widest uppercase bg-primary text-primary-foreground px-5 py-3 text-center"
