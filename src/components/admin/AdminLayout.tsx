@@ -83,14 +83,35 @@ const AdminLayout = () => {
       </aside>
 
       {/* Mobile header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-card border-b border-border px-4 py-3 flex items-center justify-between">
-        <Link to="/admin/promotions" className="flex items-center gap-2">
-          <img src={logoImage} alt="Clarity" className="h-7 rounded-sm" />
-          <span className="text-xs font-medium">Admin</span>
-        </Link>
-        <Button variant="ghost" size="sm" onClick={handleLogout}>
-          <LogOut className="w-4 h-4" />
-        </Button>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-card border-b border-border">
+        <div className="px-4 py-3 flex items-center justify-between">
+          <Link to="/admin/promotions" className="flex items-center gap-2">
+            <img src={logoImage} alt="Clarity" className="h-7 rounded-sm" />
+            <span className="text-xs font-medium">Admin</span>
+          </Link>
+          <Button variant="ghost" size="sm" onClick={handleLogout}>
+            <LogOut className="w-4 h-4" />
+          </Button>
+        </div>
+        <nav className="flex border-t border-border">
+          {navItems.map((item) => {
+            const active = location.pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs transition-colors ${
+                  active
+                    ? "text-primary border-b-2 border-primary font-medium"
+                    : "text-muted-foreground"
+                }`}
+              >
+                <item.icon className="w-3.5 h-3.5" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
       {/* Main content */}
