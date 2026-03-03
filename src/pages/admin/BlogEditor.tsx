@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Save, Eye, Upload, X, Loader2, ExternalLink } from "lucide-react";
-import BlogAiAssistant from "@/components/admin/BlogAiAssistant";
+import BlogAiAssistant, { type BlogInsertData } from "@/components/admin/BlogAiAssistant";
 
 const blogTable = () => supabase.from("blog_articles") as any;
 
@@ -184,7 +184,23 @@ const BlogEditor = () => {
         </div>
         <div className="flex gap-2">
           <BlogAiAssistant
-            onInsert={(text) => set("content_th", (form.content_th || "") + "\n\n" + text)}
+            onInsert={(data: BlogInsertData) => {
+              setForm((prev) => ({
+                ...prev,
+                ...(data.title_th && { title_th: data.title_th }),
+                ...(data.title_en && { title_en: data.title_en }),
+                ...(data.excerpt_th && { excerpt_th: data.excerpt_th }),
+                ...(data.excerpt_en && { excerpt_en: data.excerpt_en }),
+                ...(data.content_th && { content_th: data.content_th }),
+                ...(data.content_en && { content_en: data.content_en }),
+                ...(data.meta_title_th && { meta_title_th: data.meta_title_th }),
+                ...(data.meta_title_en && { meta_title_en: data.meta_title_en }),
+                ...(data.meta_description_th && { meta_description_th: data.meta_description_th }),
+                ...(data.meta_description_en && { meta_description_en: data.meta_description_en }),
+                ...(data.tags && { tags: data.tags }),
+                ...(data.slug && { slug: data.slug }),
+              }));
+            }}
             context={form.title_th}
           />
           {!isNew && form.status === "published" && (
