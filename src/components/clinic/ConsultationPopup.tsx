@@ -13,7 +13,7 @@ const concerns = [
   { value: "skin_quality", th: "คุณภาพผิว", en: "Skin Quality" },
   { value: "lifting", th: "ยกกระชับ", en: "Lifting & Firming" },
   { value: "pigmentation", th: "ฝ้า กระ จุดด่างดำ", en: "Pigmentation" },
-  { value: "pores", th: "รูขุมขน & เนื้อผิว", en: "Pores & Texture" },
+  { value: "filler_botox", th: "ฟิลเลอร์ & โบท็อก", en: "Filler & Botox" },
   { value: "not_sure", th: "ยังไม่แน่ใจ (ต้องการคำแนะนำ)", en: "Not sure (Need advice)" },
 ];
 
