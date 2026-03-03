@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Plus, Search, Edit, Trash2, Eye, EyeOff, FileText,
 } from "lucide-react";
+import BulkArticleGenerator from "@/components/admin/BulkArticleGenerator";
 
 const blogTable = () => supabase.from("blog_articles") as any;
 
@@ -91,10 +92,13 @@ const BlogsList = () => {
           <h1 className="font-display text-2xl text-foreground">บทความ</h1>
           <p className="text-xs text-muted-foreground mt-1">จัดการ Blog Articles สำหรับ SEO</p>
         </div>
-        <Button onClick={() => navigate("/admin/blogs/new")} size="sm" className="gap-1.5">
-          <Plus className="w-4 h-4" />
-          เขียนบทความใหม่
-        </Button>
+        <div className="flex gap-2">
+          <BulkArticleGenerator />
+          <Button onClick={() => navigate("/admin/blogs/new")} size="sm" className="gap-1.5">
+            <Plus className="w-4 h-4" />
+            เขียนบทความใหม่
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
