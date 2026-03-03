@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 const rolesTable = () => supabase.from("user_roles") as any;
@@ -14,46 +14,55 @@ interface AuthState {
   isEditor: boolean;
 }
 
+async function fetchRole(userId: string): Promise<AppRole | null> {
+  const { data } = await rolesTable()
+    .select("role")
+    .eq("user_id", userId)
+    .limit(1)
+    .single();
+  return (data?.role as AppRole) ?? null;
+}
+
 export function useAuth(): AuthState {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
+  const initialized = useRef(false);
 
   useEffect(() => {
+    // Set up listener FIRST — this is the single source of truth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         const currentUser = session?.user ?? null;
         setUser(currentUser);
 
         if (currentUser) {
-          const { data } = await rolesTable()
-            .select("role")
-            .eq("user_id", currentUser.id)
-            .limit(1)
-            .single();
-          setRole((data?.role as AppRole) ?? null);
+          const r = await fetchRole(currentUser.id);
+          setRole(r);
         } else {
           setRole(null);
         }
-        setLoading(false);
+
+        // Only set loading false after first event
+        if (!initialized.current) {
+          initialized.current = true;
+          setLoading(false);
+        }
       }
     );
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        const { data } = await rolesTable()
-          .select("role")
-          .eq("user_id", currentUser.id)
-          .limit(1)
-          .single();
-        setRole((data?.role as AppRole) ?? null);
+    // Fallback: if onAuthStateChange hasn't fired after 3s, unblock UI
+    const timeout = setTimeout(() => {
+      if (!initialized.current) {
+        initialized.current = true;
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    }, 3000);
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   return {
