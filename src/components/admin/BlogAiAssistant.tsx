@@ -2,23 +2,55 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Sparkles, Send, Copy, Check, Loader2, Trash2 } from "lucide-react";
+import { Sparkles, Send, Copy, Check, Loader2, Trash2, FileDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
+export type BlogInsertData = {
+  title_th?: string;
+  title_en?: string;
+  excerpt_th?: string;
+  excerpt_en?: string;
+  content_th?: string;
+  content_en?: string;
+  meta_title_th?: string;
+  meta_title_en?: string;
+  meta_description_th?: string;
+  meta_description_en?: string;
+  tags?: string[];
+  slug?: string;
+};
+
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/blog-ai-assistant`;
 
 const QUICK_PROMPTS = [
-  { label: "เขียนบทความ", prompt: "ช่วยเขียนบทความเรื่อง [หัวข้อ] ความยาวประมาณ 800 คำ เน้น SEO เป็นภาษาไทย" },
-  { label: "แปลเป็น EN", prompt: "ช่วยแปลเนื้อหาต่อไปนี้เป็นภาษาอังกฤษ โดยรักษา Markdown format:" },
-  { label: "แนะนำ SEO", prompt: "ช่วยแนะนำ meta title (ไม่เกิน 60 ตัวอักษร) และ meta description (ไม่เกิน 160 ตัวอักษร) สำหรับบทความเรื่อง:" },
-  { label: "สรุปบทความ", prompt: "ช่วยเขียน excerpt สั้นๆ 2-3 ประโยค สำหรับบทความนี้:" },
+  { label: "เขียนบทความ", prompt: "ช่วยเขียนบทความเรื่อง [หัวข้อ] ความยาวประมาณ 800 คำ เน้น Local SEO ราชเทวี พญาไท สยาม เป็นทั้งภาษาไทยและอังกฤษ" },
+  { label: "หลุมสิว", prompt: "ช่วยเขียนบทความเรื่องการรักษาหลุมสิวด้วยเลเซอร์ที่ Clarity Laser Clinic ย่านราชเทวี ทั้งภาษาไทยและอังกฤษ" },
+  { label: "งานผิว", prompt: "ช่วยเขียนบทความเรื่องงานผิวและการดูแลผิวหน้าอย่างมืออาชีพที่ Clarity Laser Clinic ใกล้ BTS พญาไท ทั้งภาษาไทยและอังกฤษ" },
+  { label: "ยกกระชับ", prompt: "ช่วยเขียนบทความเรื่องการยกกระชับผิวหน้าด้วยเทคโนโลยีเลเซอร์ที่ Clarity Laser Clinic ย่านสยาม ทั้งภาษาไทยและอังกฤษ" },
 ];
 
 interface BlogAiAssistantProps {
-  onInsert?: (text: string) => void;
+  onInsert?: (data: BlogInsertData) => void;
   context?: string;
+}
+
+function tryParseArticleJson(text: string): BlogInsertData | null {
+  try {
+    // Try direct parse
+    const parsed = JSON.parse(text);
+    if (parsed.content_th || parsed.title_th) return parsed;
+  } catch {
+    // Try to extract JSON from text
+    const match = text.match(/\{[\s\S]*"content_th"[\s\S]*\}/);
+    if (match) {
+      try {
+        return JSON.parse(match[0]);
+      } catch { /* ignore */ }
+    }
+  }
+  return null;
 }
 
 const BlogAiAssistant = ({ onInsert, context }: BlogAiAssistantProps) => {
@@ -115,8 +147,31 @@ const BlogAiAssistant = ({ onInsert, context }: BlogAiAssistantProps) => {
   };
 
   const handleInsert = (text: string) => {
-    onInsert?.(text);
-    toast({ title: "วางเนื้อหาแล้ว" });
+    const parsed = tryParseArticleJson(text);
+    if (parsed && onInsert) {
+      onInsert(parsed);
+      toast({ title: "วางเนื้อหาทุกช่องแล้ว", description: "ตรวจสอบทั้ง TH และ EN ก่อนบันทึก" });
+    } else if (onInsert) {
+      // Fallback: insert as content_th only
+      onInsert({ content_th: text });
+      toast({ title: "วางเนื้อหา (TH) แล้ว" });
+    }
+  };
+
+  const getDisplayContent = (text: string) => {
+    const parsed = tryParseArticleJson(text);
+    if (!parsed) return text;
+    
+    const parts: string[] = [];
+    if (parsed.title_th) parts.push(`## 🇹🇭 ${parsed.title_th}`);
+    if (parsed.excerpt_th) parts.push(`> ${parsed.excerpt_th}`);
+    if (parsed.title_en) parts.push(`## 🇬🇧 ${parsed.title_en}`);
+    if (parsed.excerpt_en) parts.push(`> ${parsed.excerpt_en}`);
+    if (parsed.content_th) parts.push(`\n---\n**เนื้อหา TH:** ${parsed.content_th.slice(0, 200)}...`);
+    if (parsed.content_en) parts.push(`**เนื้อหา EN:** ${parsed.content_en.slice(0, 200)}...`);
+    if (parsed.tags?.length) parts.push(`\n🏷️ Tags: ${parsed.tags.join(", ")}`);
+    if (parsed.slug) parts.push(`🔗 Slug: ${parsed.slug}`);
+    return parts.join("\n\n");
   };
 
   return (
@@ -132,7 +187,7 @@ const BlogAiAssistant = ({ onInsert, context }: BlogAiAssistantProps) => {
           <div className="flex items-center justify-between">
             <SheetTitle className="text-sm font-medium flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-primary" />
-              AI ช่วยเขียนบทความ
+              AI ช่วยเขียน (TH + EN)
             </SheetTitle>
             {messages.length > 0 && (
               <Button
@@ -153,7 +208,8 @@ const BlogAiAssistant = ({ onInsert, context }: BlogAiAssistantProps) => {
           {messages.length === 0 && (
             <div className="space-y-3">
               <p className="text-xs text-muted-foreground text-center py-4">
-                สวัสดีค่ะ! ฉันช่วยเขียนบทความ แปลภาษา และแนะนำ SEO ได้ค่ะ
+                สวัสดีค่ะ! ฉันช่วยเขียนบทความ 2 ภาษา (TH + EN) พร้อม SEO<br/>
+                เน้น Local SEO: ราชเทวี, พญาไท, สยาม
               </p>
               <div className="grid grid-cols-2 gap-2">
                 {QUICK_PROMPTS.map((qp) => (
@@ -179,7 +235,7 @@ const BlogAiAssistant = ({ onInsert, context }: BlogAiAssistantProps) => {
                 }`}
               >
                 <div className="whitespace-pre-wrap break-words text-xs leading-relaxed">
-                  {msg.content}
+                  {msg.role === "assistant" ? getDisplayContent(msg.content) : msg.content}
                 </div>
                 {msg.role === "assistant" && !isLoading && (
                   <div className="flex gap-1 mt-2 pt-2 border-t border-border/50">
@@ -196,10 +252,11 @@ const BlogAiAssistant = ({ onInsert, context }: BlogAiAssistantProps) => {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 px-2 text-[10px] text-primary"
+                        className="h-6 px-2 text-[10px] text-primary font-medium"
                         onClick={() => handleInsert(msg.content)}
                       >
-                        วางในเนื้อหา
+                        <FileDown className="w-3 h-3 mr-1" />
+                        วางลงทุกช่อง
                       </Button>
                     )}
                   </div>
@@ -223,7 +280,7 @@ const BlogAiAssistant = ({ onInsert, context }: BlogAiAssistantProps) => {
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="พิมพ์คำสั่ง เช่น 'เขียนบทความเรื่องหลุมสิว'..."
+              placeholder="พิมพ์หัวข้อ เช่น 'เขียนบทความเรื่องหลุมสิว'..."
               rows={2}
               className="text-sm resize-none flex-1"
               onKeyDown={(e) => {
