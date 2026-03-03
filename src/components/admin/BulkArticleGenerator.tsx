@@ -1,6 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -13,7 +12,7 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Sparkles, Loader2, CheckCircle, XCircle, Zap } from "lucide-react";
+import { Sparkles, Loader2, CheckCircle, XCircle, Zap, Eye, Send, CheckCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -22,14 +21,38 @@ const AI_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/blog-ai-assist
 const COVER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/blog-generate-cover`;
 const blogTable = () => supabase.from("blog_articles") as any;
 
-type ArticleStatus = "pending" | "generating" | "cover" | "saving" | "done" | "error";
+type ArticleStep = "pending" | "generating" | "cover" | "saving" | "done" | "error" | "published";
 
 interface ArticleJob {
   prompt: string;
-  status: ArticleStatus;
+  step: ArticleStep;
+  progress: number; // 0-100
   title?: string;
   error?: string;
+  articleId?: string;
+  slug?: string;
+  coverUrl?: string;
 }
+
+const STEP_PROGRESS: Record<ArticleStep, number> = {
+  pending: 0,
+  generating: 30,
+  cover: 60,
+  saving: 85,
+  done: 100,
+  error: 100,
+  published: 100,
+};
+
+const STEP_LABEL: Record<ArticleStep, string> = {
+  pending: "⏳ รอคิว",
+  generating: "✍️ กำลังเขียนบทความ...",
+  cover: "🎨 สร้างรูปปก...",
+  saving: "💾 บันทึกลงฐานข้อมูล...",
+  done: "✅ สำเร็จ (ร่าง)",
+  error: "❌ ผิดพลาด",
+  published: "🟢 เผยแพร่แล้ว",
+};
 
 function parseArticleJson(text: string) {
   try {
@@ -44,18 +67,17 @@ function parseArticleJson(text: string) {
   return null;
 }
 
-async function generateArticleContent(prompt: string): Promise<Record<string, any>> {
-  const messages = [
-    { role: "user" as const, content: prompt },
-  ];
-
+async function streamArticleContent(
+  prompt: string,
+  onProgress: (pct: number) => void
+): Promise<Record<string, any>> {
   const resp = await fetch(AI_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
     },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
   });
 
   if (!resp.ok || !resp.body) {
@@ -67,11 +89,17 @@ async function generateArticleContent(prompt: string): Promise<Record<string, an
   const decoder = new TextDecoder();
   let textBuffer = "";
   let fullText = "";
+  let chunkCount = 0;
 
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
     textBuffer += decoder.decode(value, { stream: true });
+    chunkCount++;
+
+    // Animate progress 5% → 28% based on stream chunks
+    const streamPct = Math.min(28, 5 + chunkCount * 0.5);
+    onProgress(streamPct);
 
     let newlineIndex: number;
     while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
@@ -93,6 +121,7 @@ async function generateArticleContent(prompt: string): Promise<Record<string, an
     }
   }
 
+  onProgress(30);
   const article = parseArticleJson(fullText);
   if (!article) throw new Error("AI ไม่สามารถสร้างบทความในรูปแบบ JSON ได้");
   return article;
@@ -111,6 +140,8 @@ async function generateCover(title: string, excerpt?: string, tags?: string): Pr
   if (!resp.ok) throw new Error(data.error || "สร้างรูปปกล้มเหลว");
   return data.url;
 }
+
+// ─── Component ───────────────────────────────────
 
 const BulkArticleGenerator = () => {
   const [open, setOpen] = useState(false);
@@ -136,24 +167,14 @@ const BulkArticleGenerator = () => {
     setPrompts((prev) => prev.map((p, idx) => (idx === i ? v : p)));
   };
 
-  const updateJob = (i: number, patch: Partial<ArticleJob>) => {
+  const patchJob = useCallback((i: number, patch: Partial<ArticleJob>) => {
     setJobs((prev) => prev.map((j, idx) => (idx === i ? { ...j, ...patch } : j)));
-  };
+  }, []);
 
-  const completedCount = jobs.filter((j) => j.status === "done").length;
-  const errorCount = jobs.filter((j) => j.status === "error").length;
-
-  // Weight each step so progress moves continuously
-  const stepWeight: Record<ArticleStatus, number> = {
-    pending: 0,
-    generating: 0.2,
-    cover: 0.5,
-    saving: 0.8,
-    done: 1,
-    error: 1,
-  };
-  const progress = jobs.length > 0
-    ? (jobs.reduce((sum, j) => sum + stepWeight[j.status], 0) / jobs.length) * 100
+  const completedCount = jobs.filter((j) => j.step === "done" || j.step === "published").length;
+  const errorCount = jobs.filter((j) => j.step === "error").length;
+  const totalProgress = jobs.length > 0
+    ? jobs.reduce((sum, j) => sum + j.progress, 0) / jobs.length
     : 0;
 
   const handleGenerate = async () => {
@@ -165,38 +186,51 @@ const BulkArticleGenerator = () => {
 
     abortRef.current = false;
     setIsRunning(true);
-    const initialJobs: ArticleJob[] = validPrompts.map((p) => ({ prompt: p, status: "pending" }));
+    const initialJobs: ArticleJob[] = validPrompts.map((p) => ({ prompt: p, step: "pending", progress: 0 }));
     setJobs(initialJobs);
 
     const { data: { user } } = await supabase.auth.getUser();
-
     const CONCURRENCY = 3;
 
     const processOne = async (i: number) => {
       if (abortRef.current) return;
-      updateJob(i, { status: "generating" });
+
+      // Step 1: Generate content with streaming progress
+      patchJob(i, { step: "generating", progress: 5 });
       try {
-        const article = await generateArticleContent(validPrompts[i]);
-        updateJob(i, { title: article.title_th || article.title_en || `บทความ ${i + 1}` });
+        const article = await streamArticleContent(validPrompts[i], (pct) => {
+          patchJob(i, { progress: pct });
+        });
+        patchJob(i, { title: article.title_th || article.title_en || `บทความ ${i + 1}`, progress: 30 });
         if (abortRef.current) return;
 
-        updateJob(i, { status: "cover" });
+        // Step 2: Generate cover
+        patchJob(i, { step: "cover", progress: 35 });
         let coverUrl = "";
         try {
+          // Simulate sub-progress for cover generation
+          const coverTimer = setInterval(() => {
+            patchJob(i, { progress: Math.min(58, 35 + Math.random() * 5) });
+          }, 2000);
           coverUrl = await generateCover(
             article.title_th || article.title_en || "",
             article.excerpt_th || article.excerpt_en,
             article.tags?.join(", ")
           );
+          clearInterval(coverTimer);
         } catch (coverErr) {
           console.warn("Cover generation failed:", coverErr);
         }
+        patchJob(i, { progress: 60, coverUrl: coverUrl || undefined });
         if (abortRef.current) return;
 
-        updateJob(i, { status: "saving" });
+        // Step 3: Save to database
+        patchJob(i, { step: "saving", progress: 70 });
         let slug = article.slug || `article-${Date.now()}-${i}`;
         const { data: existing } = await blogTable().select("id").eq("slug", slug).maybeSingle();
         if (existing) slug = `${slug}-${Date.now()}`;
+
+        patchJob(i, { progress: 80 });
 
         const payload = {
           slug,
@@ -216,15 +250,20 @@ const BulkArticleGenerator = () => {
           created_by: user?.id,
         };
 
-        const { error } = await blogTable().insert(payload);
+        const { data: inserted, error } = await blogTable().insert(payload).select("id, slug").single();
         if (error) throw new Error(error.message);
-        updateJob(i, { status: "done" });
+
+        patchJob(i, {
+          step: "done",
+          progress: 100,
+          articleId: inserted?.id,
+          slug: inserted?.slug || slug,
+        });
       } catch (err: any) {
-        updateJob(i, { status: "error", error: err.message });
+        patchJob(i, { step: "error", progress: 100, error: err.message });
       }
     };
 
-    // Process in parallel batches of CONCURRENCY
     for (let start = 0; start < validPrompts.length; start += CONCURRENCY) {
       if (abortRef.current) break;
       const batch = Array.from(
@@ -236,24 +275,34 @@ const BulkArticleGenerator = () => {
 
     setIsRunning(false);
     queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
-    toast({
-      title: `สร้างบทความเสร็จสิ้น`,
-      description: `สำเร็จ ${jobs.filter((j) => j.status === "done").length + (jobs[jobs.length - 1]?.status === "done" ? 0 : 0)} จาก ${validPrompts.length} บทความ`,
-    });
+    toast({ title: "สร้างบทความเสร็จสิ้น" });
   };
 
-  const handleStop = () => {
-    abortRef.current = true;
+  const handlePublish = async (i: number) => {
+    const job = jobs[i];
+    if (!job.articleId) return;
+    const { error } = await blogTable()
+      .update({ status: "published", published_at: new Date().toISOString() })
+      .eq("id", job.articleId);
+    if (error) {
+      toast({ title: "เผยแพร่ไม่สำเร็จ", description: error.message, variant: "destructive" });
+    } else {
+      patchJob(i, { step: "published" });
+      queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
+    }
   };
 
-  const statusLabel: Record<ArticleStatus, string> = {
-    pending: "รอคิว",
-    generating: "กำลังเขียน...",
-    cover: "สร้างรูปปก...",
-    saving: "บันทึก...",
-    done: "สำเร็จ ✓",
-    error: "ผิดพลาด ✗",
+  const handlePublishAll = async () => {
+    const draftJobs = jobs
+      .map((j, i) => ({ j, i }))
+      .filter(({ j }) => j.step === "done" && j.articleId);
+    for (const { i } of draftJobs) {
+      await handlePublish(i);
+    }
+    toast({ title: `เผยแพร่ ${draftJobs.length} บทความแล้ว` });
   };
+
+  const draftCount = jobs.filter((j) => j.step === "done").length;
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!isRunning) setOpen(v); }}>
@@ -270,13 +319,13 @@ const BulkArticleGenerator = () => {
             สร้างบทความอัตโนมัติ (Bulk)
           </DialogTitle>
           <DialogDescription className="text-xs">
-            ใส่ prompt ตามจำนวนที่ต้องการ ระบบจะสร้างบทความ + รูปปก + บันทึกลงฐานข้อมูลอัตโนมัติ
+            ใส่ prompt ตามจำนวนที่ต้องการ ระบบจะสร้างบทความ + รูปปก + บันทึกอัตโนมัติ
           </DialogDescription>
         </DialogHeader>
 
+        {/* ─── Setup view ─── */}
         {!isRunning && jobs.length === 0 && (
           <div className="space-y-5 flex-1 overflow-y-auto">
-            {/* Count selector */}
             <div className="space-y-2">
               <Label className="text-xs">จำนวนบทความ: <strong>{count}</strong></Label>
               <Slider
@@ -288,13 +337,10 @@ const BulkArticleGenerator = () => {
                 className="w-full"
               />
               <div className="flex justify-between text-[10px] text-muted-foreground">
-                <span>2</span>
-                <span>50</span>
-                <span>100</span>
+                <span>2</span><span>50</span><span>100</span>
               </div>
             </div>
 
-            {/* Prompts */}
             <div className="space-y-2">
               <Label className="text-xs">Prompts ({count} รายการ)</Label>
               <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
@@ -313,7 +359,6 @@ const BulkArticleGenerator = () => {
               </div>
             </div>
 
-            {/* Fill helper */}
             <div className="flex gap-2 flex-wrap">
               <Button
                 variant="outline"
@@ -346,56 +391,105 @@ const BulkArticleGenerator = () => {
           </div>
         )}
 
-        {/* Progress view */}
+        {/* ─── Progress view ─── */}
         {(isRunning || jobs.length > 0) && (
           <div className="space-y-4 flex-1 overflow-y-auto">
+            {/* Overall progress */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">
-                  สำเร็จ {completedCount}/{jobs.length} | ผิดพลาด {errorCount}
+                  ทั้งหมด {Math.round(totalProgress)}% — สำเร็จ {completedCount}/{jobs.length} | ผิดพลาด {errorCount}
                 </span>
                 {isRunning && (
-                  <Button variant="destructive" size="sm" className="text-xs h-7" onClick={handleStop}>
+                  <Button variant="destructive" size="sm" className="text-xs h-7" onClick={() => { abortRef.current = true; }}>
                     หยุด
                   </Button>
                 )}
               </div>
-              <Progress value={progress} className="h-2 transition-all duration-500" />
+              <Progress value={totalProgress} className="h-2" />
             </div>
 
-            <div className="space-y-1.5 max-h-[50vh] overflow-y-auto pr-1">
+            {/* Per-article cards */}
+            <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
               {jobs.map((job, i) => (
                 <div
                   key={i}
-                  className={`flex items-center gap-2 p-2 rounded-lg border text-xs ${
-                    job.status === "done"
-                      ? "border-green-200 bg-green-50"
-                      : job.status === "error"
-                      ? "border-destructive/30 bg-destructive/5"
-                      : job.status === "pending"
-                      ? "border-border bg-muted/30"
-                      : "border-primary/30 bg-primary/5"
+                  className={`rounded-lg border p-3 text-xs space-y-2 transition-colors ${
+                    job.step === "done" ? "border-primary/30 bg-primary/5"
+                    : job.step === "published" ? "border-green-300 bg-green-50"
+                    : job.step === "error" ? "border-destructive/30 bg-destructive/5"
+                    : job.step === "pending" ? "border-border bg-muted/20"
+                    : "border-primary/20 bg-primary/5"
                   }`}
                 >
-                  <span className="w-5 text-center text-muted-foreground">{i + 1}</span>
-                  {(job.status === "generating" || job.status === "cover" || job.status === "saving") && (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-primary shrink-0" />
-                  )}
-                  {job.status === "done" && <CheckCircle className="w-3.5 h-3.5 text-green-600 shrink-0" />}
-                  {job.status === "error" && <XCircle className="w-3.5 h-3.5 text-destructive shrink-0" />}
-                  <div className="flex-1 min-w-0">
-                    <p className="truncate">{job.title || job.prompt.slice(0, 60)}</p>
-                    {job.error && <p className="text-destructive text-[10px] truncate">{job.error}</p>}
+                  {/* Header row */}
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 text-center text-muted-foreground font-medium">{i + 1}</span>
+                    {(job.step === "generating" || job.step === "cover" || job.step === "saving") && (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-primary shrink-0" />
+                    )}
+                    {job.step === "done" && <CheckCircle className="w-3.5 h-3.5 text-primary shrink-0" />}
+                    {job.step === "published" && <CheckCheck className="w-3.5 h-3.5 text-green-600 shrink-0" />}
+                    {job.step === "error" && <XCircle className="w-3.5 h-3.5 text-destructive shrink-0" />}
+                    <div className="flex-1 min-w-0">
+                      <p className="truncate font-medium">{job.title || job.prompt.slice(0, 60)}</p>
+                    </div>
                   </div>
-                  <span className="text-[10px] text-muted-foreground shrink-0">
-                    {statusLabel[job.status]}
-                  </span>
+
+                  {/* Per-article progress bar */}
+                  <div className="flex items-center gap-2">
+                    <Progress value={job.progress} className="h-1.5 flex-1" />
+                    <span className="text-[10px] text-muted-foreground w-8 text-right">{Math.round(job.progress)}%</span>
+                  </div>
+
+                  {/* Status label */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-muted-foreground">{STEP_LABEL[job.step]}</span>
+
+                    {/* Action buttons */}
+                    <div className="flex gap-1">
+                      {(job.step === "done" || job.step === "published") && job.slug && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-[10px] gap-1"
+                          onClick={() => window.open(`/blog/${job.slug}`, "_blank")}
+                        >
+                          <Eye className="w-3 h-3" />
+                          Preview
+                        </Button>
+                      )}
+                      {job.step === "done" && job.articleId && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          className="h-6 px-2 text-[10px] gap-1"
+                          onClick={() => handlePublish(i)}
+                        >
+                          <Send className="w-3 h-3" />
+                          เผยแพร่
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {job.error && <p className="text-destructive text-[10px]">{job.error}</p>}
                 </div>
               ))}
             </div>
 
+            {/* Bottom actions */}
             {!isRunning && (
               <div className="flex gap-2">
+                {draftCount > 0 && (
+                  <Button
+                    onClick={handlePublishAll}
+                    className="flex-1 text-xs gap-1.5"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    เผยแพร่ทั้งหมด ({draftCount})
+                  </Button>
+                )}
                 <Button
                   variant="outline"
                   className="flex-1 text-xs"
@@ -403,7 +497,7 @@ const BulkArticleGenerator = () => {
                 >
                   สร้างชุดใหม่
                 </Button>
-                <Button className="flex-1 text-xs" onClick={() => setOpen(false)}>
+                <Button variant="secondary" className="text-xs" onClick={() => setOpen(false)}>
                   ปิด
                 </Button>
               </div>
