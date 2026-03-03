@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate, Outlet, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, LogOut, Loader2 } from "lucide-react";
+import { LayoutDashboard, FileText, LogOut, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logoImage from "@/assets/logo-clarity.jpeg";
 
@@ -34,6 +34,7 @@ const AdminLayout = () => {
 
   const navItems = [
     { href: "/admin/promotions", label: "โปรโมชั่น", sublabel: "Promotions", icon: LayoutDashboard },
+    { href: "/admin/blogs", label: "บทความ", sublabel: "Blog Articles", icon: FileText },
   ];
 
   return (

@@ -12,6 +12,8 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
 import PromotionsList from "./pages/admin/PromotionsList";
 import PromotionEditor from "./pages/admin/PromotionEditor";
+import BlogsList from "./pages/admin/BlogsList";
+import BlogEditor from "./pages/admin/BlogEditor";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,9 @@ const App = () => (
               <Route path="promotions" element={<PromotionsList />} />
               <Route path="promotions/new" element={<PromotionEditor />} />
               <Route path="promotions/:id" element={<PromotionEditor />} />
+              <Route path="blogs" element={<BlogsList />} />
+              <Route path="blogs/new" element={<BlogEditor />} />
+              <Route path="blogs/:id" element={<BlogEditor />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
