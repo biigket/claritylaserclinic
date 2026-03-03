@@ -142,7 +142,19 @@ const BulkArticleGenerator = () => {
 
   const completedCount = jobs.filter((j) => j.status === "done").length;
   const errorCount = jobs.filter((j) => j.status === "error").length;
-  const progress = jobs.length > 0 ? ((completedCount + errorCount) / jobs.length) * 100 : 0;
+
+  // Weight each step so progress moves continuously
+  const stepWeight: Record<ArticleStatus, number> = {
+    pending: 0,
+    generating: 0.2,
+    cover: 0.5,
+    saving: 0.8,
+    done: 1,
+    error: 1,
+  };
+  const progress = jobs.length > 0
+    ? (jobs.reduce((sum, j) => sum + stepWeight[j.status], 0) / jobs.length) * 100
+    : 0;
 
   const handleGenerate = async () => {
     const validPrompts = prompts.filter((p) => p.trim());
@@ -348,7 +360,7 @@ const BulkArticleGenerator = () => {
                   </Button>
                 )}
               </div>
-              <Progress value={progress} className="h-2" />
+              <Progress value={progress} className="h-2 transition-all duration-500" />
             </div>
 
             <div className="space-y-1.5 max-h-[50vh] overflow-y-auto pr-1">
