@@ -11,64 +11,48 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { title, excerpt, extra_prompt } = await req.json();
+    const { title, excerpt, tags, content_summary, extra_prompt } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const context = [title, excerpt].filter(Boolean).join(" — ");
-    if (!context) throw new Error("ต้องมีชื่อบทความหรือบทคัดย่อเพื่อสร้างรูป");
+    if (!title && !excerpt) throw new Error("ต้องมีชื่อบทความหรือบทคัดย่อเพื่อสร้างรูป");
 
-    const prompt = `Create a professional 16:9 ultra high-resolution professional blog cover image, clean medical aesthetic clinic blog cover image for an article about: "${context}".
+    // Build rich article context for the AI
+    const contextParts: string[] = [];
+    if (title) contextParts.push(`Article Title: "${title}"`);
+    if (excerpt) contextParts.push(`Summary: "${excerpt}"`);
+    if (tags) contextParts.push(`Topics/Tags: ${tags}`);
+    if (content_summary) contextParts.push(`Content Preview: "${content_summary}"`);
+    const articleContext = contextParts.join("\n");
 
-STYLE & MOOD:
-Modern, minimal, luxury aesthetic medicine.
-Muted professional tones.
-Dark brown and taupe background palette inspired by high-end dermatology branding.
-Premium, trustworthy, clean clinical atmosphere.
+    const prompt = `You are a professional medical aesthetic blog cover designer. Analyze the following article details carefully and create a cover image that DIRECTLY represents the article's specific topic and content.
 
-BACKGROUND:
-- Deep dark brown or taupe gradient background.
-- Soft studio lighting with subtle depth.
-- Cinematic yet minimal.
-- Smooth gradient transitions.
-- Slight vignette for elegance.
+${articleContext}
 
-DESIGN ELEMENTS:
-- Abstract medical-inspired shapes (very subtle).
-- Soft flowing wave textures or light diffusion layers.
-- Minimal gold or rose-gold accent glow (very refined, not flashy).
-- Soft reflective surface or shadow gradient to create depth.
-- Clean negative space for editorial balance.
+INSTRUCTIONS:
+1. First, identify the CORE SUBJECT of the article (e.g. acne treatment, laser skin, anti-aging, skincare ingredients, dermatology procedure, etc.)
+2. Then design a cover that visually represents THAT specific subject — not a generic medical image.
 
-LIGHTING:
-- Soft diffused lighting.
-- Gentle rim highlights.
-- Subtle volumetric light for premium depth.
-- No harsh shadows.
+VISUAL APPROACH — choose the most fitting for the article topic:
+- If about a specific skin condition → show abstract representation of skin texture, cellular patterns, or before/after concept
+- If about a treatment/procedure → show the concept through elegant medical-inspired abstract art (laser beams, light therapy glow, molecular structures)
+- If about skincare/ingredients → show beautiful product-inspired compositions, ingredient textures, botanical elements
+- If about beauty/anti-aging → show elegant, aspirational imagery with flowing forms, golden light, youthful energy
+- If about science/research → show data visualization aesthetics, molecular structures, DNA-inspired patterns
 
-COLOR GRADING:
-- Unified warm taupe color grading.
-- Muted tones.
-- Slight warm highlight accents.
-- Balanced contrast.
-- High-end dermatology campaign feel.
+STYLE:
+- Modern, minimal, luxury aesthetic medicine
+- Dark brown and taupe background palette with warm accents
+- Soft diffused cinematic lighting
+- Premium, trustworthy, clean clinical atmosphere
+- Ultra high resolution, photorealistic, 16:9 aspect ratio
 
 STRICT RULES:
-- No text.
-- No letters.
-- No logos.
-- No watermark.
-- No people.
-- No typography.
-- No medical tools visible.
-- Keep minimal and elegant.
-
-OUTPUT:
-Ultra-detailed, photorealistic.
-High dynamic range.
-Crisp and clean.
-Editorial blog cover quality.
-16:9 aspect ratio.${extra_prompt ? `\n\nADDITIONAL INSTRUCTIONS:\n${extra_prompt}` : ""}`;
+- No text, letters, logos, watermarks, or typography of any kind
+- No people or faces
+- No visible medical tools or needles
+- Keep minimal and elegant
+- The image MUST relate to the article topic, not be generic${extra_prompt ? `\n\nADDITIONAL STYLE INSTRUCTIONS FROM EDITOR:\n${extra_prompt}` : ""}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -110,7 +94,6 @@ Editorial blog cover quality.
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Convert base64 to Uint8Array
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
     const binaryStr = atob(base64Data);
     const bytes = new Uint8Array(binaryStr.length);
