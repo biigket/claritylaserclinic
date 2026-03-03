@@ -11,7 +11,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { title, excerpt } = await req.json();
+    const { title, excerpt, extra_prompt } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
@@ -68,7 +68,7 @@ Ultra-detailed, photorealistic.
 High dynamic range.
 Crisp and clean.
 Editorial blog cover quality.
-16:9 aspect ratio.`;
+16:9 aspect ratio.${extra_prompt ? `\n\nADDITIONAL INSTRUCTIONS:\n${extra_prompt}` : ""}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
