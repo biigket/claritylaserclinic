@@ -48,6 +48,7 @@ const BlogEditor = () => {
   const [uploading, setUploading] = useState(false);
   const [generatingCover, setGeneratingCover] = useState(false);
   const [tagInput, setTagInput] = useState("");
+  const [coverPrompt, setCoverPrompt] = useState("");
 
   const { data: existing } = useQuery({
     queryKey: ["blog-article", id],
@@ -118,6 +119,7 @@ const BlogEditor = () => {
           body: JSON.stringify({
             title: form.title_th || form.title_en,
             excerpt: form.excerpt_th || form.excerpt_en,
+            extra_prompt: coverPrompt || undefined,
           }),
         }
       );
@@ -347,6 +349,16 @@ const BlogEditor = () => {
                   {generatingCover ? "กำลังสร้าง..." : "AI สร้างรูปปก"}
                 </span>
               </button>
+            </div>
+            <div className="w-full mt-3">
+              <Textarea
+                value={coverPrompt}
+                onChange={(e) => setCoverPrompt(e.target.value)}
+                placeholder="เพิ่ม prompt สำหรับ AI สร้างรูปปก เช่น 'เน้นโทนสีฟ้า มีลวดลายคลื่น'..."
+                rows={2}
+                className="text-sm"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">ไม่จำเป็นต้องกรอก — AI จะใช้ชื่อบทความและบทคัดย่อเป็นหลัก</p>
             </div>
           </Field>
 
