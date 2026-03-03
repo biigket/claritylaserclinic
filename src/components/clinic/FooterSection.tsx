@@ -53,7 +53,7 @@ const FooterSection = () => {
         {/* Social links */}
         <div className="mt-12 pt-8 border-t border-background/10 flex flex-wrap gap-6 text-background/40 font-body text-xs">
           <a href="https://line.me/R/ti/p/@clarityclinic" target="_blank" rel="noopener noreferrer" className="hover:text-background/70 transition-colors">LINE @clarityclinic</a>
-          <a href="https://facebook.com/ClarityClinic" target="_blank" rel="noopener noreferrer" className="hover:text-background/70 transition-colors">Facebook</a>
+          <a href="https://www.facebook.com/share/1apkLYX3ss/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="hover:text-background/70 transition-colors">Facebook</a>
           <a href="https://instagram.com/Clarity.laserclinic" target="_blank" rel="noopener noreferrer" className="hover:text-background/70 transition-colors">Instagram</a>
           <a href="https://tiktok.com/@clarity.clinic" target="_blank" rel="noopener noreferrer" className="hover:text-background/70 transition-colors">TikTok</a>
         </div>
