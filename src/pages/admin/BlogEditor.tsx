@@ -128,6 +128,8 @@ const BlogEditor = () => {
           body: JSON.stringify({
             title: form.title_th || form.title_en,
             excerpt: form.excerpt_th || form.excerpt_en,
+            tags: (form.tags as string[])?.length ? (form.tags as string[]).join(", ") : undefined,
+            content_summary: (form.content_th || form.content_en || "").slice(0, 500) || undefined,
             extra_prompt: coverPrompt || undefined,
           }),
         }
