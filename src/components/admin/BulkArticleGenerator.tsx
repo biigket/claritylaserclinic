@@ -158,18 +158,16 @@ const BulkArticleGenerator = () => {
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    for (let i = 0; i < validPrompts.length; i++) {
-      if (abortRef.current) break;
+    const CONCURRENCY = 3;
 
-      // Step 1: Generate content
+    const processOne = async (i: number) => {
+      if (abortRef.current) return;
       updateJob(i, { status: "generating" });
       try {
         const article = await generateArticleContent(validPrompts[i]);
         updateJob(i, { title: article.title_th || article.title_en || `บทความ ${i + 1}` });
+        if (abortRef.current) return;
 
-        if (abortRef.current) break;
-
-        // Step 2: Generate cover
         updateJob(i, { status: "cover" });
         let coverUrl = "";
         try {
@@ -179,15 +177,11 @@ const BulkArticleGenerator = () => {
             article.tags?.join(", ")
           );
         } catch (coverErr) {
-          console.warn("Cover generation failed, continuing without cover:", coverErr);
+          console.warn("Cover generation failed:", coverErr);
         }
+        if (abortRef.current) return;
 
-        if (abortRef.current) break;
-
-        // Step 3: Save to database
         updateJob(i, { status: "saving" });
-
-        // Ensure unique slug
         let slug = article.slug || `article-${Date.now()}-${i}`;
         const { data: existing } = await blogTable().select("id").eq("slug", slug).maybeSingle();
         if (existing) slug = `${slug}-${Date.now()}`;
@@ -212,11 +206,20 @@ const BulkArticleGenerator = () => {
 
         const { error } = await blogTable().insert(payload);
         if (error) throw new Error(error.message);
-
         updateJob(i, { status: "done" });
       } catch (err: any) {
         updateJob(i, { status: "error", error: err.message });
       }
+    };
+
+    // Process in parallel batches of CONCURRENCY
+    for (let start = 0; start < validPrompts.length; start += CONCURRENCY) {
+      if (abortRef.current) break;
+      const batch = Array.from(
+        { length: Math.min(CONCURRENCY, validPrompts.length - start) },
+        (_, k) => start + k
+      );
+      await Promise.all(batch.map(processOne));
     }
 
     setIsRunning(false);
