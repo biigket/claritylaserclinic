@@ -346,7 +346,7 @@ const BulkArticleGenerator = () => {
   const draftCount = jobs.filter((j) => j.step === "done").length;
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (isRunning && !v) { handleStop(); } setOpen(v); }}>
+    <Dialog open={open} onOpenChange={(v) => { console.log("BulkDialog onOpenChange:", v, "isRunning:", isRunning); if (isRunning && !v) { handleStop(); } setOpen(v); }}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1.5 text-xs border-primary/30 text-primary hover:bg-primary/5">
           <Zap className="w-3.5 h-3.5" />
