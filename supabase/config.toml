@@ -2,3 +2,6 @@ project_id = "pwgymezdgragssvlucvt"
 
 [functions.blog-ai-assistant]
 verify_jwt = false
+
+[functions.blog-generate-cover]
+verify_jwt = false

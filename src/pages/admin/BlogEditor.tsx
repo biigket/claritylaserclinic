@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Eye, Upload, X, Loader2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Save, Eye, Upload, X, Loader2, ExternalLink, Sparkles } from "lucide-react";
 import BlogAiAssistant, { type BlogInsertData } from "@/components/admin/BlogAiAssistant";
 
 const blogTable = () => supabase.from("blog_articles") as any;
@@ -46,6 +46,7 @@ const BlogEditor = () => {
 
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [generatingCover, setGeneratingCover] = useState(false);
   const [tagInput, setTagInput] = useState("");
 
   const { data: existing } = useQuery({
@@ -97,6 +98,38 @@ const BlogEditor = () => {
 
   const removeTag = (t: string) => {
     set("tags", (form.tags as string[]).filter((x) => x !== t));
+  };
+
+  const handleGenerateCover = async () => {
+    if (!form.title_th && !form.title_en) {
+      toast({ title: "กรุณากรอกชื่อบทความก่อนสร้างรูปปก", variant: "destructive" });
+      return;
+    }
+    setGeneratingCover(true);
+    try {
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/blog-generate-cover`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            title: form.title_th || form.title_en,
+            excerpt: form.excerpt_th || form.excerpt_en,
+          }),
+        }
+      );
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || "สร้างรูปภาพล้มเหลว");
+      set("cover_image_url", data.url);
+      toast({ title: "สร้างรูปปกสำเร็จ ✨" });
+    } catch (err: any) {
+      toast({ title: "สร้างรูปปกล้มเหลว", description: err.message, variant: "destructive" });
+    } finally {
+      setGeneratingCover(false);
+    }
   };
 
   const handleSave = async (publish = false) => {
@@ -300,6 +333,20 @@ const BlogEditor = () => {
                 <span className="text-[10px] text-muted-foreground mt-1">อัปโหลดรูปปก</span>
                 <input type="file" accept="image/*" className="hidden" onChange={handleUploadCover} />
               </label>
+              <button
+                onClick={handleGenerateCover}
+                disabled={generatingCover}
+                className="flex flex-col items-center justify-center w-48 h-32 border-2 border-dashed border-primary/30 rounded-lg cursor-pointer hover:border-primary/60 hover:bg-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {generatingCover ? (
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                ) : (
+                  <Sparkles className="w-5 h-5 text-primary" />
+                )}
+                <span className="text-[10px] text-primary mt-1">
+                  {generatingCover ? "กำลังสร้าง..." : "AI สร้างรูปปก"}
+                </span>
+              </button>
             </div>
           </Field>
 
