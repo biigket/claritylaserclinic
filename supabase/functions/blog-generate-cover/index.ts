@@ -18,11 +18,57 @@ serve(async (req) => {
     const context = [title, excerpt].filter(Boolean).join(" — ");
     if (!context) throw new Error("ต้องมีชื่อบทความหรือบทคัดย่อเพื่อสร้างรูป");
 
-    const prompt = `Create a professional, clean medical aesthetic clinic blog cover image for an article about: "${context}". 
-Style: Modern, minimal, soft lighting, pastel tones with hints of gold or rose gold. 
-The image should look premium and trustworthy, suitable for a dermatology and laser clinic. 
-Do NOT include any text or letters in the image. 
-16:9 aspect ratio, ultra high resolution.`;
+    const prompt = `Create a professional 16:9 ultra high-resolution professional blog cover image, clean medical aesthetic clinic blog cover image for an article about: "${context}".
+
+STYLE & MOOD:
+Modern, minimal, luxury aesthetic medicine.
+Muted professional tones.
+Dark brown and taupe background palette inspired by high-end dermatology branding.
+Premium, trustworthy, clean clinical atmosphere.
+
+BACKGROUND:
+- Deep dark brown or taupe gradient background.
+- Soft studio lighting with subtle depth.
+- Cinematic yet minimal.
+- Smooth gradient transitions.
+- Slight vignette for elegance.
+
+DESIGN ELEMENTS:
+- Abstract medical-inspired shapes (very subtle).
+- Soft flowing wave textures or light diffusion layers.
+- Minimal gold or rose-gold accent glow (very refined, not flashy).
+- Soft reflective surface or shadow gradient to create depth.
+- Clean negative space for editorial balance.
+
+LIGHTING:
+- Soft diffused lighting.
+- Gentle rim highlights.
+- Subtle volumetric light for premium depth.
+- No harsh shadows.
+
+COLOR GRADING:
+- Unified warm taupe color grading.
+- Muted tones.
+- Slight warm highlight accents.
+- Balanced contrast.
+- High-end dermatology campaign feel.
+
+STRICT RULES:
+- No text.
+- No letters.
+- No logos.
+- No watermark.
+- No people.
+- No typography.
+- No medical tools visible.
+- Keep minimal and elegant.
+
+OUTPUT:
+Ultra-detailed, photorealistic.
+High dynamic range.
+Crisp and clean.
+Editorial blog cover quality.
+16:9 aspect ratio.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
