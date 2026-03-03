@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,8 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import logoImage from "@/assets/logo-clarity.jpeg";
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => localStorage.getItem("admin_email") || "");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(() => !!localStorage.getItem("admin_email"));
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -17,6 +19,12 @@ const AdminLogin = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    if (remember) {
+      localStorage.setItem("admin_email", email);
+    } else {
+      localStorage.removeItem("admin_email");
+    }
 
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -76,6 +84,16 @@ const AdminLogin = () => {
                 required
                 className="mt-1"
               />
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="remember"
+                checked={remember}
+                onCheckedChange={(checked) => setRemember(!!checked)}
+              />
+              <Label htmlFor="remember" className="text-xs text-muted-foreground cursor-pointer">
+                จดจำอีเมล
+              </Label>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
