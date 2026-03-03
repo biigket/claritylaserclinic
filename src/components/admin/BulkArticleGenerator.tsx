@@ -67,18 +67,34 @@ function parseArticleJson(text: string) {
   return null;
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} หมดเวลา (${ms / 1000}s)`)), ms);
+    promise.then(
+      (v) => { clearTimeout(timer); resolve(v); },
+      (e) => { clearTimeout(timer); reject(e); }
+    );
+  });
+}
+
 async function streamArticleContent(
   prompt: string,
-  onProgress: (pct: number) => void
+  onProgress: (pct: number) => void,
+  abortSignal?: AbortSignal
 ): Promise<Record<string, any>> {
-  const resp = await fetch(AI_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-    },
-    body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
-  });
+  const resp = await withTimeout(
+    fetch(AI_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ messages: [{ role: "user", content: prompt }] }),
+      signal: abortSignal,
+    }),
+    120_000,
+    "AI เขียนบทความ"
+  );
 
   if (!resp.ok || !resp.body) {
     const err = await resp.json().catch(() => ({}));
@@ -91,34 +107,38 @@ async function streamArticleContent(
   let fullText = "";
   let chunkCount = 0;
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    textBuffer += decoder.decode(value, { stream: true });
-    chunkCount++;
+  try {
+    while (true) {
+      if (abortSignal?.aborted) throw new Error("ถูกยกเลิก");
+      const { done, value } = await withTimeout(reader.read(), 60_000, "รอข้อมูลจาก AI");
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
+      chunkCount++;
 
-    // Animate progress 5% → 28% based on stream chunks
-    const streamPct = Math.min(28, 5 + chunkCount * 0.5);
-    onProgress(streamPct);
+      const streamPct = Math.min(28, 5 + chunkCount * 0.5);
+      onProgress(streamPct);
 
-    let newlineIndex: number;
-    while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-      let line = textBuffer.slice(0, newlineIndex);
-      textBuffer = textBuffer.slice(newlineIndex + 1);
-      if (line.endsWith("\r")) line = line.slice(0, -1);
-      if (line.startsWith(":") || line.trim() === "") continue;
-      if (!line.startsWith("data: ")) continue;
-      const jsonStr = line.slice(6).trim();
-      if (jsonStr === "[DONE]") break;
-      try {
-        const parsed = JSON.parse(jsonStr);
-        const content = parsed.choices?.[0]?.delta?.content;
-        if (content) fullText += content;
-      } catch {
-        textBuffer = line + "\n" + textBuffer;
-        break;
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") break;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) fullText += content;
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
       }
     }
+  } finally {
+    reader.releaseLock();
   }
 
   onProgress(30);
@@ -150,6 +170,7 @@ const BulkArticleGenerator = () => {
   const [jobs, setJobs] = useState<ArticleJob[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const abortRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -177,6 +198,18 @@ const BulkArticleGenerator = () => {
     ? jobs.reduce((sum, j) => sum + j.progress, 0) / jobs.length
     : 0;
 
+  const handleStop = useCallback(() => {
+    abortRef.current = true;
+    abortControllerRef.current?.abort();
+    setIsRunning(false);
+    // Mark pending jobs as error
+    setJobs((prev) => prev.map((j) =>
+      j.step === "pending" || j.step === "generating" || j.step === "cover" || j.step === "saving"
+        ? { ...j, step: "error", progress: 100, error: "ถูกยกเลิก" }
+        : j
+    ));
+  }, []);
+
   const handleGenerate = async () => {
     const validPrompts = prompts.filter((p) => p.trim());
     if (validPrompts.length === 0) {
@@ -184,45 +217,52 @@ const BulkArticleGenerator = () => {
       return;
     }
 
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
     abortRef.current = false;
     setIsRunning(true);
-    const initialJobs: ArticleJob[] = validPrompts.map((p) => ({ prompt: p, step: "pending", progress: 0 }));
+    const initialJobs: ArticleJob[] = validPrompts.map((p) => ({ prompt: p, step: "pending" as ArticleStep, progress: 0 }));
     setJobs(initialJobs);
 
     const { data: { user } } = await supabase.auth.getUser();
-    const CONCURRENCY = 3;
+    const CONCURRENCY = 2;
 
     const processOne = async (i: number) => {
-      if (abortRef.current) return;
+      if (abortRef.current) {
+        patchJob(i, { step: "error", progress: 100, error: "ถูกยกเลิก" });
+        return;
+      }
 
-      // Step 1: Generate content with streaming progress
       patchJob(i, { step: "generating", progress: 5 });
       try {
         const article = await streamArticleContent(validPrompts[i], (pct) => {
           patchJob(i, { progress: pct });
-        });
+        }, controller.signal);
         patchJob(i, { title: article.title_th || article.title_en || `บทความ ${i + 1}`, progress: 30 });
-        if (abortRef.current) return;
+        if (abortRef.current) throw new Error("ถูกยกเลิก");
 
         // Step 2: Generate cover
         patchJob(i, { step: "cover", progress: 35 });
         let coverUrl = "";
         try {
-          // Simulate sub-progress for cover generation
           const coverTimer = setInterval(() => {
             patchJob(i, { progress: Math.min(58, 35 + Math.random() * 5) });
           }, 2000);
-          coverUrl = await generateCover(
-            article.title_th || article.title_en || "",
-            article.excerpt_th || article.excerpt_en,
-            article.tags?.join(", ")
+          coverUrl = await withTimeout(
+            generateCover(
+              article.title_th || article.title_en || "",
+              article.excerpt_th || article.excerpt_en,
+              article.tags?.join(", ")
+            ),
+            90_000,
+            "สร้างรูปปก"
           );
           clearInterval(coverTimer);
         } catch (coverErr) {
           console.warn("Cover generation failed:", coverErr);
         }
         patchJob(i, { progress: 60, coverUrl: coverUrl || undefined });
-        if (abortRef.current) return;
+        if (abortRef.current) throw new Error("ถูกยกเลิก");
 
         // Step 3: Save to database
         patchJob(i, { step: "saving", progress: 70 });
@@ -274,6 +314,7 @@ const BulkArticleGenerator = () => {
     }
 
     setIsRunning(false);
+    abortControllerRef.current = null;
     queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
     toast({ title: "สร้างบทความเสร็จสิ้น" });
   };
@@ -305,7 +346,7 @@ const BulkArticleGenerator = () => {
   const draftCount = jobs.filter((j) => j.step === "done").length;
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!isRunning) setOpen(v); }}>
+    <Dialog open={open} onOpenChange={(v) => { if (isRunning && !v) { handleStop(); } setOpen(v); }}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1.5 text-xs border-primary/30 text-primary hover:bg-primary/5">
           <Zap className="w-3.5 h-3.5" />
@@ -401,7 +442,7 @@ const BulkArticleGenerator = () => {
                   ทั้งหมด {Math.round(totalProgress)}% — สำเร็จ {completedCount}/{jobs.length} | ผิดพลาด {errorCount}
                 </span>
                 {isRunning && (
-                  <Button variant="destructive" size="sm" className="text-xs h-7" onClick={() => { abortRef.current = true; }}>
+                  <Button variant="destructive" size="sm" className="text-xs h-7" onClick={handleStop}>
                     หยุด
                   </Button>
                 )}
