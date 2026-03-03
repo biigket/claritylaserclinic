@@ -19,6 +19,15 @@ const slugify = (text: string) =>
 
 type BlogData = Record<string, any>;
 
+const Field = ({ label, sublabel, children }: { label: string; sublabel?: string; children: React.ReactNode }) => (
+  <div>
+    <Label className="text-xs text-muted-foreground uppercase tracking-wide">
+      {label} {sublabel && <span className="normal-case text-[10px]">({sublabel})</span>}
+    </Label>
+    <div className="mt-1">{children}</div>
+  </div>
+);
+
 const BlogEditor = () => {
   const { id } = useParams();
   const isNew = !id || id === "new";
@@ -193,14 +202,6 @@ const BlogEditor = () => {
     setSaving(false);
   };
 
-  const Field = ({ label, sublabel, children }: { label: string; sublabel?: string; children: React.ReactNode }) => (
-    <div>
-      <Label className="text-xs text-muted-foreground uppercase tracking-wide">
-        {label} {sublabel && <span className="normal-case text-[10px]">({sublabel})</span>}
-      </Label>
-      <div className="mt-1">{children}</div>
-    </div>
-  );
 
   return (
     <div className="p-4 md:p-8 max-w-4xl">
