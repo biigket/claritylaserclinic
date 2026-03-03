@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Save, Eye, Upload, X, Loader2, ExternalLink } from "lucide-react";
+import BlogAiAssistant from "@/components/admin/BlogAiAssistant";
 
 const blogTable = () => supabase.from("blog_articles") as any;
 
@@ -182,6 +183,10 @@ const BlogEditor = () => {
           </div>
         </div>
         <div className="flex gap-2">
+          <BlogAiAssistant
+            onInsert={(text) => set("content_th", (form.content_th || "") + "\n\n" + text)}
+            context={form.title_th}
+          />
           {!isNew && form.status === "published" && (
             <Button variant="outline" size="sm" className="gap-1.5 text-xs" asChild>
               <a href={`/blog/${form.slug}`} target="_blank" rel="noopener noreferrer">

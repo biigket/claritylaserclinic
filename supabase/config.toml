@@ -1,1 +1,4 @@
 project_id = "pwgymezdgragssvlucvt"
+
+[functions.blog-ai-assistant]
+verify_jwt = false
