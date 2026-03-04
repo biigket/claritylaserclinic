@@ -188,8 +188,15 @@ const BlogEditor = () => {
 
     let error;
     if (isNew) {
-      const res = await blogTable().insert(payload);
+      const res = await blogTable().insert(payload).select("id").single();
       error = res.error;
+      if (!error && res.data?.id) {
+        queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
+        toast({ title: publish ? "เผยแพร่แล้ว" : "บันทึกสำเร็จ" });
+        navigate(`/admin/blogs/${res.data.id}`, { replace: true });
+        setSaving(false);
+        return;
+      }
     } else {
       const { created_by, ...updatePayload } = payload;
       const res = await blogTable().update(updatePayload).eq("id", id);
@@ -201,7 +208,6 @@ const BlogEditor = () => {
     } else {
       queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
       toast({ title: publish ? "เผยแพร่แล้ว" : "บันทึกสำเร็จ" });
-      if (isNew) navigate("/admin/blogs");
     }
     setSaving(false);
   };
@@ -234,8 +240,15 @@ const BlogEditor = () => {
       };
       let error;
       if (isNew) {
-        const res = await blogTable().insert(payload);
+        const res = await blogTable().insert(payload).select("id").single();
         error = res.error;
+        if (!error && res.data?.id) {
+          setAutoSaveStatus("บันทึกร่างอัตโนมัติแล้ว ✓");
+          queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
+          navigate(`/admin/blogs/${res.data.id}`, { replace: true });
+          setTimeout(() => setAutoSaveStatus(null), 3000);
+          return;
+        }
       } else {
         const { created_by, ...updatePayload } = payload;
         const res = await blogTable().update(updatePayload).eq("id", id);
