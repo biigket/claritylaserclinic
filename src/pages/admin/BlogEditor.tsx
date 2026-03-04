@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -58,6 +58,8 @@ const BlogEditor = () => {
   const [generatingCover, setGeneratingCover] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [coverPrompt, setCoverPrompt] = useState("");
+  const [autoSaveStatus, setAutoSaveStatus] = useState<string | null>(null);
+  const pendingAiSave = useRef(false);
 
   const { data: existing } = useQuery({
     queryKey: ["blog-article", id],
@@ -204,6 +206,53 @@ const BlogEditor = () => {
     setSaving(false);
   };
 
+  // Auto-save draft after AI insert
+  useEffect(() => {
+    if (!pendingAiSave.current) return;
+    pendingAiSave.current = false;
+    if (!form.slug || !form.content_th) return;
+
+    const autoSaveDraft = async () => {
+      setAutoSaveStatus("กำลังบันทึกร่างอัตโนมัติ...");
+      const { data: { user } } = await supabase.auth.getUser();
+      const payload: Record<string, any> = {
+        slug: form.slug,
+        status: "draft",
+        title_th: form.title_th || "",
+        title_en: form.title_en || null,
+        excerpt_th: form.excerpt_th || null,
+        excerpt_en: form.excerpt_en || null,
+        content_th: form.content_th,
+        content_en: form.content_en || null,
+        cover_image_url: form.cover_image_url || null,
+        tags: form.tags,
+        meta_title_th: form.meta_title_th || null,
+        meta_title_en: form.meta_title_en || null,
+        meta_description_th: form.meta_description_th || null,
+        meta_description_en: form.meta_description_en || null,
+        created_by: user?.id,
+      };
+      let error;
+      if (isNew) {
+        const res = await blogTable().insert(payload);
+        error = res.error;
+      } else {
+        const { created_by, ...updatePayload } = payload;
+        const res = await blogTable().update(updatePayload).eq("id", id);
+        error = res.error;
+      }
+      if (error) {
+        setAutoSaveStatus("บันทึกอัตโนมัติล้มเหลว");
+        console.warn("Auto-save failed:", error.message);
+      } else {
+        setAutoSaveStatus("บันทึกร่างอัตโนมัติแล้ว ✓");
+        queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
+      }
+      setTimeout(() => setAutoSaveStatus(null), 3000);
+    };
+    autoSaveDraft();
+  }, [form]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
   return (
     <div className="p-4 md:p-8 max-w-4xl">
@@ -221,8 +270,12 @@ const BlogEditor = () => {
           </div>
         </div>
         <div className="flex gap-2">
+          {autoSaveStatus && (
+            <span className="text-[10px] text-muted-foreground self-center animate-pulse">{autoSaveStatus}</span>
+          )}
           <BlogAiAssistant
             onInsert={(data: BlogInsertData) => {
+              pendingAiSave.current = true;
               setForm((prev) => ({
                 ...prev,
                 ...(data.title_th && { title_th: data.title_th }),

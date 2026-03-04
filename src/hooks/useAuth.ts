@@ -29,6 +29,7 @@ export function useAuth(): AuthState {
   const [loading, setLoading] = useState(true);
   const roleCache = useRef<{ userId: string; role: AppRole | null } | null>(null);
   const sessionChecked = useRef(false);
+  const hadSessionBefore = useRef(false);
 
   const applyUser = useCallback(async (currentUser: User | null, forceRoleFetch = false) => {
     if (!currentUser) {
@@ -38,6 +39,7 @@ export function useAuth(): AuthState {
       return;
     }
 
+    hadSessionBefore.current = true;
     setUser(currentUser);
 
     // Use cached role if same user and not forced
@@ -50,6 +52,7 @@ export function useAuth(): AuthState {
         setRole(r);
       } catch (err) {
         console.warn("Failed to fetch role:", err);
+        // Keep cached role on network error — don't kick user out
         if (roleCache.current?.userId === currentUser.id) {
           setRole(roleCache.current.role);
         }
@@ -60,7 +63,6 @@ export function useAuth(): AuthState {
   useEffect(() => {
     let mounted = true;
 
-    // 1. Restore session from storage FIRST — this is the source of truth on refresh
     const initSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -81,12 +83,12 @@ export function useAuth(): AuthState {
 
     initSession();
 
-    // 2. Listen for subsequent auth changes (login, logout, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
 
         if (event === "SIGNED_OUT") {
+          hadSessionBefore.current = false;
           setUser(null);
           setRole(null);
           roleCache.current = null;
@@ -95,8 +97,13 @@ export function useAuth(): AuthState {
         }
 
         if (event === "TOKEN_REFRESHED") {
-          // Just update user object, keep cached role
-          if (session?.user) setUser(session.user);
+          if (session?.user) {
+            setUser(session.user);
+            // Re-apply cached role to ensure state is consistent
+            if (roleCache.current?.userId === session.user.id) {
+              setRole(roleCache.current.role);
+            }
+          }
           return;
         }
 
@@ -106,7 +113,6 @@ export function useAuth(): AuthState {
           return;
         }
 
-        // INITIAL_SESSION — only handle if getSession hasn't resolved yet
         if (event === "INITIAL_SESSION" && !sessionChecked.current) {
           await applyUser(session?.user ?? null, true);
           sessionChecked.current = true;
@@ -115,7 +121,7 @@ export function useAuth(): AuthState {
       }
     );
 
-    // 3. Fallback timeout
+    // Fallback timeout
     const timeout = setTimeout(() => {
       if (mounted && !sessionChecked.current) {
         sessionChecked.current = true;
@@ -123,10 +129,34 @@ export function useAuth(): AuthState {
       }
     }, 5000);
 
+    // Proactive token refresh on window focus to prevent expiry
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === "visible" && hadSessionBefore.current) {
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          if (error) {
+            console.warn("Session refresh on focus failed:", error);
+            return;
+          }
+          if (session?.user && mounted) {
+            setUser(session.user);
+            if (roleCache.current?.userId === session.user.id) {
+              setRole(roleCache.current.role);
+            }
+          }
+        } catch (err) {
+          console.warn("Visibility refresh error:", err);
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
       clearTimeout(timeout);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [applyUser]);
 
