@@ -13,124 +13,112 @@ interface AuthState {
 }
 
 async function fetchRole(userId: string): Promise<AppRole | null> {
-  const { data } = await (supabase.from("user_roles") as any)
+  const { data, error } = await supabase
+    .from("user_roles")
     .select("role")
     .eq("user_id", userId)
     .limit(1)
     .single();
 
+  if (error) {
+    console.warn("fetchRole error:", error.message);
+    return null;
+  }
+
   return (data?.role as AppRole) ?? null;
 }
 
 export function useAuth(): AuthState {
-  const [user, setUser] = useState<User | null>(null);
-  const [role, setRole] = useState<AppRole | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [state, setState] = useState<{
+    user: User | null;
+    role: AppRole | null;
+    loading: boolean;
+  }>({ user: null, role: null, loading: true });
 
   const roleCache = useRef<{ userId: string; role: AppRole | null } | null>(null);
-  const initialized = useRef(false);
 
-  const applyUser = useCallback(async (currentUser: User | null, forceRoleFetch = false) => {
+  const resolveUser = useCallback(async (currentUser: User | null) => {
     if (!currentUser) {
-      setUser(null);
-      setRole(null);
       roleCache.current = null;
-      setLoading(false);
+      setState({ user: null, role: null, loading: false });
       return;
     }
 
-    setUser(currentUser);
-
-    if (!forceRoleFetch && roleCache.current?.userId === currentUser.id) {
-      setRole(roleCache.current.role);
-      setLoading(false);
+    // Use cached role immediately while we verify
+    if (roleCache.current?.userId === currentUser.id) {
+      setState({ user: currentUser, role: roleCache.current.role, loading: false });
       return;
     }
+
+    // Set user immediately but keep loading until role is fetched
+    setState(prev => ({ ...prev, user: currentUser, loading: true }));
 
     try {
-      const nextRole = await fetchRole(currentUser.id);
-      roleCache.current = { userId: currentUser.id, role: nextRole };
-      setRole(nextRole);
-    } catch (err) {
-      console.warn("Failed to fetch role:", err);
-      if (roleCache.current?.userId === currentUser.id) {
-        setRole(roleCache.current.role);
-      } else {
-        setRole(null);
-      }
-    } finally {
-      setLoading(false);
+      const role = await fetchRole(currentUser.id);
+      roleCache.current = { userId: currentUser.id, role };
+      setState({ user: currentUser, role, loading: false });
+    } catch {
+      setState({ user: currentUser, role: null, loading: false });
     }
   }, []);
 
   useEffect(() => {
     let mounted = true;
+    let resolved = false;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!mounted) return;
 
-      if (event === "INITIAL_SESSION") {
-        initialized.current = true;
-        await applyUser(session?.user ?? null, true);
-        return;
-      }
-
-      if (event === "SIGNED_IN") {
-        await applyUser(session?.user ?? null, true);
-        return;
-      }
-
       if (event === "SIGNED_OUT") {
-        initialized.current = true;
-        setUser(null);
-        setRole(null);
+        resolved = true;
         roleCache.current = null;
-        setLoading(false);
+        setState({ user: null, role: null, loading: false });
+        return;
+      }
+
+      if (event === "INITIAL_SESSION" || event === "SIGNED_IN") {
+        resolved = true;
+        await resolveUser(session?.user ?? null);
         return;
       }
 
       if (event === "TOKEN_REFRESHED" && session?.user) {
-        await applyUser(session.user, false);
+        // Keep cached role, just update user object
+        const cachedRole = roleCache.current?.userId === session.user.id
+          ? roleCache.current.role
+          : null;
+        setState({ user: session.user, role: cachedRole, loading: false });
       }
     });
 
-    // IMPORTANT: hydrate session explicitly (listener is set first)
-    const hydrateSession = async () => {
+    // Fallback: if INITIAL_SESSION doesn't fire within 2s, hydrate manually
+    const fallbackTimer = setTimeout(async () => {
+      if (!mounted || resolved) return;
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (!mounted) return;
-
-        if (error) {
-          console.warn("getSession error:", error);
-        }
-
-        if (!initialized.current) {
-          initialized.current = true;
-          await applyUser(session?.user ?? null, true);
-        }
-      } catch (err) {
-        if (!mounted) return;
-        console.warn("hydrateSession error:", err);
-        if (!initialized.current) {
-          initialized.current = true;
-          setLoading(false);
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!mounted || resolved) return;
+        resolved = true;
+        await resolveUser(session?.user ?? null);
+      } catch {
+        if (mounted && !resolved) {
+          resolved = true;
+          setState({ user: null, role: null, loading: false });
         }
       }
-    };
-
-    void hydrateSession();
+    }, 2000);
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      clearTimeout(fallbackTimer);
     };
-  }, [applyUser]);
+  }, [resolveUser]);
 
   return {
-    user,
-    role,
-    loading,
-    isAdmin: role === "admin",
-    isEditor: role === "editor",
+    user: state.user,
+    role: state.role,
+    loading: state.loading,
+    isAdmin: state.role === "admin",
+    isEditor: state.role === "editor",
   };
 }
