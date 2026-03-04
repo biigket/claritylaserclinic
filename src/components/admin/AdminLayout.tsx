@@ -11,15 +11,10 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Only redirect to login after loading completes AND we're sure there's no session
-  // Use a small delay to avoid redirect during transient auth states (token refresh, etc.)
   useEffect(() => {
     if (loading) return;
     if (!user || (!isAdmin && !isEditor)) {
-      const timer = setTimeout(() => {
-        navigate("/admin/login");
-      }, 500);
-      return () => clearTimeout(timer);
+      navigate("/admin/login", { replace: true });
     }
   }, [user, loading, isAdmin, isEditor, navigate]);
 
