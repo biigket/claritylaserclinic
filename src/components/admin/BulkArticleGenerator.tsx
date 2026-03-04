@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
@@ -12,7 +13,7 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Sparkles, Loader2, CheckCircle, XCircle, Zap, Eye, Send, CheckCheck } from "lucide-react";
+import { Sparkles, Loader2, CheckCircle, XCircle, Zap, Eye, Send, CheckCheck, Wand2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -169,6 +170,8 @@ const BulkArticleGenerator = () => {
   const [prompts, setPrompts] = useState<string[]>(Array(5).fill(""));
   const [jobs, setJobs] = useState<ArticleJob[]>([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [aiInstruction, setAiInstruction] = useState("");
+  const [isGeneratingPrompts, setIsGeneratingPrompts] = useState(false);
   const abortRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const { toast } = useToast();
@@ -186,6 +189,85 @@ const BulkArticleGenerator = () => {
 
   const setPrompt = (i: number, v: string) => {
     setPrompts((prev) => prev.map((p, idx) => (idx === i ? v : p)));
+  };
+
+  const handleGeneratePrompts = async () => {
+    if (!aiInstruction.trim()) {
+      toast({ title: "กรุณาใส่คำสั่งก่อน", variant: "destructive" });
+      return;
+    }
+    setIsGeneratingPrompts(true);
+    try {
+      const resp = await fetch(AI_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: "user",
+              content: `สร้าง prompt สำหรับเขียนบทความบล็อก จำนวน ${count} prompt ตามคำสั่งนี้: "${aiInstruction}"
+
+กฎ:
+- ตอบเป็น JSON array เท่านั้น เช่น ["prompt 1", "prompt 2", ...]
+- แต่ละ prompt ต้องเป็นคำสั่งเขียนบทความที่ชัดเจน มี keyword และ location ของ Clarity Laser Clinic (ราชเทวี, ใกล้ BTS พญาไท, ย่านสยาม)
+- ห้ามซ้ำกัน แต่ละอันต้องเป็นหัวข้อที่แตกต่างกัน
+- ต้องมีจำนวนครบ ${count} prompt
+- ห้ามใส่ markdown code block ครอบ
+- ตอบ JSON array เท่านั้น ไม่ต้องมีข้อความอื่น`,
+            },
+          ],
+        }),
+      });
+
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        throw new Error(err.error || `Error ${resp.status}`);
+      }
+
+      // Parse SSE stream
+      const reader = resp.body!.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let fullText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) fullText += content;
+          } catch { /* partial */ }
+        }
+      }
+
+      const match = fullText.match(/\[[\s\S]*\]/);
+      if (match) {
+        const promptsArr = JSON.parse(match[0]) as string[];
+        setPrompts(prev => prev.map((_, i) => promptsArr[i] || ""));
+        toast({ title: `สร้าง ${Math.min(promptsArr.length, count)} prompts สำเร็จ` });
+      } else {
+        throw new Error("AI ไม่สามารถสร้าง prompts ได้");
+      }
+    } catch (err: any) {
+      console.error("Generate prompts error:", err);
+      toast({ title: "สร้าง prompts ไม่สำเร็จ", description: err.message, variant: "destructive" });
+    } finally {
+      setIsGeneratingPrompts(false);
+    }
   };
 
   const patchJob = useCallback((i: number, patch: Partial<ArticleJob>) => {
@@ -380,6 +462,34 @@ const BulkArticleGenerator = () => {
               <div className="flex justify-between text-[10px] text-muted-foreground">
                 <span>2</span><span>50</span><span>100</span>
               </div>
+            </div>
+
+            {/* AI Prompt Generator */}
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
+              <Label className="text-xs font-medium flex items-center gap-1.5">
+                <Wand2 className="w-3.5 h-3.5 text-primary" />
+                AI สร้าง Prompt อัตโนมัติ
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  value={aiInstruction}
+                  onChange={(e) => setAiInstruction(e.target.value)}
+                  placeholder={`เช่น "บทความเกี่ยวกับการดูแลผิวหน้า" หรือ "เลเซอร์รักษาหลุมสิว"`}
+                  className="text-xs flex-1"
+                  disabled={isGeneratingPrompts}
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="text-xs gap-1.5 shrink-0"
+                  onClick={handleGeneratePrompts}
+                  disabled={isGeneratingPrompts || !aiInstruction.trim()}
+                >
+                  {isGeneratingPrompts ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+                  {isGeneratingPrompts ? "กำลังสร้าง..." : `สร้าง ${count} Prompts`}
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground">ใส่คำสั่งกว้างๆ แล้ว AI จะสร้าง prompt ละเอียดตามจำนวนบทความที่ตั้งไว้</p>
             </div>
 
             <div className="space-y-2">
