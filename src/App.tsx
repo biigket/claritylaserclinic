@@ -28,14 +28,14 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogArticle />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route path="promotions" element={<PromotionsList />} />
-              <Route path="promotions/new" element={<PromotionEditor />} />
-              <Route path="promotions/:id" element={<PromotionEditor />} />
-              <Route path="blogs" element={<BlogsList />} />
-              <Route path="blogs/new" element={<BlogEditor />} />
-              <Route path="blogs/:id" element={<BlogEditor />} />
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route element={<AdminLayout />}>
+              <Route path="/admin/promotions" element={<PromotionsList />} />
+              <Route path="/admin/promotions/new" element={<PromotionEditor />} />
+              <Route path="/admin/promotions/:id" element={<PromotionEditor />} />
+              <Route path="/admin/blogs" element={<BlogsList />} />
+              <Route path="/admin/blogs/new" element={<BlogEditor />} />
+              <Route path="/admin/blogs/:id" element={<BlogEditor />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
