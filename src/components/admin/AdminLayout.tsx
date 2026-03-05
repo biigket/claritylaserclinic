@@ -14,7 +14,7 @@ const AdminLayout = () => {
   useEffect(() => {
     if (loading) return;
     if (!user || (!isAdmin && !isEditor)) {
-      navigate("/admin/login", { replace: true });
+      navigate("/admin", { replace: true });
     }
   }, [user, loading, isAdmin, isEditor, navigate]);
 
@@ -30,7 +30,7 @@ const AdminLayout = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/admin/login");
+    navigate("/admin");
   };
 
   const navItems = [
