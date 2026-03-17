@@ -429,8 +429,8 @@ export default function ScarAssessment() {
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto mb-8">
                 {t({
-                  th: "ทีมงาน Clarity Clinic จะติดต่อกลับเพื่อให้คำแนะนำเพิ่มเติม",
-                  en: "The Clarity Clinic team will contact you with further recommendations.",
+                  th: "ถ้าต้องการสอบถามเพิ่มเติมหรือทำนัดคุณหมอ สามารถทักแชทและแจ้งชื่อได้เลยครับ",
+                  en: "For more info or to book an appointment, just send us a chat with your name.",
                 })}
               </p>
 
