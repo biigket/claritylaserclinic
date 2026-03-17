@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import BlogList from "./pages/BlogList";
 import BlogArticle from "./pages/BlogArticle";
 import NotFound from "./pages/NotFound";
+import ScarAssessment from "./pages/ScarAssessment";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminLayout from "./components/admin/AdminLayout";
 import PromotionsList from "./pages/admin/PromotionsList";
@@ -26,6 +27,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/scar-assessment" element={<ScarAssessment />} />
             <Route path="/blog" element={<BlogList />} />
             <Route path="/blog/:slug" element={<BlogArticle />} />
             <Route path="/admin" element={<AdminLogin />} />
