@@ -70,7 +70,7 @@ const cases = [
 ];
 
 const CaseReviewsSection = () => {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   return (
     <section className="py-16 md:py-24 bg-muted/30">
