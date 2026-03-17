@@ -123,7 +123,7 @@ const CaseReviewsSection = () => {
                     {t({ th: "ผลลัพธ์:", en: "Results:" })}
                   </p>
                   <ul className="space-y-1">
-                    {t(c.results).map((r: string, j: number) => (
+                    {c.results[lang].map((r: string, j: number) => (
                       <li key={j} className="flex items-start gap-2 text-sm text-foreground/90">
                         <span className="text-primary mt-0.5">✓</span>
                         <span>{r}</span>
