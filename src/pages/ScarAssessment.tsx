@@ -436,7 +436,7 @@ export default function ScarAssessment() {
 
               <div className="flex gap-3 max-w-xs mx-auto">
                 <a
-                  href="https://lin.ee/ExampleLINE"
+                  href="https://lin.ee/EPUPlNG"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 bg-[#06C755] text-white font-medium py-3.5 rounded-2xl text-sm active:scale-[0.98] transition-transform"
