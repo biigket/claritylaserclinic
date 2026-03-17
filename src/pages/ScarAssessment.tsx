@@ -413,7 +413,7 @@ export default function ScarAssessment() {
               </button>
 
               <p className="text-xs text-muted-foreground text-center mt-3">
-                {t({ th: "ทีมงานจะติดต่อกลับภายใน 24 ชั่วโมง", en: "Our team will contact you within 24 hours" })}
+                {t({ th: "ทีมงานจะติดต่อภายใน 1 ชั่วโมง ในเวลาทำการ 11.00-20.00 น.", en: "Our team will contact you within 1 hour during business hours (11:00–20:00)" })}
               </p>
             </motion.div>
           )}
