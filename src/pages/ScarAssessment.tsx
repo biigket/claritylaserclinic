@@ -23,9 +23,9 @@ const quizData = {
     },
     micro: { th: "เลือกคำตอบที่ใกล้เคียงที่สุด", en: "Select the closest answer" },
     choices: [
-      { label: { th: "ตื้น มองใกล้ ๆ ถึงเห็น", en: "Shallow — only visible up close" }, value: 1 },
-      { label: { th: "เห็นชัดในแสงปกติ", en: "Visible under normal lighting" }, value: 2 },
-      { label: { th: "ลึก ผิวไม่เรียบชัดเจน", en: "Deep — clearly uneven skin texture" }, value: 3 },
+      { label: { th: "ตื้น ต้องส่องกระจกตั้งใจมองใกล้ ๆ ถึงจะเห็น", en: "Shallow — only visible when looking closely in a mirror" }, value: 1 },
+      { label: { th: "เห็นชัดในแสงปกติ แต่ไม่มีคนทัก", en: "Visible under normal lighting, but no one comments" }, value: 2 },
+      { label: { th: "ลึก ผิวไม่เรียบชัดเจน มีคนทัก", en: "Deep — clearly uneven skin, others have noticed" }, value: 3 },
     ] as QuizChoice[],
   },
   q2: {
@@ -36,8 +36,8 @@ const quizData = {
     micro: { th: "เลือกคำตอบที่ใกล้เคียงที่สุด", en: "Select the closest answer" },
     choices: [
       { label: { th: "มีไม่กี่จุด", en: "Only a few spots" }, value: 1 },
-      { label: { th: "หลายจุดบางบริเวณ", en: "Multiple spots in some areas" }, value: 2 },
-      { label: { th: "กระจายหลายบริเวณทั่วหน้า", en: "Widespread across the face" }, value: 3 },
+      { label: { th: "หลายจุดบางบริเวณ เฉพาะหน้าแก้ม", en: "Multiple spots in some areas, mainly on cheeks" }, value: 2 },
+      { label: { th: "กระจายหลายบริเวณทั่วหน้า มีถึงขมับ", en: "Widespread across the face, reaching the temples" }, value: 3 },
     ] as QuizChoice[],
   },
   q3: {
