@@ -73,7 +73,7 @@ const CaseReviewsSection = () => {
   const { t, lang } = useLanguage();
 
   return (
-    <section className="py-16 md:py-24 bg-muted/30">
+    <section id="case-reviews" className="py-16 md:py-24 bg-muted/30">
       <div className="max-w-5xl mx-auto px-4">
         <div className="text-center mb-12">
           <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium mb-4">

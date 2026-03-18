@@ -33,7 +33,7 @@ const Index = () => {
       <TechnologySection />
       
       <JourneySection />
-      <CtaSection onBook={openPopup} />
+      <CtaSection />
       <CaseReviewsSection />
       <FooterSection />
       <FloatingButton />

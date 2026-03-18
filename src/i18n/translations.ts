@@ -341,10 +341,10 @@ const translations = {
       en: "Ready to begin your journey to better skin",
     },
     desc: {
-      th: "นัดปรึกษาแพทย์ผู้เชี่ยวชาญเพื่อวิเคราะห์ปัญหาผิวของคุณ",
-      en: "Schedule a consultation with our specialist to analyze your skin concerns",
+      th: "ดูผลลัพธ์จริงจากคนไข้ที่มีปัญหาคล้ายกับคุณ",
+      en: "See real results from patients with similar concerns",
     },
-    button: { th: "นัดปรึกษาแพทย์", en: "Book a Consultation" },
+    button: { th: "ดูเคสรีวิวที่ใกล้เคียงกับคุณ", en: "See Cases Like Yours" },
   },
   footer: {
     clinic: { th: "Clarity Clinic – Skin & Laser", en: "Clarity Clinic – Skin & Laser" },

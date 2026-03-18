@@ -2,13 +2,14 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import translations from "@/i18n/translations";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
-interface CtaSectionProps {
-  onBook?: () => void;
-}
-
-const CtaSection = ({ onBook }: CtaSectionProps) => {
+const CtaSection = () => {
   const { t } = useLanguage();
   const ref = useScrollReveal();
+
+  const scrollToCaseReviews = () => {
+    const el = document.getElementById("case-reviews");
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
 
   return (
     <section className="section-padding">
@@ -20,7 +21,7 @@ const CtaSection = ({ onBook }: CtaSectionProps) => {
           {t(translations.cta.desc)}
         </p>
         <button
-          onClick={onBook}
+          onClick={scrollToCaseReviews}
           className="inline-block font-body text-xs tracking-widest uppercase bg-primary text-primary-foreground px-10 py-4 hover:bg-primary/90 transition-colors duration-300"
         >
           {t(translations.cta.button)}
