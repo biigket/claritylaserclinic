@@ -23,8 +23,8 @@ const ScarAssessmentCTA = () => {
               </p>
               <h2 className="font-display text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light text-foreground leading-tight mb-3 md:mb-4">
                 {t({
-                  th: "ประเมินหลุมสิวของคุณ\nใน 1 นาที",
-                  en: "Assess Your Acne Scars\nin 1 Minute",
+                  th: "ประเมินหลุมสิวของคุณ\nใน 30 วินาที",
+                  en: "Assess Your Acne Scars\nin 30 Seconds",
                 })}
               </h2>
               <p className="font-body text-xs sm:text-sm font-light text-muted-foreground leading-relaxed max-w-md mb-6 md:mb-8">
