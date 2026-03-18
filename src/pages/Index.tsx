@@ -25,6 +25,7 @@ const Index = () => {
     <div className="min-h-screen">
       <Navbar onBook={openPopup} />
       <HeroSection onBook={openPopup} />
+      <ScarAssessmentCTA />
       <PhilosophySection />
       <SpeakerSection />
       <WhyClaritySection />
