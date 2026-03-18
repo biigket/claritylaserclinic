@@ -394,49 +394,76 @@ export default function ScarAssessment() {
                 })}
               </div>
 
-              {/* Program recommendation */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-foreground mb-3">
-                  {t({ th: "โปรแกรมที่เหมาะกับคุณ", en: "Recommended Program" })}
-                </h3>
-                <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border/60">
-                  <img src={result.image} alt={`${program.toUpperCase()} Program`} className="w-full" />
-                  <div className="p-4">
-                    <p className="text-sm text-muted-foreground mb-2">{t(result.suitable)}</p>
-                    <div className="flex items-baseline gap-1 mb-2">
-                      <span className="text-2xl font-bold text-primary">{result.price}</span>
-                      <span className="text-sm text-muted-foreground">{t({ th: "บาท / ครั้ง", en: "THB / session" })}</span>
-                    </div>
-                    <p className="text-xs text-[hsl(var(--gold))] font-medium">{t(result.benefit)}</p>
+              <button
+                onClick={() => goTo("caseReview")}
+                className="w-full bg-primary text-primary-foreground font-medium py-4 rounded-2xl text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+              >
+                {t({ th: "เคสหลุมสิวที่ใกล้เคียงกับคุณ", en: "See Similar Acne Scar Cases" })}
+              </button>
+            </motion.div>
+          )}
+
+          {/* ─── CASE REVIEW ─── */}
+          {step === "caseReview" && (
+            <motion.div key="caseReview" {...fadeVariant} className="pt-8">
+              <button onClick={goBack} className="p-1 text-muted-foreground hover:text-foreground transition-colors mb-4">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+
+              <h2 className="text-lg font-semibold text-foreground mb-3">
+                {t({ th: "เคสหลุมสิวที่ใกล้เคียงกับคุณ", en: "Similar Acne Scar Cases" })}
+              </h2>
+
+              <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border/60 mb-6">
+                <img src={caseReviews[program].image} alt={t(caseReviews[program].badge)} className="w-full" loading="lazy" />
+                <div className="p-4 space-y-3">
+                  <p className="text-base font-bold text-foreground">{t(caseReviews[program].badge)}</p>
+                  <p className="text-sm font-semibold text-primary">{t(caseReviews[program].sessions)}</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{t(caseReviews[program].intro)}</p>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-foreground">{t({ th: "ผลลัพธ์:", en: "Results:" })}</p>
+                    <ul className="space-y-1">
+                      {caseReviews[program].results[lang].map((r: string, j: number) => (
+                        <li key={j} className="flex items-start gap-2 text-sm text-foreground/90">
+                          <span className="text-primary mt-0.5">✓</span>
+                          <span>{r}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
+                  <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3 leading-relaxed">{t(caseReviews[program].note)}</p>
+                  <p className="text-sm text-muted-foreground italic">{t(caseReviews[program].suitable)}</p>
                 </div>
               </div>
 
-              {/* Case Review */}
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-foreground mb-3">
-                  {t({ th: "เคสรีวิวที่ใกล้เคียงกับคุณ", en: "Similar Case Review" })}
-                </h3>
-                <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border/60">
-                  <img src={caseReviews[program].image} alt={t(caseReviews[program].badge)} className="w-full" loading="lazy" />
-                  <div className="p-4 space-y-3">
-                    <p className="text-base font-bold text-foreground">{t(caseReviews[program].badge)}</p>
-                    <p className="text-sm font-semibold text-primary">{t(caseReviews[program].sessions)}</p>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{t(caseReviews[program].intro)}</p>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-foreground">{t({ th: "ผลลัพธ์:", en: "Results:" })}</p>
-                      <ul className="space-y-1">
-                        {caseReviews[program].results[lang].map((r: string, j: number) => (
-                          <li key={j} className="flex items-start gap-2 text-sm text-foreground/90">
-                            <span className="text-primary mt-0.5">✓</span>
-                            <span>{r}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                    <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3 leading-relaxed">{t(caseReviews[program].note)}</p>
-                    <p className="text-sm text-muted-foreground italic">{t(caseReviews[program].suitable)}</p>
+              <button
+                onClick={() => goTo("program")}
+                className="w-full bg-primary text-primary-foreground font-medium py-4 rounded-2xl text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+              >
+                {t({ th: "รับแผนการรักษาเฉพาะคุณ", en: "Get Your Personalized Plan" })}
+              </button>
+            </motion.div>
+          )}
+
+          {/* ─── PROGRAM ─── */}
+          {step === "program" && (
+            <motion.div key="program" {...fadeVariant} className="pt-8">
+              <button onClick={goBack} className="p-1 text-muted-foreground hover:text-foreground transition-colors mb-4">
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+
+              <h3 className="text-lg font-semibold text-foreground mb-3">
+                {t({ th: "โปรแกรมที่เหมาะกับคุณ", en: "Recommended Program" })}
+              </h3>
+              <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border/60 mb-6">
+                <img src={result.image} alt={`${program.toUpperCase()} Program`} className="w-full" />
+                <div className="p-4">
+                  <p className="text-sm text-muted-foreground mb-2">{t(result.suitable)}</p>
+                  <div className="flex items-baseline gap-1 mb-2">
+                    <span className="text-2xl font-bold text-primary">{result.price}</span>
+                    <span className="text-sm text-muted-foreground">{t({ th: "บาท / ครั้ง", en: "THB / session" })}</span>
                   </div>
+                  <p className="text-xs text-[hsl(var(--gold))] font-medium">{t(result.benefit)}</p>
                 </div>
               </div>
 
