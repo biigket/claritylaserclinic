@@ -106,6 +106,80 @@ const programResults: Record<ProgramKey, {
   },
 };
 
+const caseReviews: Record<ProgramKey, {
+  image: string;
+  badge: Record<"th" | "en", string>;
+  sessions: Record<"th" | "en", string>;
+  intro: Record<"th" | "en", string>;
+  results: Record<"th" | "en", string[]>;
+  note: Record<"th" | "en", string>;
+  suitable: Record<"th" | "en", string>;
+}> = {
+  "2x": {
+    image: review2x,
+    badge: { th: "🟢 เคส 2X — Mild", en: "🟢 Case 2X — Mild" },
+    sessions: { th: "✨ รีวิวผลลัพธ์ (ทำ 3 ครั้ง)", en: "✨ Results Review (3 Sessions)" },
+    intro: {
+      th: "เคสนี้เป็นหลุมสิวระดับเริ่มต้น (ตื้น กระจายไม่มาก) หลังเข้ารับการรักษาด้วยโปรแกรม 2X ต่อเนื่อง 3 ครั้ง",
+      en: "Mild acne scars (shallow, scattered). After 3 consecutive sessions with the 2X program:",
+    },
+    results: {
+      th: ["ผิวดูเรียบเนียนขึ้นอย่างเห็นได้ชัด", "หลุมตื้นดูจางลง", "Texture ผิวโดยรวมดีขึ้น"],
+      en: ["Visibly smoother skin texture", "Shallow scars noticeably faded", "Overall skin texture improved"],
+    },
+    note: {
+      th: "💡 เคสระดับนี้มักเริ่มเห็นการเปลี่ยนแปลงตั้งแต่ครั้งแรก (~20%) และจะชัดขึ้นเมื่อทำต่อเนื่อง",
+      en: "💡 At this level, changes are often visible from the first session (~20%) and improve with continued treatment.",
+    },
+    suitable: {
+      th: "เหมาะสำหรับคนที่เริ่มมีหลุมสิว และต้องการปรับผิวให้เรียบขึ้นแบบค่อยเป็นค่อยไป",
+      en: "Ideal for those with early-stage scars seeking gradual skin refinement.",
+    },
+  },
+  "4x": {
+    image: review4x,
+    badge: { th: "🟡 เคส 4X — Moderate", en: "🟡 Case 4X — Moderate" },
+    sessions: { th: "✨ รีวิวผลลัพธ์ (ทำ 4 ครั้ง)", en: "✨ Results Review (4 Sessions)" },
+    intro: {
+      th: "เคสนี้เป็นหลุมสิวระดับปานกลาง (เห็นชัดในแสงปกติ มีหลายจุด) รักษาด้วยโปรแกรม 4X ต่อเนื่อง 4 ครั้ง",
+      en: "Moderate acne scars (visible under normal light, multiple areas). After 4 consecutive sessions with the 4X program:",
+    },
+    results: {
+      th: ["หลุมสิวดูตื้นขึ้นอย่างชัดเจน", "ผิวเรียบขึ้นและสม่ำเสมอมากขึ้น", "รูขุมขนและ texture ดีขึ้นร่วมด้วย"],
+      en: ["Scars significantly shallower", "Smoother, more even skin surface", "Improved pore size and texture"],
+    },
+    note: {
+      th: "💡 เคสระดับนี้มักต้องใช้การรักษาหลายเทคนิคร่วมกัน และต้องทำต่อเนื่องเพื่อให้เห็นผลชัด",
+      en: "💡 This level typically requires multi-technique treatment and consistent sessions for visible results.",
+    },
+    suitable: {
+      th: "เหมาะสำหรับคนที่เคยรักษามาบ้าง แต่ยังต้องการผลลัพธ์ที่ดีขึ้นแบบชัดเจน",
+      en: "Ideal for those who've tried treatments before but want significantly better results.",
+    },
+  },
+  "5x": {
+    image: review5x,
+    badge: { th: "🔴 เคส 5X — Severe", en: "🔴 Case 5X — Severe" },
+    sessions: { th: "✨ รีวิวผลลัพธ์ (ทำ 6 ครั้ง)", en: "✨ Results Review (6 Sessions)" },
+    intro: {
+      th: "เคสนี้เป็นหลุมสิวระดับลึกและซับซ้อน รักษาด้วยโปรแกรม 5X ต่อเนื่อง 6 ครั้ง",
+      en: "Severe, deep acne scars with complex scarring patterns. After 6 consecutive sessions with the 5X program:",
+    },
+    results: {
+      th: ["หลุมลึกดูตื้นขึ้นอย่างมีนัยสำคัญ", "ผิวเรียบขึ้นชัดเจนเมื่อเทียบก่อนรักษา", "ภาพรวมผิวดีขึ้นทั้งพื้นผิวและความสม่ำเสมอ"],
+      en: ["Deep scars significantly shallower", "Clearly smoother skin compared to baseline", "Overall skin quality improved in texture and evenness"],
+    },
+    note: {
+      th: "💡 เคสระดับนี้จำเป็นต้องใช้การรักษาหลายระดับ (multi-layer treatment) และต้องใช้เวลาในการฟื้นฟูผิว",
+      en: "💡 This level requires multi-layer treatment and patience for skin regeneration.",
+    },
+    suitable: {
+      th: "เหมาะสำหรับคนที่มีหลุมสิวลึก หรือเคยทำหลายวิธีแล้วยังไม่ดีขึ้น",
+      en: "Ideal for those with deep scars or who haven't seen improvement from other methods.",
+    },
+  },
+};
+
 function getProgram(score: number): ProgramKey {
   if (score <= 4) return "2x";
   if (score <= 6) return "4x";
