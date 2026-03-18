@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "@/components/clinic/Navbar";
 import HeroSection from "@/components/clinic/HeroSection";
+import ScarAssessmentCTA from "@/components/clinic/ScarAssessmentCTA";
 import PhilosophySection from "@/components/clinic/PhilosophySection";
 import SpeakerSection from "@/components/clinic/SpeakerSection";
 import WhyClaritySection from "@/components/clinic/WhyClaritySection";
