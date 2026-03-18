@@ -36,7 +36,6 @@ const Index = () => {
       
       <JourneySection />
       <CtaSection />
-      <CaseReviewsSection />
       <FooterSection />
       <FloatingButton />
       <ConsultationPopup open={popupOpen} onClose={() => setPopupOpen(false)} />
