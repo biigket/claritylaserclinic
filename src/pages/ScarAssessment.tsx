@@ -11,7 +11,7 @@ import review4x from "@/assets/review-4x.jpg";
 import review5x from "@/assets/review-5x.jpg";
 import logoClarity from "@/assets/logo-clarity.jpeg";
 
-type Step = "hero" | "q1" | "q2" | "q3" | "result" | "lead" | "thanks";
+type Step = "hero" | "q1" | "q2" | "q3" | "result" | "caseReview" | "program" | "lead" | "thanks";
 
 interface QuizChoice {
   label: Record<"th" | "en", string>;
