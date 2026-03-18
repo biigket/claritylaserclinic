@@ -412,6 +412,34 @@ export default function ScarAssessment() {
                 </div>
               </div>
 
+              {/* Case Review */}
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-foreground mb-3">
+                  {t({ th: "เคสรีวิวที่ใกล้เคียงกับคุณ", en: "Similar Case Review" })}
+                </h3>
+                <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border/60">
+                  <img src={caseReviews[program].image} alt={t(caseReviews[program].badge)} className="w-full" loading="lazy" />
+                  <div className="p-4 space-y-3">
+                    <p className="text-base font-bold text-foreground">{t(caseReviews[program].badge)}</p>
+                    <p className="text-sm font-semibold text-primary">{t(caseReviews[program].sessions)}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{t(caseReviews[program].intro)}</p>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-foreground">{t({ th: "ผลลัพธ์:", en: "Results:" })}</p>
+                      <ul className="space-y-1">
+                        {caseReviews[program].results[lang].map((r: string, j: number) => (
+                          <li key={j} className="flex items-start gap-2 text-sm text-foreground/90">
+                            <span className="text-primary mt-0.5">✓</span>
+                            <span>{r}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3 leading-relaxed">{t(caseReviews[program].note)}</p>
+                    <p className="text-sm text-muted-foreground italic">{t(caseReviews[program].suitable)}</p>
+                  </div>
+                </div>
+              </div>
+
               <button
                 onClick={() => goTo("lead")}
                 className="w-full bg-primary text-primary-foreground font-medium py-4 rounded-2xl text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
