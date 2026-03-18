@@ -6,6 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import program2x from "@/assets/program-2x-scar.jpg";
 import program4x from "@/assets/program-4x-scar.jpg";
 import program5x from "@/assets/program-5x-scar.jpg";
+import review2x from "@/assets/review-2x.jpg";
+import review4x from "@/assets/review-4x.jpg";
+import review5x from "@/assets/review-5x.jpg";
 import logoClarity from "@/assets/logo-clarity.jpeg";
 
 type Step = "hero" | "q1" | "q2" | "q3" | "result" | "lead" | "thanks";
@@ -100,6 +103,80 @@ const programResults: Record<ProgramKey, {
     image: program5x,
     price: "12,990",
     benefit: { th: "ซื้อ 3 ครั้ง ฟรี 1 ครั้ง | ซื้อ 5 ครั้ง ฟรี 2 ครั้ง", en: "Buy 3 get 1 free | Buy 5 get 2 free" },
+  },
+};
+
+const caseReviews: Record<ProgramKey, {
+  image: string;
+  badge: Record<"th" | "en", string>;
+  sessions: Record<"th" | "en", string>;
+  intro: Record<"th" | "en", string>;
+  results: Record<"th" | "en", string[]>;
+  note: Record<"th" | "en", string>;
+  suitable: Record<"th" | "en", string>;
+}> = {
+  "2x": {
+    image: review2x,
+    badge: { th: "🟢 เคส 2X — Mild", en: "🟢 Case 2X — Mild" },
+    sessions: { th: "✨ รีวิวผลลัพธ์ (ทำ 3 ครั้ง)", en: "✨ Results Review (3 Sessions)" },
+    intro: {
+      th: "เคสนี้เป็นหลุมสิวระดับเริ่มต้น (ตื้น กระจายไม่มาก) หลังเข้ารับการรักษาด้วยโปรแกรม 2X ต่อเนื่อง 3 ครั้ง",
+      en: "Mild acne scars (shallow, scattered). After 3 consecutive sessions with the 2X program:",
+    },
+    results: {
+      th: ["ผิวดูเรียบเนียนขึ้นอย่างเห็นได้ชัด", "หลุมตื้นดูจางลง", "Texture ผิวโดยรวมดีขึ้น"],
+      en: ["Visibly smoother skin texture", "Shallow scars noticeably faded", "Overall skin texture improved"],
+    },
+    note: {
+      th: "💡 เคสระดับนี้มักเริ่มเห็นการเปลี่ยนแปลงตั้งแต่ครั้งแรก (~20%) และจะชัดขึ้นเมื่อทำต่อเนื่อง",
+      en: "💡 At this level, changes are often visible from the first session (~20%) and improve with continued treatment.",
+    },
+    suitable: {
+      th: "เหมาะสำหรับคนที่เริ่มมีหลุมสิว และต้องการปรับผิวให้เรียบขึ้นแบบค่อยเป็นค่อยไป",
+      en: "Ideal for those with early-stage scars seeking gradual skin refinement.",
+    },
+  },
+  "4x": {
+    image: review4x,
+    badge: { th: "🟡 เคส 4X — Moderate", en: "🟡 Case 4X — Moderate" },
+    sessions: { th: "✨ รีวิวผลลัพธ์ (ทำ 4 ครั้ง)", en: "✨ Results Review (4 Sessions)" },
+    intro: {
+      th: "เคสนี้เป็นหลุมสิวระดับปานกลาง (เห็นชัดในแสงปกติ มีหลายจุด) รักษาด้วยโปรแกรม 4X ต่อเนื่อง 4 ครั้ง",
+      en: "Moderate acne scars (visible under normal light, multiple areas). After 4 consecutive sessions with the 4X program:",
+    },
+    results: {
+      th: ["หลุมสิวดูตื้นขึ้นอย่างชัดเจน", "ผิวเรียบขึ้นและสม่ำเสมอมากขึ้น", "รูขุมขนและ texture ดีขึ้นร่วมด้วย"],
+      en: ["Scars significantly shallower", "Smoother, more even skin surface", "Improved pore size and texture"],
+    },
+    note: {
+      th: "💡 เคสระดับนี้มักต้องใช้การรักษาหลายเทคนิคร่วมกัน และต้องทำต่อเนื่องเพื่อให้เห็นผลชัด",
+      en: "💡 This level typically requires multi-technique treatment and consistent sessions for visible results.",
+    },
+    suitable: {
+      th: "เหมาะสำหรับคนที่เคยรักษามาบ้าง แต่ยังต้องการผลลัพธ์ที่ดีขึ้นแบบชัดเจน",
+      en: "Ideal for those who've tried treatments before but want significantly better results.",
+    },
+  },
+  "5x": {
+    image: review5x,
+    badge: { th: "🔴 เคส 5X — Severe", en: "🔴 Case 5X — Severe" },
+    sessions: { th: "✨ รีวิวผลลัพธ์ (ทำ 6 ครั้ง)", en: "✨ Results Review (6 Sessions)" },
+    intro: {
+      th: "เคสนี้เป็นหลุมสิวระดับลึกและซับซ้อน รักษาด้วยโปรแกรม 5X ต่อเนื่อง 6 ครั้ง",
+      en: "Severe, deep acne scars with complex scarring patterns. After 6 consecutive sessions with the 5X program:",
+    },
+    results: {
+      th: ["หลุมลึกดูตื้นขึ้นอย่างมีนัยสำคัญ", "ผิวเรียบขึ้นชัดเจนเมื่อเทียบก่อนรักษา", "ภาพรวมผิวดีขึ้นทั้งพื้นผิวและความสม่ำเสมอ"],
+      en: ["Deep scars significantly shallower", "Clearly smoother skin compared to baseline", "Overall skin quality improved in texture and evenness"],
+    },
+    note: {
+      th: "💡 เคสระดับนี้จำเป็นต้องใช้การรักษาหลายระดับ (multi-layer treatment) และต้องใช้เวลาในการฟื้นฟูผิว",
+      en: "💡 This level requires multi-layer treatment and patience for skin regeneration.",
+    },
+    suitable: {
+      th: "เหมาะสำหรับคนที่มีหลุมสิวลึก หรือเคยทำหลายวิธีแล้วยังไม่ดีขึ้น",
+      en: "Ideal for those with deep scars or who haven't seen improvement from other methods.",
+    },
   },
 };
 
@@ -331,6 +408,34 @@ export default function ScarAssessment() {
                       <span className="text-sm text-muted-foreground">{t({ th: "บาท / ครั้ง", en: "THB / session" })}</span>
                     </div>
                     <p className="text-xs text-[hsl(var(--gold))] font-medium">{t(result.benefit)}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Case Review */}
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-foreground mb-3">
+                  {t({ th: "เคสรีวิวที่ใกล้เคียงกับคุณ", en: "Similar Case Review" })}
+                </h3>
+                <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-border/60">
+                  <img src={caseReviews[program].image} alt={t(caseReviews[program].badge)} className="w-full" loading="lazy" />
+                  <div className="p-4 space-y-3">
+                    <p className="text-base font-bold text-foreground">{t(caseReviews[program].badge)}</p>
+                    <p className="text-sm font-semibold text-primary">{t(caseReviews[program].sessions)}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{t(caseReviews[program].intro)}</p>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-foreground">{t({ th: "ผลลัพธ์:", en: "Results:" })}</p>
+                      <ul className="space-y-1">
+                        {caseReviews[program].results[lang].map((r: string, j: number) => (
+                          <li key={j} className="flex items-start gap-2 text-sm text-foreground/90">
+                            <span className="text-primary mt-0.5">✓</span>
+                            <span>{r}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <p className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3 leading-relaxed">{t(caseReviews[program].note)}</p>
+                    <p className="text-sm text-muted-foreground italic">{t(caseReviews[program].suitable)}</p>
                   </div>
                 </div>
               </div>
