@@ -471,7 +471,7 @@ export default function ScarAssessment() {
                 onClick={() => goTo("lead")}
                 className="w-full bg-primary text-primary-foreground font-medium py-4 rounded-2xl text-base shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
               >
-                {t({ th: "รับแผนการรักษาเฉพาะคุณ", en: "Get Your Personalized Plan" })}
+                {t({ th: "จองคิวปรึกษาเลย", en: "Book a Consultation Now" })}
               </button>
             </motion.div>
           )}
