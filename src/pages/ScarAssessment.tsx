@@ -186,7 +186,7 @@ function getProgram(score: number): ProgramKey {
   return "5x";
 }
 
-const stepOrder: Step[] = ["hero", "q1", "q2", "q3", "result", "lead", "thanks"];
+const stepOrder: Step[] = ["hero", "q1", "q2", "q3", "result", "caseReview", "program", "lead", "thanks"];
 
 export default function ScarAssessment() {
   const { lang, setLang, t } = useLanguage();
