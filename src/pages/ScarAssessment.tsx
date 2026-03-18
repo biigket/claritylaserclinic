@@ -6,6 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import program2x from "@/assets/program-2x-scar.jpg";
 import program4x from "@/assets/program-4x-scar.jpg";
 import program5x from "@/assets/program-5x-scar.jpg";
+import review2x from "@/assets/review-2x.jpg";
+import review4x from "@/assets/review-4x.jpg";
+import review5x from "@/assets/review-5x.jpg";
 import logoClarity from "@/assets/logo-clarity.jpeg";
 
 type Step = "hero" | "q1" | "q2" | "q3" | "result" | "lead" | "thanks";
