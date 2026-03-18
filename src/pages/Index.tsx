@@ -12,7 +12,7 @@ import TechnologySection from "@/components/clinic/TechnologySection";
 
 import JourneySection from "@/components/clinic/JourneySection";
 import CtaSection from "@/components/clinic/CtaSection";
-import CaseReviewsSection from "@/components/clinic/CaseReviewsSection";
+
 import FooterSection from "@/components/clinic/FooterSection";
 import FloatingButton from "@/components/clinic/FloatingButton";
 import ConsultationPopup from "@/components/clinic/ConsultationPopup";
@@ -36,7 +36,6 @@ const Index = () => {
       
       <JourneySection />
       <CtaSection />
-      <CaseReviewsSection />
       <FooterSection />
       <FloatingButton />
       <ConsultationPopup open={popupOpen} onClose={() => setPopupOpen(false)} />
