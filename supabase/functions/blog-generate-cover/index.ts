@@ -54,71 +54,58 @@ STRICT RULES:
 - Keep minimal and elegant
 - The image MUST relate to the article topic, not be generic${extra_prompt ? `\n\nADDITIONAL STYLE INSTRUCTIONS FROM EDITOR:\n${extra_prompt}` : ""}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
-        messages: [{ role: "user", content: prompt }],
-        modalities: ["image", "text"],
-      }),
-    });
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "คำขอมากเกินไป กรุณารอสักครู่" }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "เครดิต AI หมด กรุณาเติมเครดิต" }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const t = await response.text();
-      console.error("AI image error:", response.status, t);
-      throw new Error("AI image generation failed");
-    }
-
-    const data = await response.json();
-    console.log("AI response structure:", JSON.stringify(Object.keys(data)));
-    const choice = data.choices?.[0];
-    if (choice) {
-      console.log("Choice keys:", JSON.stringify(Object.keys(choice)));
-      console.log("Message keys:", JSON.stringify(Object.keys(choice.message || {})));
-      if (choice.message?.content) {
-        const contentType = typeof choice.message.content;
-        console.log("Content type:", contentType);
-        if (Array.isArray(choice.message.content)) {
-          console.log("Content parts:", JSON.stringify(choice.message.content.map((p: any) => ({ type: p.type, hasData: !!p.data, hasUrl: !!p.image_url }))));
-        }
-      }
-    }
-
-    // Try multiple known response formats
+    // Retry up to 2 times if model returns text-only without an image
     let imageBase64: string | undefined;
-    // Format 1: inline_data in content parts
-    if (Array.isArray(choice?.message?.content)) {
-      const imgPart = choice.message.content.find((p: any) => p.type === "image_url" || p.type === "image" || p.inline_data);
-      if (imgPart?.image_url?.url) imageBase64 = imgPart.image_url.url;
-      else if (imgPart?.inline_data?.data) imageBase64 = `data:${imgPart.inline_data.mime_type || "image/png"};base64,${imgPart.inline_data.data}`;
-    }
-    // Format 2: images array
-    if (!imageBase64) imageBase64 = choice?.message?.images?.[0]?.image_url?.url;
-    // Format 3: direct base64 in content
-    if (!imageBase64 && typeof choice?.message?.content === "string" && choice.message.content.length > 1000) {
-      imageBase64 = choice.message.content;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image",
+          messages: [{ role: "user", content: prompt }],
+          modalities: ["image", "text"],
+        }),
+      });
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          return new Response(JSON.stringify({ error: "คำขอมากเกินไป กรุณารอสักครู่" }), {
+            status: 429,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (response.status === 402) {
+          return new Response(JSON.stringify({ error: "เครดิต AI หมด กรุณาเติมเครดิต" }), {
+            status: 402,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        const t = await response.text();
+        console.error("AI image error:", response.status, t);
+        throw new Error("AI image generation failed");
+      }
+
+      const data = await response.json();
+      const choice = data.choices?.[0];
+
+      // Try multiple known response formats
+      // Format 1: images array (most common)
+      imageBase64 = choice?.message?.images?.[0]?.image_url?.url;
+      // Format 2: inline_data in content parts
+      if (!imageBase64 && Array.isArray(choice?.message?.content)) {
+        const imgPart = choice.message.content.find((p: any) => p.type === "image_url" || p.type === "image" || p.inline_data);
+        if (imgPart?.image_url?.url) imageBase64 = imgPart.image_url.url;
+        else if (imgPart?.inline_data?.data) imageBase64 = `data:${imgPart.inline_data.mime_type || "image/png"};base64,${imgPart.inline_data.data}`;
+      }
+
+      if (imageBase64) break;
+      console.warn(`Attempt ${attempt + 1}: AI returned text-only, retrying...`);
     }
 
-    if (!imageBase64) {
-      console.error("Full AI response:", JSON.stringify(data).slice(0, 2000));
-      throw new Error("ไม่สามารถสร้างรูปภาพได้");
-    }
+    if (!imageBase64) throw new Error("ไม่สามารถสร้างรูปภาพได้ กรุณาลองใหม่");
 
     // Upload to Supabase Storage
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
