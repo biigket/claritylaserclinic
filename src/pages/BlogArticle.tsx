@@ -65,6 +65,26 @@ const BlogArticle = () => {
           ? (data.meta_title_th || data.title_th)
           : (data.meta_title_en || data.title_en || data.title_th);
         document.title = title;
+
+        // Fetch related articles (same tags, exclude current)
+        const { data: related } = await supabase
+          .from("blog_articles")
+          .select("id, slug, title_th, title_en, cover_image_url, tags, published_at")
+          .eq("status", "published")
+          .neq("slug", slug)
+          .order("published_at", { ascending: false })
+          .limit(6);
+
+        if (related) {
+          // Sort by tag overlap
+          const currentTags = data.tags || [];
+          const scored = related.map((r: RelatedArticle) => ({
+            ...r,
+            score: (r.tags || []).filter((t: string) => currentTags.includes(t)).length,
+          }));
+          scored.sort((a: { score: number }, b: { score: number }) => b.score - a.score);
+          setRelatedArticles(scored.slice(0, 3));
+        }
       }
       setLoading(false);
     };
