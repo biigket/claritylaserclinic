@@ -86,8 +86,39 @@ STRICT RULES:
     }
 
     const data = await response.json();
-    const imageBase64 = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    if (!imageBase64) throw new Error("ไม่สามารถสร้างรูปภาพได้");
+    console.log("AI response structure:", JSON.stringify(Object.keys(data)));
+    const choice = data.choices?.[0];
+    if (choice) {
+      console.log("Choice keys:", JSON.stringify(Object.keys(choice)));
+      console.log("Message keys:", JSON.stringify(Object.keys(choice.message || {})));
+      if (choice.message?.content) {
+        const contentType = typeof choice.message.content;
+        console.log("Content type:", contentType);
+        if (Array.isArray(choice.message.content)) {
+          console.log("Content parts:", JSON.stringify(choice.message.content.map((p: any) => ({ type: p.type, hasData: !!p.data, hasUrl: !!p.image_url }))));
+        }
+      }
+    }
+
+    // Try multiple known response formats
+    let imageBase64: string | undefined;
+    // Format 1: inline_data in content parts
+    if (Array.isArray(choice?.message?.content)) {
+      const imgPart = choice.message.content.find((p: any) => p.type === "image_url" || p.type === "image" || p.inline_data);
+      if (imgPart?.image_url?.url) imageBase64 = imgPart.image_url.url;
+      else if (imgPart?.inline_data?.data) imageBase64 = `data:${imgPart.inline_data.mime_type || "image/png"};base64,${imgPart.inline_data.data}`;
+    }
+    // Format 2: images array
+    if (!imageBase64) imageBase64 = choice?.message?.images?.[0]?.image_url?.url;
+    // Format 3: direct base64 in content
+    if (!imageBase64 && typeof choice?.message?.content === "string" && choice.message.content.length > 1000) {
+      imageBase64 = choice.message.content;
+    }
+
+    if (!imageBase64) {
+      console.error("Full AI response:", JSON.stringify(data).slice(0, 2000));
+      throw new Error("ไม่สามารถสร้างรูปภาพได้");
+    }
 
     // Upload to Supabase Storage
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
