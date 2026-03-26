@@ -38,6 +38,7 @@ const BlogArticle = () => {
   const { slug } = useParams<{ slug: string }>();
   const { lang } = useLanguage();
   const [article, setArticle] = useState<Article | null>(null);
+  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [popupOpen, setPopupOpen] = useState(false);
 
