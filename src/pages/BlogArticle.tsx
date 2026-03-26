@@ -5,7 +5,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import Navbar from "@/components/clinic/Navbar";
 import FooterSection from "@/components/clinic/FooterSection";
 import ConsultationPopup from "@/components/clinic/ConsultationPopup";
-import { ArrowLeft, Calendar, Eye } from "lucide-react";
+import { ArrowLeft, Calendar, Eye, ArrowRight } from "lucide-react";
 
 interface Article {
   id: string;
@@ -24,10 +24,21 @@ interface Article {
   meta_description_en: string | null;
 }
 
+interface RelatedArticle {
+  id: string;
+  slug: string;
+  title_th: string;
+  title_en: string | null;
+  cover_image_url: string | null;
+  tags: string[];
+  published_at: string | null;
+}
+
 const BlogArticle = () => {
   const { slug } = useParams<{ slug: string }>();
   const { lang } = useLanguage();
   const [article, setArticle] = useState<Article | null>(null);
+  const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [popupOpen, setPopupOpen] = useState(false);
 
@@ -54,6 +65,26 @@ const BlogArticle = () => {
           ? (data.meta_title_th || data.title_th)
           : (data.meta_title_en || data.title_en || data.title_th);
         document.title = title;
+
+        // Fetch related articles (same tags, exclude current)
+        const { data: related } = await supabase
+          .from("blog_articles")
+          .select("id, slug, title_th, title_en, cover_image_url, tags, published_at")
+          .eq("status", "published")
+          .neq("slug", slug)
+          .order("published_at", { ascending: false })
+          .limit(6);
+
+        if (related) {
+          // Sort by tag overlap
+          const currentTags = data.tags || [];
+          const scored = related.map((r: RelatedArticle) => ({
+            ...r,
+            score: (r.tags || []).filter((t: string) => currentTags.includes(t)).length,
+          }));
+          scored.sort((a: { score: number }, b: { score: number }) => b.score - a.score);
+          setRelatedArticles(scored.slice(0, 3));
+        }
       }
       setLoading(false);
     };
@@ -284,6 +315,81 @@ const BlogArticle = () => {
               {lang === "th" ? "นัดปรึกษาแพทย์" : "Book a Consultation"}
             </button>
           </div>
+
+          {/* Internal Links - Related Articles */}
+          {relatedArticles.length > 0 && (
+            <nav className="mt-16" aria-label="Related articles">
+              <h2 className="font-display text-2xl text-foreground mb-6">
+                {lang === "th" ? "บทความที่เกี่ยวข้อง" : "Related Articles"}
+              </h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {relatedArticles.map((related) => (
+                  <Link
+                    key={related.id}
+                    to={`/blog/${related.slug}`}
+                    className="group block bg-card border border-border rounded-sm overflow-hidden hover:shadow-md transition-shadow duration-300"
+                  >
+                    <div className="aspect-[16/9] bg-muted overflow-hidden">
+                      {related.cover_image_url ? (
+                        <img
+                          src={related.cover_image_url}
+                          alt={lang === "th" ? related.title_th : (related.title_en || related.title_th)}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                          <span className="text-3xl">📝</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      {related.tags && related.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mb-2">
+                          {related.tags.slice(0, 2).map((tag) => (
+                            <span
+                              key={tag}
+                              className="font-body text-[10px] tracking-wider uppercase px-2 py-0.5 bg-accent text-accent-foreground rounded-sm"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <h3 className="font-display text-sm text-foreground group-hover:text-primary transition-colors duration-300 line-clamp-2 mb-2">
+                        {lang === "th" ? related.title_th : (related.title_en || related.title_th)}
+                      </h3>
+                      <span className="inline-flex items-center gap-1 font-body text-xs text-primary group-hover:gap-2 transition-all duration-300">
+                        {lang === "th" ? "อ่านต่อ" : "Read more"}
+                        <ArrowRight className="w-3 h-3" />
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </nav>
+          )}
+
+          {/* Breadcrumb for SEO */}
+          <nav className="mt-12 pt-6 border-t border-border" aria-label="Breadcrumb">
+            <ol className="flex flex-wrap items-center gap-1.5 font-body text-xs text-muted-foreground">
+              <li>
+                <Link to="/" className="hover:text-foreground transition-colors">
+                  {lang === "th" ? "หน้าแรก" : "Home"}
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li>
+                <Link to="/blog" className="hover:text-foreground transition-colors">
+                  {lang === "th" ? "บทความ" : "Blog"}
+                </Link>
+              </li>
+              <li aria-hidden="true">/</li>
+              <li className="text-foreground truncate max-w-[200px]" aria-current="page">
+                {title}
+              </li>
+            </ol>
+          </nav>
         </div>
       </article>
 
