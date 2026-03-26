@@ -5,7 +5,7 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import Navbar from "@/components/clinic/Navbar";
 import FooterSection from "@/components/clinic/FooterSection";
 import ConsultationPopup from "@/components/clinic/ConsultationPopup";
-import { ArrowLeft, Calendar, Eye } from "lucide-react";
+import { ArrowLeft, Calendar, Eye, ArrowRight } from "lucide-react";
 
 interface Article {
   id: string;
