@@ -24,6 +24,16 @@ interface Article {
   meta_description_en: string | null;
 }
 
+interface RelatedArticle {
+  id: string;
+  slug: string;
+  title_th: string;
+  title_en: string | null;
+  cover_image_url: string | null;
+  tags: string[];
+  published_at: string | null;
+}
+
 const BlogArticle = () => {
   const { slug } = useParams<{ slug: string }>();
   const { lang } = useLanguage();
