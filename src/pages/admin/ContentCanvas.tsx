@@ -467,7 +467,7 @@ const ContentCanvas = () => {
 
       {/* Input Form */}
       {!articleData && !isGenerating && (
-        <div className="bg-card rounded-xl border border-border p-6 mb-6">
+        <div id="canvas-input-form" className="bg-card rounded-xl border border-border p-6 mb-6">
           <CanvasInputForm onGenerate={handleGenerate} isGenerating={isGenerating} externalFill={externalFill} />
         </div>
       )}
