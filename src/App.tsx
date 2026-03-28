@@ -15,6 +15,7 @@ import PromotionsList from "./pages/admin/PromotionsList";
 import PromotionEditor from "./pages/admin/PromotionEditor";
 import BlogsList from "./pages/admin/BlogsList";
 import BlogEditor from "./pages/admin/BlogEditor";
+import ContentCanvas from "./pages/admin/ContentCanvas";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="/admin/blogs" element={<BlogsList />} />
               <Route path="/admin/blogs/new" element={<BlogEditor />} />
               <Route path="/admin/blogs/:id" element={<BlogEditor />} />
+              <Route path="/admin/content-canvas" element={<ContentCanvas />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
