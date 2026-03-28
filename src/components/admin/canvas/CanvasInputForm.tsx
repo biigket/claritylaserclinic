@@ -20,6 +20,7 @@ export interface CanvasInput {
 interface Props {
   onGenerate: (input: CanvasInput) => void;
   isGenerating: boolean;
+  externalFill?: Partial<CanvasInput> | null;
 }
 
 const AUTOFILL_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/canvas-autofill`;
@@ -32,7 +33,7 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
   </div>
 );
 
-const CanvasInputForm = ({ onGenerate, isGenerating }: Props) => {
+const CanvasInputForm = ({ onGenerate, isGenerating, externalFill }: Props) => {
   const { toast } = useToast();
   const [quickPrompt, setQuickPrompt] = useState("");
   const [isAutoFilling, setIsAutoFilling] = useState(false);
@@ -56,6 +57,13 @@ const CanvasInputForm = ({ onGenerate, isGenerating }: Props) => {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
   }, [form]);
+
+  // Apply external fill from topic backlog
+  useEffect(() => {
+    if (externalFill) {
+      setForm((prev) => ({ ...prev, ...externalFill }));
+    }
+  }, [externalFill]);
 
   const set = (key: keyof CanvasInput, value: string) => setForm((prev) => ({ ...prev, [key]: value }));
 
