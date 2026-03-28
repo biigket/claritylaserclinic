@@ -229,25 +229,43 @@ ${existingArticlesContext ? `\nบทความที่มีอยู่ (�
           ?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || `article-${Date.now()}`;
         const slug = `${baseSlug}-${Date.now().toString(36)}`;
 
-        // Generate cover image
-        let coverImageUrl = null;
-        try {
-          const coverResp = await fetch(`${SUPABASE_URL}/functions/v1/blog-generate-cover`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
-            },
-            body: JSON.stringify({
-              title: articleData.title_th || topic.title_th,
-              excerpt: articleData.excerpt_th,
-              tags: articleData.tags?.join(", "),
-            }),
-          });
-          const coverData = await coverResp.json();
-          if (coverResp.ok && coverData.url) coverImageUrl = coverData.url;
-        } catch (e) {
-          console.warn("[auto-publish] Cover generation failed:", e);
+        // Generate cover image with retry (must complete before publishing)
+        let coverImageUrl: string | null = null;
+        const maxCoverRetries = 3;
+        for (let attempt = 1; attempt <= maxCoverRetries; attempt++) {
+          try {
+            console.log(`[auto-publish] Cover attempt ${attempt}/${maxCoverRetries} for: ${topic.title_th}`);
+            const coverResp = await fetch(`${SUPABASE_URL}/functions/v1/blog-generate-cover`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+              },
+              body: JSON.stringify({
+                title: articleData.title_th || topic.title_th,
+                excerpt: articleData.excerpt_th,
+                tags: articleData.tags?.join(", "),
+              }),
+            });
+            const coverData = await coverResp.json();
+            if (coverResp.ok && coverData.url) {
+              coverImageUrl = coverData.url;
+              console.log(`[auto-publish] Cover generated on attempt ${attempt}`);
+              break;
+            }
+            console.warn(`[auto-publish] Cover attempt ${attempt} failed: ${coverResp.status}`);
+          } catch (e) {
+            console.warn(`[auto-publish] Cover attempt ${attempt} error:`, e);
+          }
+          if (attempt < maxCoverRetries) {
+            await new Promise((r) => setTimeout(r, 5000)); // wait 5s before retry
+          }
+        }
+
+        if (!coverImageUrl) {
+          console.warn(`[auto-publish] All cover attempts failed for ${topic.title_th}, skipping publish`);
+          await supabase.from("content_topic_backlog").update({ status: "pending" }).eq("id", topic.id);
+          continue;
         }
 
         // Insert article
