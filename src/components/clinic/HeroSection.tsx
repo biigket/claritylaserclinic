@@ -17,6 +17,7 @@ const HeroSection = ({ onBook }: HeroSectionProps) => {
         <img
           src={heroImage}
           alt="Clarity Laser & Aesthetic reception"
+          fetchPriority="high"
           className="w-full h-full object-cover object-center md:object-[center_40%]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-background/20" />

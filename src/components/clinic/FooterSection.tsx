@@ -45,6 +45,7 @@ const FooterSection = () => {
             <img
               src={mapImage}
               alt="Clarity Clinic location map"
+              loading="lazy"
               className="w-full h-auto object-cover brightness-90 contrast-[0.95]"
             />
           </div>

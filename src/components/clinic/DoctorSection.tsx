@@ -22,6 +22,7 @@ const DoctorSection = () => {
             <img
               src={doctorImage}
               alt="นพ.ฐิติคมน์ – Clarity Clinic"
+              loading="lazy"
               className="w-full h-auto object-cover grayscale-[15%] brightness-105 contrast-[0.95]"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
