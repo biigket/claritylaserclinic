@@ -294,8 +294,9 @@ const ContentCanvas = () => {
         return parts.filter(Boolean).join("\n\n---\n\n");
       };
 
-      const slug = articleData.slug || articleData.title_en
+      const baseSlug = articleData.slug || articleData.title_en
         ?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || `article-${Date.now()}`;
+      const slug = `${baseSlug}-${Date.now().toString(36)}`;
 
       const payload = {
         slug,
