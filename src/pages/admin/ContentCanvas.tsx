@@ -487,7 +487,6 @@ const ContentCanvas = () => {
             <p className="text-[10px] text-muted-foreground">สร้างบทความ 2 ภาษา + Local SEO สำหรับ AI Search Engines</p>
           </div>
           <BulkCanvasGenerator />
-          </div>
         </div>
 
         {articleData && (
