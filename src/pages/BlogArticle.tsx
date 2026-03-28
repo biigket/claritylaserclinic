@@ -199,6 +199,53 @@ const BlogArticle = () => {
       .replace(/\*\*(.+?)\*\*/g, '<strong class="text-foreground font-medium">$1</strong>');
   };
 
+  const title = article ? (lang === "th" ? article.title_th : (article.title_en || article.title_th)) : "";
+  const content = article ? (lang === "th" ? article.content_th : (article.content_en || article.content_th)) : "";
+  const metaDesc = article ? (lang === "th" ? (article.meta_description_th || "") : (article.meta_description_en || article.meta_description_th || "")) : "";
+  const canonicalUrl = `https://claritylaserclinic.lovable.app/blog/${slug || ""}`;
+
+  const jsonLdData = useMemo(() => {
+    if (!article) return undefined;
+    return [
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": title,
+        "description": metaDesc,
+        "image": article.cover_image_url || undefined,
+        "datePublished": article.published_at || undefined,
+        "dateModified": article.published_at || undefined,
+        "author": { "@type": "Organization", "name": "Clarity Laser & Aesthetic Clinic" },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Clarity Laser & Aesthetic Clinic",
+          "url": "https://claritylaserclinic.lovable.app",
+        },
+        "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl },
+        "keywords": (article.tags || []).join(", "),
+        "inLanguage": lang === "th" ? "th-TH" : "en-US",
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": lang === "th" ? "หน้าแรก" : "Home", "item": "https://claritylaserclinic.lovable.app/" },
+          { "@type": "ListItem", "position": 2, "name": lang === "th" ? "บทความ" : "Blog", "item": "https://claritylaserclinic.lovable.app/blog" },
+          { "@type": "ListItem", "position": 3, "name": title, "item": canonicalUrl },
+        ],
+      },
+    ];
+  }, [article, lang, title, metaDesc, canonicalUrl]);
+
+  useSeoHead({
+    title: article ? (lang === "th" ? (article.meta_title_th || article.title_th) : (article.meta_title_en || article.title_en || article.title_th)) : "Loading...",
+    description: metaDesc || undefined,
+    canonical: canonicalUrl,
+    ogType: "article",
+    ogImage: article?.cover_image_url || undefined,
+    jsonLd: jsonLdData,
+  });
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -229,50 +276,6 @@ const BlogArticle = () => {
       </div>
     );
   }
-
-  const title = lang === "th" ? article.title_th : (article.title_en || article.title_th);
-  const content = lang === "th" ? article.content_th : (article.content_en || article.content_th);
-  const metaDesc = lang === "th" ? (article.meta_description_th || "") : (article.meta_description_en || article.meta_description_th || "");
-  const canonicalUrl = `https://claritylaserclinic.lovable.app/blog/${article.slug}`;
-
-  const jsonLdData = useMemo(() => [
-    {
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
-      "headline": title,
-      "description": metaDesc,
-      "image": article.cover_image_url || undefined,
-      "datePublished": article.published_at || undefined,
-      "dateModified": article.published_at || undefined,
-      "author": { "@type": "Organization", "name": "Clarity Laser & Aesthetic Clinic" },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Clarity Laser & Aesthetic Clinic",
-        "url": "https://claritylaserclinic.lovable.app",
-      },
-      "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl },
-      "keywords": (article.tags || []).join(", "),
-      "inLanguage": lang === "th" ? "th-TH" : "en-US",
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": lang === "th" ? "หน้าแรก" : "Home", "item": "https://claritylaserclinic.lovable.app/" },
-        { "@type": "ListItem", "position": 2, "name": lang === "th" ? "บทความ" : "Blog", "item": "https://claritylaserclinic.lovable.app/blog" },
-        { "@type": "ListItem", "position": 3, "name": title, "item": canonicalUrl },
-      ],
-    },
-  ], [article, lang, title, metaDesc, canonicalUrl]);
-
-  useSeoHead({
-    title: lang === "th" ? (article.meta_title_th || article.title_th) : (article.meta_title_en || article.title_en || article.title_th),
-    description: metaDesc,
-    canonical: canonicalUrl,
-    ogType: "article",
-    ogImage: article.cover_image_url || undefined,
-    jsonLd: jsonLdData,
-  });
 
   return (
     <div className="min-h-screen bg-background">
