@@ -45,7 +45,7 @@ const CanvasInputForm = ({ onGenerate, isGenerating }: Props) => {
     return {
       topic: "",
       brand: "Clarity Laser Clinic",
-      author: "",
+      author: "นพ.ฐิติคมน์ 61395, แพทย์ผู้เชี่ยวชาญด้านผิวหนังและเลเซอร์",
       audience: "",
       dataPoints: "",
       language: "Both",
