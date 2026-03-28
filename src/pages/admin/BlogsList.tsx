@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Plus, Search, Edit, Trash2, Eye, EyeOff, FileText,
+  Plus, Search, Edit, Trash2, Eye, EyeOff, FileText, Pin, PinOff,
 } from "lucide-react";
 import BulkArticleGenerator from "@/components/admin/BulkArticleGenerator";
 
@@ -25,6 +25,7 @@ type Article = {
   view_count: number;
   published_at: string | null;
   updated_at: string;
+  is_pinned: boolean;
 };
 
 const statusColors: Record<string, string> = {
@@ -44,7 +45,8 @@ const BlogsList = () => {
     queryKey: ["admin-blogs"],
     queryFn: async () => {
       const { data, error } = await blogTable()
-        .select("id, slug, status, title_th, title_en, cover_image_url, tags, view_count, published_at, updated_at")
+        .select("id, slug, status, title_th, title_en, cover_image_url, tags, view_count, published_at, updated_at, is_pinned")
+        .order("is_pinned", { ascending: false })
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data as Article[];
@@ -80,6 +82,12 @@ const BlogsList = () => {
     await blogTable().delete().eq("id", id);
     queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
     toast({ title: "ลบสำเร็จ" });
+  };
+
+  const handleTogglePin = async (a: Article) => {
+    await blogTable().update({ is_pinned: !a.is_pinned }).eq("id", a.id);
+    queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
+    toast({ title: a.is_pinned ? "ยกเลิกปักหมุดแล้ว" : "ปักหมุดเป็นต้นแบบ AI แล้ว" });
   };
 
   const statuses = ["all", "draft", "published"];
@@ -139,7 +147,7 @@ const BlogsList = () => {
           {filtered.map((a) => (
             <div
               key={a.id}
-              className="group bg-card border border-border rounded-xl p-3 flex items-center gap-3 transition-shadow hover:shadow-sm"
+              className={`group border rounded-xl p-3 flex items-center gap-3 transition-shadow hover:shadow-sm ${a.is_pinned ? "bg-primary/5 border-primary/30" : "bg-card border-border"}`}
             >
               {/* Thumbnail */}
               <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center overflow-hidden shrink-0">
@@ -152,7 +160,8 @@ const BlogsList = () => {
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
+                <p className="text-sm font-medium text-foreground truncate flex items-center gap-1.5">
+                  {a.is_pinned && <Pin className="w-3.5 h-3.5 text-primary shrink-0" />}
                   {a.title_th || a.title_en || "ไม่มีชื่อ"}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -169,6 +178,9 @@ const BlogsList = () => {
 
               {/* Actions */}
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="ghost" size="icon" className="h-8 w-8" title={a.is_pinned ? "ยกเลิกปักหมุด" : "ปักหมุดเป็นต้นแบบ AI"} onClick={() => handleTogglePin(a)}>
+                  {a.is_pinned ? <PinOff className="w-3.5 h-3.5 text-primary" /> : <Pin className="w-3.5 h-3.5" />}
+                </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/admin/blogs/${a.id}`)}>
                   <Edit className="w-3.5 h-3.5" />
                 </Button>
