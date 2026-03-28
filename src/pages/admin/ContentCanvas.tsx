@@ -380,17 +380,39 @@ const ContentCanvas = () => {
     toast({ title: `กำลังสร้างบทความ: ${topic.title_th}` });
   };
 
-  // Fill form from backlog topic (without generating)
-  const handleFillFormFromBacklog = (topic: TopicItem) => {
-    setExternalFill({
-      topic: topic.title_th || topic.title_en || "",
-    });
+  // Fill form from backlog topic (with AI-generated dataPoints)
+  const handleFillFormFromBacklog = async (topic: TopicItem) => {
+    const topicTitle = topic.title_th || topic.title_en || "";
+    setExternalFill({ topic: topicTitle });
     setActiveTopicId(topic.id);
-    toast({ title: `กรอกหัวข้อ "${topic.title_th}" ในฟอร์มแล้ว — ปรับแต่งได้เลย` });
-    // Scroll to form
+    toast({ title: `กรอกหัวข้อ "${topicTitle}" — กำลังให้ AI เติมข้อมูลสถิติ...` });
+
     setTimeout(() => {
       document.getElementById("canvas-input-form")?.scrollIntoView({ behavior: "smooth" });
     }, 100);
+
+    // AI fill dataPoints
+    try {
+      const resp = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/canvas-autofill`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ prompt: topicTitle }),
+      });
+      const data = await resp.json();
+      if (resp.ok && data) {
+        setExternalFill({
+          topic: topicTitle,
+          ...(data.audience && { audience: data.audience }),
+          ...(data.dataPoints && { dataPoints: data.dataPoints }),
+        });
+        toast({ title: "AI เติมข้อมูลสถิติให้แล้ว ✨" });
+      }
+    } catch (e) {
+      console.warn("AI fill dataPoints failed:", e);
+    }
   };
 
   const handleDeleteTopic = async (id: string) => {
