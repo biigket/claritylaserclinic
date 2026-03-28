@@ -55,6 +55,7 @@ const ContentCanvas = () => {
   const [publishing, setPublishing] = useState(false);
   const [publishedArticles, setPublishedArticles] = useState<Array<{ title: string; slug: string }>>([]);
   const [deletingTopic, setDeletingTopic] = useState<string | null>(null);
+  const [externalFill, setExternalFill] = useState<Partial<CanvasInput> | null>(null);
 
   // Fetch existing articles for internal linking
   const { data: existingArticles } = useQuery({
