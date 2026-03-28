@@ -81,6 +81,21 @@ serve(async (req) => {
       // Continue without knowledge context
     }
 
+    const systemPrompt = isBulkMode
+      ? `คุณเป็น AI สำหรับ Clarity Laser Clinic สร้างหัวข้อบทความ SEO สำหรับคลินิกผิวหนังและเลเซอร์ ย่านราชเทวี ใกล้ BTS พญาไท สยาม
+
+เมื่อได้รับคำสั่ง ให้สร้างหัวข้อบทความที่หลากหลาย ไม่ซ้ำกัน เหมาะกับ AI Search (ChatGPT, Perplexity, Google AI Overview)
+
+${knowledgeContext ? `--- คลังความรู้ ---\n${knowledgeContext}\n--- จบ ---\nใช้ข้อมูลจากคลังความรู้ช่วยสร้างหัวข้อที่เฉพาะเจาะจงและมีข้อมูลรองรับ` : ""}
+
+ตอบเป็น JSON เท่านั้น: {"topics": ["หัวข้อ 1", "หัวข้อ 2", ...]}
+ห้ามใส่ markdown code block`
+      : buildSystemPrompt(knowledgeContext);
+
+    const userMsg = isBulkMode
+      ? `สร้าง ${count} หัวข้อบทความที่แตกต่างกัน จากคำสั่ง: "${prompt}"\nต้องมีจำนวนครบ ${count} หัวข้อ แต่ละหัวข้อเป็นคำถามหรือ keyword ที่คนจะค้นหา`
+      : prompt;
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -90,8 +105,8 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
         messages: [
-          { role: "system", content: buildSystemPrompt(knowledgeContext) },
-          { role: "user", content: prompt },
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMsg },
         ],
       }),
     });
