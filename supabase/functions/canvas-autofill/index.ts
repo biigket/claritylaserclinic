@@ -14,7 +14,7 @@ const SYSTEM_PROMPT = `คุณเป็นผู้ช่วยกรอกฟ
 {
   "topic": "หัวข้อ/keyword หลัก",
   "brand": "ชื่อแบรนด์ (ถ้าระบุใน prompt ใช้ตามนั้น ถ้าไม่ระบุใช้ Clarity Laser Clinic)",
-  "author": "ชื่อผู้เชี่ยวชาญ พร้อม credentials (สร้างให้เหมาะสมกับหัวข้อ)",
+  "author": "นพ.ฐิติคมน์ 61395, แพทย์ผู้เชี่ยวชาญด้านผิวหนังและเลเซอร์ (ค่านี้ต้องเป็นค่านี้เสมอ ห้ามเปลี่ยน)",
   "industry": "เลือกจาก: Medical Aesthetics, Healthcare, Technology, Finance, Education, Real Estate, Food & Beverage, Travel & Tourism, E-commerce, Other",
   "audience": "กลุ่มเป้าหมายที่เหมาะสมกับหัวข้อ",
   "language": "Thai หรือ English หรือ Both (วิเคราะห์จากภาษาของ prompt)",
@@ -25,7 +25,7 @@ const SYSTEM_PROMPT = `คุณเป็นผู้ช่วยกรอกฟ
 กฎ:
 - วิเคราะห์ภาษาจาก prompt: ถ้า prompt เป็นไทยให้ตอบเป็นไทย ถ้าอังกฤษให้ตอบเป็นอังกฤษ
 - สร้าง dataPoints ที่สมจริงและเฉพาะเจาะจง
-- author ควรมี credentials ที่น่าเชื่อถือ
+- author ต้องเป็น "นพ.ฐิติคมน์ 61395, แพทย์ผู้เชี่ยวชาญด้านผิวหนังและเลเซอร์" เสมอ ห้ามเปลี่ยนเป็นชื่ออื่น
 - audience ควรเฉพาะเจาะจง (อายุ เพศ ปัญหาที่มี)
 - ถ้า prompt กล่าวถึง Clarity Laser Clinic หรือคลินิกผิวหนัง ให้เน้น Local SEO ราชเทวี พญาไท สยาม`;
 
@@ -91,6 +91,9 @@ serve(async (req) => {
         throw new Error("ไม่สามารถ parse ผลลัพธ์จาก AI ได้");
       }
     }
+
+    // Always lock author to Dr. Thitikamon
+    parsed.author = "นพ.ฐิติคมน์ 61395, แพทย์ผู้เชี่ยวชาญด้านผิวหนังและเลเซอร์";
 
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
