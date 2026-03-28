@@ -34,13 +34,13 @@ const BlogList = () => {
     description: lang === "th"
       ? "รวมบทความความรู้ดูแลผิว รักษาหลุมสิว เลเซอร์ ฟิลเลอร์ โบท็อก จากแพทย์ผู้เชี่ยวชาญ Clarity Laser Clinic ราชเทวี กรุงเทพ"
       : "Expert articles on skin care, acne scar treatment, laser, filler & botox from Clarity Laser Clinic Bangkok",
-    canonical: "https://claritylaserclinic.lovable.app/blog",
+    canonical: "https://claritylaserclinic.com/blog",
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
       "name": lang === "th" ? "บทความดูแลผิว" : "Skin Care Articles",
-      "url": "https://claritylaserclinic.lovable.app/blog",
-      "isPartOf": { "@type": "WebSite", "name": "Clarity Laser & Aesthetic Clinic", "url": "https://claritylaserclinic.lovable.app" },
+      "url": "https://claritylaserclinic.com/blog",
+      "isPartOf": { "@type": "WebSite", "name": "Clarity Laser & Aesthetic Clinic", "url": "https://claritylaserclinic.com" },
     },
   });
 
