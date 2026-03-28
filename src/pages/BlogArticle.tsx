@@ -126,7 +126,9 @@ const BlogArticle = () => {
         if (bullets.length) {
           elements.push(
             <div key={`tldr-${blockIdx}`} className="bg-primary/5 border border-primary/20 rounded-xl p-5 md:p-6 my-6">
-              <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3">TL;DR</p>
+              <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-3">
+                {lang === "th" ? "สรุปสั้นๆ" : "Quick Summary"}
+              </p>
               <ul className="space-y-2">
                 {bullets.map((b, i) => (
                   <li key={i} className="text-sm leading-relaxed flex gap-2.5">

@@ -225,7 +225,9 @@ const ArticlePreview = ({ data, onRegenerateSection, regeneratingSection, coverI
           {/* TL;DR */}
           {bullets?.length ? (
             <div className="bg-primary/5 border border-primary/20 rounded-xl p-5 space-y-2">
-              <p className="text-xs font-semibold text-primary uppercase tracking-wider">TL;DR</p>
+              <p className="text-xs font-semibold text-primary uppercase tracking-wider">
+                {previewLang === "th" ? "สรุปสั้นๆ" : "Quick Summary"}
+              </p>
               <ul className="space-y-1.5">
                 {bullets.map((b, i) => (
                   <li key={i} className="text-sm leading-relaxed flex gap-2">
