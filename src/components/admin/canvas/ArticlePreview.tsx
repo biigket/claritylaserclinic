@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Check, RefreshCw, FileText, Code2, Loader2, Globe } from "lucide-react";
+import { Copy, Check, RefreshCw, FileText, Code2, Loader2, Globe, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +51,7 @@ interface Props {
   regeneratingSection: string | null;
   coverImageUrl?: string;
   onGenerateRelated?: (topic: { title_th: string; title_en: string; slug: string }) => void;
+  onDeleteRelated?: (index: number) => void;
 }
 
 function calcGeoScore(details?: Record<string, boolean>): number {
@@ -117,7 +118,7 @@ function articleToMarkdown(data: ArticleData, lang: "th" | "en"): string {
   return parts.join("\n");
 }
 
-const ArticlePreview = ({ data, onRegenerateSection, regeneratingSection, coverImageUrl, onGenerateRelated }: Props) => {
+const ArticlePreview = ({ data, onRegenerateSection, regeneratingSection, coverImageUrl, onGenerateRelated, onDeleteRelated }: Props) => {
   const { toast } = useToast();
   const [copiedType, setCopiedType] = useState<string | null>(null);
   const [showSchema, setShowSchema] = useState(false);
@@ -333,20 +334,32 @@ const ArticlePreview = ({ data, onRegenerateSection, regeneratingSection, coverI
                       {t(r.description_th, r.description_en)}
                     </p>
                   </div>
-                  {onGenerateRelated && (
-                    <Button
-                      variant="outline" size="sm"
-                      className="shrink-0 gap-1 text-[10px] h-7 border-primary/30 text-primary hover:bg-primary/5"
-                      onClick={() => onGenerateRelated({
-                        title_th: r.title_th,
-                        title_en: r.title_en,
-                        slug: r.suggested_slug || "",
-                      })}
-                    >
-                      <Globe className="w-3 h-3" />
-                      เขียนบทความนี้
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {onGenerateRelated && (
+                      <Button
+                        variant="outline" size="sm"
+                        className="gap-1 text-[10px] h-7 border-primary/30 text-primary hover:bg-primary/5"
+                        onClick={() => onGenerateRelated({
+                          title_th: r.title_th,
+                          title_en: r.title_en,
+                          slug: r.suggested_slug || "",
+                        })}
+                      >
+                        <Globe className="w-3 h-3" />
+                        เขียนบทความนี้
+                      </Button>
+                    )}
+                    {onDeleteRelated && (
+                      <Button
+                        variant="ghost" size="sm"
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => onDeleteRelated(i)}
+                        title="ลบหัวข้อนี้"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
