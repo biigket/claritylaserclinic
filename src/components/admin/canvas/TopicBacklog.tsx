@@ -19,6 +19,7 @@ export interface TopicItem {
 interface Props {
   topics: TopicItem[];
   onWrite: (topic: TopicItem) => void;
+  onFillForm: (topic: TopicItem) => void;
   onDelete: (id: string) => void;
   isDeleting: string | null;
   isCollapsed?: boolean;
