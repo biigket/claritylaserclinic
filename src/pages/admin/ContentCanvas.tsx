@@ -370,7 +370,18 @@ const ContentCanvas = () => {
     toast({ title: `กำลังสร้างบทความ: ${topic.title_th}` });
   };
 
-  // Delete topic from backlog
+  // Fill form from backlog topic (without generating)
+  const handleFillFormFromBacklog = (topic: TopicItem) => {
+    setExternalFill({
+      topic: topic.title_th || topic.title_en || "",
+    });
+    toast({ title: `กรอกหัวข้อ "${topic.title_th}" ในฟอร์มแล้ว — ปรับแต่งได้เลย` });
+    // Scroll to form
+    setTimeout(() => {
+      document.getElementById("canvas-input-form")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
   const handleDeleteTopic = async (id: string) => {
     setDeletingTopic(id);
     try {
