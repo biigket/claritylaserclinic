@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Copy, Check, RefreshCw, FileText, Code2, Loader2, Globe } from "lucide-react";
+import { Copy, Check, RefreshCw, FileText, Code2, Loader2, Globe, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +51,7 @@ interface Props {
   regeneratingSection: string | null;
   coverImageUrl?: string;
   onGenerateRelated?: (topic: { title_th: string; title_en: string; slug: string }) => void;
+  onDeleteRelated?: (index: number) => void;
 }
 
 function calcGeoScore(details?: Record<string, boolean>): number {
