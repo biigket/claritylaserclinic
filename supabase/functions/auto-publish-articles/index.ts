@@ -157,6 +157,18 @@ serve(async (req) => {
       .map((a: any) => `- "${a.title_th || a.title_en}" → /blog/${a.slug}`)
       .join("\n");
 
+    // Fetch knowledge vault for reference
+    const { data: knowledgeDocs } = await supabase
+      .from("knowledge_documents")
+      .select("title, extracted_text")
+      .eq("status", "ready")
+      .order("created_at", { ascending: false })
+      .limit(10);
+
+    const knowledgeContext = (knowledgeDocs || [])
+      .map((d: any) => `### ${d.title}\n${(d.extracted_text || "").slice(0, 3000)}`)
+      .join("\n\n---\n\n");
+
     const results: any[] = [];
 
     for (const topic of pendingTopics) {
@@ -189,8 +201,9 @@ serve(async (req) => {
 ${topic.description_th ? `รายละเอียด: ${topic.description_th}` : ""}
 วันที่: ${new Date().toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" })}
 ${existingArticlesContext ? `\nบทความที่มีอยู่ (ใช้สร้าง internal links):\n${existingArticlesContext}` : ""}
+${knowledgeContext ? `\n## คลังความรู้อ้างอิง (ใช้ข้อมูลเหล่านี้เป็นแหล่งอ้างอิง ดึงตัวเลข ข้อเท็จจริงมาใช้):\n${knowledgeContext}` : ""}
 
-สำคัญ: ต้องเขียนทั้งภาษาไทยและอังกฤษ สอดแทรก Local SEO keywords`,
+สำคัญ: ต้องเขียนทั้งภาษาไทยและอังกฤษ สอดแทรก Local SEO keywords${knowledgeContext ? " และใช้ข้อมูลจากคลังความรู้อ้างอิงให้มากที่สุด" : ""}`,
               },
             ],
             stream: false,
