@@ -31,6 +31,7 @@ serve(async (req) => {
 
     // Fetch relevant reference images from database
     let referenceImageUrls: string[] = [];
+    let doctorImageUrl: string | null = null;
     try {
       // Build search terms from title/tags
       const searchTerms = [
@@ -46,8 +47,18 @@ serve(async (req) => {
         .limit(20);
 
       if (refImages && refImages.length > 0) {
-        // Score each image by relevance to article
-        const scored = refImages.map((img: any) => {
+        // Separate doctor images from others
+        const doctorImages = refImages.filter((img: any) => img.category === "doctor");
+        const nonDoctorImages = refImages.filter((img: any) => img.category !== "doctor");
+
+        // Always pick a random doctor image if any exist
+        if (doctorImages.length > 0) {
+          const randomIdx = Math.floor(Math.random() * doctorImages.length);
+          doctorImageUrl = doctorImages[randomIdx].image_url;
+        }
+
+        // Score non-doctor images by relevance to article
+        const scored = nonDoctorImages.map((img: any) => {
           let score = 0;
           const imgText = `${img.title} ${img.category} ${(img.tags || []).join(" ")}`.toLowerCase();
           for (const term of searchTerms) {
@@ -57,7 +68,6 @@ serve(async (req) => {
           if (img.category === "device" && articleContext.toLowerCase().match(/เครื่อง|laser|เลเซอร์|device|doublo|hifu|rf|ultraformer/)) score += 3;
           if (img.category === "result" && articleContext.toLowerCase().match(/ผลลัพธ์|result|before|after|รีวิว/)) score += 3;
           if (img.category === "clinic" && articleContext.toLowerCase().match(/คลินิก|clinic|clarity/)) score += 3;
-          if (img.category === "doctor" && articleContext.toLowerCase().match(/หมอ|แพทย์|doctor|dermatologist|ผู้เชี่ยวชาญ|specialist/)) score += 3;
           return { ...img, score };
         });
 
@@ -65,6 +75,7 @@ serve(async (req) => {
         scored.sort((a: any, b: any) => b.score - a.score);
         const topImages = scored.slice(0, 3);
         referenceImageUrls = topImages.map((img: any) => img.image_url);
+      }
       }
     } catch (e) {
       console.error("Failed to fetch reference images:", e);
