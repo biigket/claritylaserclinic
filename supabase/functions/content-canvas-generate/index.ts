@@ -92,7 +92,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { topic, brand, author, audience, dataPoints, length, sectionId, existingArticles } = body;
+    const { topic, brand, author, audience, dataPoints, length, sectionId, existingArticles, knowledgeContext } = body;
 
     if (!topic) {
       return new Response(JSON.stringify({ error: "Topic is required" }), {
@@ -131,8 +131,9 @@ Return JSON: {"id": "${sectionId}", "heading_th": "...", "heading_en": "...", "c
 ความยาว: ${lengthMap[length] || lengthMap.medium}
 วันที่: ${new Date().toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" })}
 ${existingArticles ? `\nบทความที่มีอยู่แล้ว (ใช้สร้าง internal links):\n${existingArticles}` : ""}
+${knowledgeContext ? `\n## คลังความรู้อ้างอิง (ใช้ข้อมูลเหล่านี้เป็นแหล่งอ้างอิงในการเขียน ดึงข้อมูล สถิติ ข้อเท็จจริงที่เกี่ยวข้องมาใช้):\n${knowledgeContext}` : ""}
 
-สำคัญ: ต้องเขียนทั้งภาษาไทยและอังกฤษ สอดแทรก Local SEO keywords ราชเทวี พญาไท สยาม`;
+สำคัญ: ต้องเขียนทั้งภาษาไทยและอังกฤษ สอดแทรก Local SEO keywords ราชเทวี พญาไท สยาม${knowledgeContext ? "\nสำคัญเพิ่มเติม: ใช้ข้อมูลจากคลังความรู้อ้างอิง ดึงตัวเลข ข้อมูลเฉพาะ ผลวิจัย มาสอดแทรกในบทความให้มากที่สุด" : ""}`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
