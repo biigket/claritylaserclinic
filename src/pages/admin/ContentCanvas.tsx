@@ -11,6 +11,7 @@ import CanvasInputForm, { type CanvasInput } from "@/components/admin/canvas/Can
 import ArticlePreview, { type ArticleData, articleToMarkdown } from "@/components/admin/canvas/ArticlePreview";
 import TopicBacklog, { type TopicItem } from "@/components/admin/canvas/TopicBacklog";
 import AutoPublishSettings from "@/components/admin/canvas/AutoPublishSettings";
+import KnowledgeVault from "@/components/admin/canvas/KnowledgeVault";
 
 const CANVAS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/content-canvas-generate`;
 const COVER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/blog-generate-cover`;
@@ -490,9 +491,10 @@ const ContentCanvas = () => {
       </div>
 
       {/* Topic Backlog */}
-      {/* Auto-Publish Settings */}
+      {/* Knowledge Vault + Auto-Publish Settings */}
       {!articleData && !isGenerating && (
-        <div className="mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <KnowledgeVault />
           <AutoPublishSettings />
         </div>
       )}
