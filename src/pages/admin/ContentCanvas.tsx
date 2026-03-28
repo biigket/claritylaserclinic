@@ -12,6 +12,7 @@ import ArticlePreview, { type ArticleData, articleToMarkdown } from "@/component
 import TopicBacklog, { type TopicItem } from "@/components/admin/canvas/TopicBacklog";
 import AutoPublishSettings from "@/components/admin/canvas/AutoPublishSettings";
 import KnowledgeVault from "@/components/admin/canvas/KnowledgeVault";
+import BulkCanvasGenerator from "@/components/admin/canvas/BulkCanvasGenerator";
 
 const CANVAS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/content-canvas-generate`;
 const COVER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/blog-generate-cover`;
