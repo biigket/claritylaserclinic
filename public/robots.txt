@@ -15,4 +15,4 @@ Allow: /
 
 Disallow: /admin
 
-Sitemap: https://claritylaserclinic.lovable.app/sitemap.xml
+Sitemap: https://claritylaserclinic.com/sitemap.xml
