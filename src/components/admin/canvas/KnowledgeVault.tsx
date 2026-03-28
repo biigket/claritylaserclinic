@@ -59,6 +59,7 @@ const formatSize = (bytes: number) => {
 
 const CATEGORY_OPTIONS = [
   { value: "device", label: "เครื่องมือแพทย์" },
+  { value: "doctor", label: "แพทย์/บุคลากร" },
   { value: "clinic", label: "คลินิก/สถานที่" },
   { value: "result", label: "ผลลัพธ์การรักษา" },
   { value: "product", label: "ผลิตภัณฑ์" },
