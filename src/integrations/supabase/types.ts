@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      auto_publish_settings: {
+        Row: {
+          batch_size: number
+          cron_expression: string
+          enabled: boolean
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          batch_size?: number
+          cron_expression?: string
+          enabled?: boolean
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          batch_size?: number
+          cron_expression?: string
+          enabled?: boolean
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       blog_articles: {
         Row: {
           content_en: string | null
