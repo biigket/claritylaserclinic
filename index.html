@@ -30,51 +30,173 @@
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "MedicalClinic",
-      "name": "Clarity Laser & Aesthetic Clinic",
-      "alternateName": "Clarity Clinic",
-      "description": "คลินิกเลเซอร์ผิวหนังเฉพาะทาง รักษาหลุมสิว ปรับคุณภาพผิว ฟิลเลอร์ โบท็อก โดยแพทย์ผู้เชี่ยวชาญ",
-      "url": "https://claritylaserclinic.com",
-      "image": "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a12455e8-8b3e-45c7-91e3-75c1ce3c162c/id-preview-89e85472--2d5d3c6f-41da-4fa1-929a-1cbcb4aa6a15.lovable.app-1772442519211.png",
-      "telephone": "+66-XX-XXX-XXXX",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Spring Tower ชั้น B",
-        "addressLocality": "กรุงเทพมหานคร",
-        "addressCountry": "TH"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": "13.7563",
-        "longitude": "100.5018"
-      },
-      "openingHours": "Mo-Sa 10:00-19:00",
-      "medicalSpecialty": "Dermatology",
-      "availableService": [
-        {
-          "@type": "MedicalProcedure",
-          "name": "Acne Scar Treatment",
-          "description": "การรักษาหลุมสิวด้วยเลเซอร์เทคโนโลยีขั้นสูง"
-        },
-        {
-          "@type": "MedicalProcedure",
-          "name": "Skin Quality Program",
-          "description": "โปรแกรมปรับคุณภาพผิวด้วยเลเซอร์และเทคโนโลยีผสมผสาน"
-        },
-        {
-          "@type": "MedicalProcedure",
-          "name": "Filler & Botox",
-          "description": "ฟิลเลอร์และโบท็อกโดยแพทย์ผู้เชี่ยวชาญ"
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Clarity Laser & Aesthetic Clinic",
+        "alternateName": "Clarity Clinic",
+        "url": "https://claritylaserclinic.com",
+        "inLanguage": ["th", "en"],
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://claritylaserclinic.com/blog?q={search_term_string}",
+          "query-input": "required name=search_term_string"
         }
-      ],
-      "sameAs": [
-        "https://www.facebook.com/share/1apkLYX3ss/?mibextid=wwXIfr",
-        "https://instagram.com/Clarity.laserclinic",
-        "https://tiktok.com/@clarity.clinic"
-      ]
-    }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Clarity Laser & Aesthetic Clinic",
+        "alternateName": "Clarity Clinic",
+        "url": "https://claritylaserclinic.com",
+        "logo": "https://claritylaserclinic.com/favicon.jpeg",
+        "image": "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a12455e8-8b3e-45c7-91e3-75c1ce3c162c/id-preview-89e85472--2d5d3c6f-41da-4fa1-929a-1cbcb4aa6a15.lovable.app-1772442519211.png",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+66-XX-XXX-XXXX",
+          "contactType": "customer service",
+          "availableLanguage": ["Thai", "English"]
+        },
+        "sameAs": [
+          "https://www.facebook.com/share/1apkLYX3ss/?mibextid=wwXIfr",
+          "https://instagram.com/Clarity.laserclinic",
+          "https://tiktok.com/@clarity.clinic"
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "MedicalClinic",
+        "name": "Clarity Laser & Aesthetic Clinic",
+        "alternateName": "Clarity Clinic",
+        "description": "คลินิกเลเซอร์ผิวหนังเฉพาะทาง รักษาหลุมสิว ปรับคุณภาพผิว ฟิลเลอร์ โบท็อก โดยแพทย์ผู้เชี่ยวชาญ",
+        "url": "https://claritylaserclinic.com",
+        "image": "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a12455e8-8b3e-45c7-91e3-75c1ce3c162c/id-preview-89e85472--2d5d3c6f-41da-4fa1-929a-1cbcb4aa6a15.lovable.app-1772442519211.png",
+        "telephone": "+66-XX-XXX-XXXX",
+        "priceRange": "฿฿฿",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Spring Tower ชั้น B",
+          "addressLocality": "กรุงเทพมหานคร",
+          "addressRegion": "กรุงเทพมหานคร",
+          "postalCode": "10400",
+          "addressCountry": "TH"
+        },
+        "geo": {
+          "@type": "GeoCoordinates",
+          "latitude": "13.7563",
+          "longitude": "100.5018"
+        },
+        "openingHoursSpecification": [
+          {
+            "@type": "OpeningHoursSpecification",
+            "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+            "opens": "10:00",
+            "closes": "19:00"
+          }
+        ],
+        "medicalSpecialty": "Dermatology",
+        "availableService": [
+          {
+            "@type": "MedicalProcedure",
+            "name": "Acne Scar Treatment",
+            "description": "การรักษาหลุมสิวด้วยเลเซอร์เทคโนโลยีขั้นสูง"
+          },
+          {
+            "@type": "MedicalProcedure",
+            "name": "Skin Quality Program",
+            "description": "โปรแกรมปรับคุณภาพผิวด้วยเลเซอร์และเทคโนโลยีผสมผสาน"
+          },
+          {
+            "@type": "MedicalProcedure",
+            "name": "Filler & Botox",
+            "description": "ฟิลเลอร์และโบท็อกโดยแพทย์ผู้เชี่ยวชาญ"
+          }
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "reviewCount": "500",
+          "bestRating": "5",
+          "worstRating": "1"
+        },
+        "review": [
+          {
+            "@type": "Review",
+            "author": { "@type": "Person", "name": "ผู้ใช้บริการ Clarity Clinic" },
+            "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+            "reviewBody": "หลุมสิวดีขึ้นมากหลังทำ 3 ครั้ง คุณหมอดูแลดีมาก อธิบายละเอียด"
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "นพ.ฐิติคมน์",
+        "jobTitle": "แพทย์ผู้เชี่ยวชาญด้านผิวหนังและเลเซอร์",
+        "worksFor": {
+          "@type": "Organization",
+          "name": "Clarity Laser & Aesthetic Clinic"
+        },
+        "medicalSpecialty": "Dermatology",
+        "memberOf": {
+          "@type": "Organization",
+          "name": "แพทยสภา",
+          "identifier": "61395"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Clarity Laser & Aesthetic Clinic | รักษาหลุมสิว ผิวใส กรุงเทพ",
+        "description": "คลินิกเลเซอร์ผิวหนังเฉพาะทาง รักษาหลุมสิว ปรับคุณภาพผิว ฟิลเลอร์ โบท็อก โดยแพทย์ผู้เชี่ยวชาญ ใกล้ BTS ราชเทวี",
+        "url": "https://claritylaserclinic.com",
+        "isPartOf": { "@type": "WebSite", "name": "Clarity Laser & Aesthetic Clinic", "url": "https://claritylaserclinic.com" },
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "หน้าแรก", "item": "https://claritylaserclinic.com/" }
+          ]
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "รักษาหลุมสิวที่ Clarity Clinic ใช้เทคโนโลยีอะไร?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Clarity Clinic ใช้เลเซอร์ Fotona SP Dynamis, Picosecond Laser และเทคโนโลยี RF Microneedling ผสมผสานเพื่อรักษาหลุมสิวทุกระดับ โดยแพทย์ผู้เชี่ยวชาญ"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "รักษาหลุมสิวต้องทำกี่ครั้ง?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "โดยทั่วไปแนะนำ 3-6 ครั้ง ห่างกัน 4-6 สัปดาห์ ขึ้นอยู่กับความรุนแรงของหลุมสิว แพทย์จะวางแผนการรักษาเฉพาะบุคคล"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Clarity Clinic อยู่ที่ไหน?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Clarity Laser & Aesthetic Clinic ตั้งอยู่ที่ Spring Tower ชั้น B ใกล้ BTS ราชเทวี กรุงเทพมหานคร เปิดให้บริการ จันทร์-เสาร์ 10:00-19:00"
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "contentUrl": "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a12455e8-8b3e-45c7-91e3-75c1ce3c162c/id-preview-89e85472--2d5d3c6f-41da-4fa1-929a-1cbcb4aa6a15.lovable.app-1772442519211.png",
+        "description": "Clarity Laser & Aesthetic Clinic คลินิกรักษาหลุมสิวกรุงเทพ",
+        "name": "Clarity Clinic OG Image"
+      }
+    ]
     </script>
 
     <!-- Meta Pixel Code -->

@@ -18,6 +18,7 @@ interface Article {
   cover_image_url: string | null;
   tags: string[];
   published_at: string | null;
+  updated_at: string | null;
   view_count: number;
   meta_title_th: string | null;
   meta_title_en: string | null;
@@ -442,17 +443,31 @@ const BlogArticle = () => {
         "description": metaDesc,
         "image": article.cover_image_url || undefined,
         "datePublished": article.published_at || undefined,
-        "dateModified": article.published_at || undefined,
-        "author": { "@type": "Organization", "name": "Clarity Laser & Aesthetic Clinic" },
+        "dateModified": article.updated_at || article.published_at || undefined,
+        "author": {
+          "@type": "Person",
+          "name": "นพ.ฐิติคมน์",
+          "jobTitle": "แพทย์ผู้เชี่ยวชาญด้านผิวหนังและเลเซอร์",
+          "worksFor": { "@type": "Organization", "name": "Clarity Laser & Aesthetic Clinic" },
+        },
         "publisher": {
           "@type": "Organization",
           "name": "Clarity Laser & Aesthetic Clinic",
           "url": "https://claritylaserclinic.com",
+          "logo": { "@type": "ImageObject", "url": "https://claritylaserclinic.com/favicon.jpeg" },
         },
         "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl },
         "keywords": (article.tags || []).join(", "),
         "inLanguage": lang === "th" ? "th-TH" : "en-US",
+        "isPartOf": { "@type": "WebSite", "name": "Clarity Laser & Aesthetic Clinic", "url": "https://claritylaserclinic.com" },
       },
+      ...(article.cover_image_url ? [{
+        "@context": "https://schema.org",
+        "@type": "ImageObject",
+        "contentUrl": article.cover_image_url,
+        "description": metaDesc || title,
+        "name": title,
+      }] : []),
       {
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
