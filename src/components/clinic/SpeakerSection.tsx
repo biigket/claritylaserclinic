@@ -3,11 +3,11 @@ import useEmblaCarousel from "embla-carousel-react";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
-import speaker1 from "@/assets/speaker-1.jpeg";
-import speaker2 from "@/assets/speaker-2.jpeg";
-import speaker3 from "@/assets/speaker-3.jpeg";
-import speaker4 from "@/assets/speaker-4.jpeg";
-import speaker5 from "@/assets/speaker-5.jpeg";
+const speaker1 = new URL("@/assets/speaker-1.jpeg", import.meta.url).href;
+const speaker2 = new URL("@/assets/speaker-2.jpeg", import.meta.url).href;
+const speaker3 = new URL("@/assets/speaker-3.jpeg", import.meta.url).href;
+const speaker4 = new URL("@/assets/speaker-4.jpeg", import.meta.url).href;
+const speaker5 = new URL("@/assets/speaker-5.jpeg", import.meta.url).href;
 
 const slides = [
   {
