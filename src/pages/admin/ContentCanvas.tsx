@@ -10,6 +10,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CanvasInputForm, { type CanvasInput } from "@/components/admin/canvas/CanvasInputForm";
 import ArticlePreview, { type ArticleData, articleToMarkdown } from "@/components/admin/canvas/ArticlePreview";
 import TopicBacklog, { type TopicItem } from "@/components/admin/canvas/TopicBacklog";
+import AutoPublishSettings from "@/components/admin/canvas/AutoPublishSettings";
 
 const CANVAS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/content-canvas-generate`;
 const COVER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/blog-generate-cover`;
@@ -430,6 +431,14 @@ const ContentCanvas = () => {
           </div>
         )}
       </div>
+
+      {/* Topic Backlog */}
+      {/* Auto-Publish Settings */}
+      {!articleData && !isGenerating && (
+        <div className="mb-4">
+          <AutoPublishSettings />
+        </div>
+      )}
 
       {/* Topic Backlog */}
       {!articleData && !isGenerating && topicBacklog.length > 0 && (
