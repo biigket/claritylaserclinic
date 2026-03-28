@@ -25,7 +25,7 @@ interface Props {
   isCollapsed?: boolean;
 }
 
-const TopicBacklog = ({ topics, onWrite, onDelete, isDeleting }: Props) => {
+const TopicBacklog = ({ topics, onWrite, onFillForm, onDelete, isDeleting }: Props) => {
   const [expanded, setExpanded] = useState(true);
   const pendingTopics = topics.filter((t) => t.status === "pending");
 
