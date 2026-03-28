@@ -55,6 +55,7 @@ const ContentCanvas = () => {
   const [publishing, setPublishing] = useState(false);
   const [publishedArticles, setPublishedArticles] = useState<Array<{ title: string; slug: string }>>([]);
   const [deletingTopic, setDeletingTopic] = useState<string | null>(null);
+  const [externalFill, setExternalFill] = useState<Partial<CanvasInput> | null>(null);
 
   // Fetch existing articles for internal linking
   const { data: existingArticles } = useQuery({
@@ -369,7 +370,18 @@ const ContentCanvas = () => {
     toast({ title: `กำลังสร้างบทความ: ${topic.title_th}` });
   };
 
-  // Delete topic from backlog
+  // Fill form from backlog topic (without generating)
+  const handleFillFormFromBacklog = (topic: TopicItem) => {
+    setExternalFill({
+      topic: topic.title_th || topic.title_en || "",
+    });
+    toast({ title: `กรอกหัวข้อ "${topic.title_th}" ในฟอร์มแล้ว — ปรับแต่งได้เลย` });
+    // Scroll to form
+    setTimeout(() => {
+      document.getElementById("canvas-input-form")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
   const handleDeleteTopic = async (id: string) => {
     setDeletingTopic(id);
     try {
@@ -446,6 +458,7 @@ const ContentCanvas = () => {
           <TopicBacklog
             topics={topicBacklog}
             onWrite={handleWriteFromBacklog}
+            onFillForm={handleFillFormFromBacklog}
             onDelete={handleDeleteTopic}
             isDeleting={deletingTopic}
           />
@@ -454,8 +467,8 @@ const ContentCanvas = () => {
 
       {/* Input Form */}
       {!articleData && !isGenerating && (
-        <div className="bg-card rounded-xl border border-border p-6 mb-6">
-          <CanvasInputForm onGenerate={handleGenerate} isGenerating={isGenerating} />
+        <div id="canvas-input-form" className="bg-card rounded-xl border border-border p-6 mb-6">
+          <CanvasInputForm onGenerate={handleGenerate} isGenerating={isGenerating} externalFill={externalFill} />
         </div>
       )}
 

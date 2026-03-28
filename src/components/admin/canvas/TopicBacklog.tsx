@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Trash2, PenLine, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, Trash2, PenLine, Clock, ChevronDown, ChevronUp, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface TopicItem {
@@ -19,12 +19,13 @@ export interface TopicItem {
 interface Props {
   topics: TopicItem[];
   onWrite: (topic: TopicItem) => void;
+  onFillForm: (topic: TopicItem) => void;
   onDelete: (id: string) => void;
   isDeleting: string | null;
   isCollapsed?: boolean;
 }
 
-const TopicBacklog = ({ topics, onWrite, onDelete, isDeleting }: Props) => {
+const TopicBacklog = ({ topics, onWrite, onFillForm, onDelete, isDeleting }: Props) => {
   const [expanded, setExpanded] = useState(true);
   const pendingTopics = topics.filter((t) => t.status === "pending");
 
@@ -82,6 +83,15 @@ const TopicBacklog = ({ topics, onWrite, onDelete, isDeleting }: Props) => {
                 )}
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 text-[11px] h-7 text-muted-foreground hover:text-foreground"
+                  onClick={() => onFillForm(topic)}
+                >
+                  <Wand2 className="w-3 h-3" />
+                  AI Fill
+                </Button>
                 <Button
                   variant="outline"
                   size="sm"
