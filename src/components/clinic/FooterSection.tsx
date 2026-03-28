@@ -60,6 +60,20 @@ const FooterSection = () => {
         </div>
 
         <div className="mt-6">
+          <div className="font-body text-[10px] font-light text-background/30 mb-4 space-y-1">
+            <p>
+              {t({
+                th: "สถานพยาบาลที่ได้รับอนุญาตจากกรมสนับสนุนบริการสุขภาพ กระทรวงสาธารณสุข",
+                en: "Licensed medical establishment by Department of Health Service Support, Ministry of Public Health, Thailand"
+              })}
+            </p>
+            <p>
+              {t({
+                th: "แพทย์ผู้ดำเนินการ: นพ.ฐิติคมน์ — ใบอนุญาตประกอบวิชาชีพเวชกรรม เลขที่ 61395 แพทยสภา",
+                en: "Lead Physician: Dr. Thitikom — Medical License #61395, Thai Medical Council"
+              })}
+            </p>
+          </div>
           <p className="font-body text-[10px] font-light text-background/40 leading-relaxed mb-4">
             {t(translations.footer.disclaimer)}
           </p>
