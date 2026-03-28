@@ -48,6 +48,7 @@ export type Database = {
           excerpt_en: string | null
           excerpt_th: string | null
           id: string
+          is_pinned: boolean
           meta_description_en: string | null
           meta_description_th: string | null
           meta_title_en: string | null
@@ -70,6 +71,7 @@ export type Database = {
           excerpt_en?: string | null
           excerpt_th?: string | null
           id?: string
+          is_pinned?: boolean
           meta_description_en?: string | null
           meta_description_th?: string | null
           meta_title_en?: string | null
@@ -92,6 +94,7 @@ export type Database = {
           excerpt_en?: string | null
           excerpt_th?: string | null
           id?: string
+          is_pinned?: boolean
           meta_description_en?: string | null
           meta_description_th?: string | null
           meta_title_en?: string | null
