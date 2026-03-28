@@ -86,6 +86,15 @@ const TopicBacklog = ({ topics, onWrite, onFillForm, onDelete, isDeleting }: Pro
                 <Button
                   variant="outline"
                   size="sm"
+                  className="gap-1.5 text-[11px] h-7 text-muted-foreground hover:text-foreground"
+                  onClick={() => onFillForm(topic)}
+                >
+                  <Wand2 className="w-3 h-3" />
+                  AI Fill
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="gap-1.5 text-[11px] h-7 border-primary/30 text-primary hover:bg-primary/5"
                   onClick={() => onWrite(topic)}
                 >
