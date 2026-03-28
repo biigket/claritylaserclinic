@@ -60,9 +60,9 @@ serve(async (req) => {
           return { ...img, score };
         });
 
-        // Take top 2 most relevant (or just first 2 if no matches)
+        // Always take top 2-3 reference images (force usage if any exist)
         scored.sort((a: any, b: any) => b.score - a.score);
-        const topImages = scored.slice(0, 2).filter((img: any) => img.score > 0 || scored.every((s: any) => s.score === 0));
+        const topImages = scored.slice(0, 3);
         referenceImageUrls = topImages.map((img: any) => img.image_url);
       }
     } catch (e) {
@@ -73,7 +73,7 @@ serve(async (req) => {
 
 ${articleContext}
 
-${referenceImageUrls.length > 0 ? "REFERENCE IMAGES: I've attached reference images from the clinic. Use them as visual inspiration for the style, equipment, and environment when creating the cover image. Match the color tones, lighting, and atmosphere of these references." : ""}
+${referenceImageUrls.length > 0 ? "CRITICAL — REFERENCE IMAGES PROVIDED: I've attached actual photos from the clinic. You MUST use these reference images as the PRIMARY visual foundation for the cover. Incorporate the exact equipment, colors, textures, lighting, and environment shown in these photos. Do NOT ignore them. The final image should look like it was photographed in the same clinic with the same equipment." : ""}
 
 INSTRUCTIONS:
 1. First, identify the CORE SUBJECT of the article (e.g. acne treatment, laser skin, anti-aging, skincare ingredients, dermatology procedure, etc.)
