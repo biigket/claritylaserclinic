@@ -118,14 +118,14 @@ const ContentCanvas = () => {
 
       const parsed = tryParseArticleJson(fullText);
       if (parsed) {
-        if (sectionId && parsed.heading && parsed.content) {
-          // Replace specific section
+        if (sectionId && (parsed as any).heading && (parsed as any).content) {
+          const sectionData = parsed as any;
           setArticleData((prev) => {
             if (!prev) return prev;
             return {
               ...prev,
               body_sections: prev.body_sections?.map((s) =>
-                s.id === sectionId ? { ...s, heading: parsed.heading || s.heading, content: parsed.content || s.content } : s
+                s.id === sectionId ? { ...s, heading: sectionData.heading || s.heading, content: sectionData.content || s.content } : s
               ),
             };
           });
