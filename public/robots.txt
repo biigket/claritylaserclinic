@@ -16,3 +16,4 @@ Allow: /
 Disallow: /admin
 
 Sitemap: https://claritylaserclinic.com/sitemap.xml
+LLMs: https://claritylaserclinic.com/llms.txt
