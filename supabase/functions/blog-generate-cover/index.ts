@@ -57,6 +57,7 @@ serve(async (req) => {
           if (img.category === "device" && articleContext.toLowerCase().match(/เครื่อง|laser|เลเซอร์|device|doublo|hifu|rf|ultraformer/)) score += 3;
           if (img.category === "result" && articleContext.toLowerCase().match(/ผลลัพธ์|result|before|after|รีวิว/)) score += 3;
           if (img.category === "clinic" && articleContext.toLowerCase().match(/คลินิก|clinic|clarity/)) score += 3;
+          if (img.category === "doctor" && articleContext.toLowerCase().match(/หมอ|แพทย์|doctor|dermatologist|ผู้เชี่ยวชาญ|specialist/)) score += 3;
           return { ...img, score };
         });
 
