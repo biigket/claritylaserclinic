@@ -45,6 +45,7 @@ const BlogList = () => {
   });
 
   useEffect(() => {
+    const fetchArticles = async () => {
       const { data } = await supabase
         .from("blog_articles")
         .select("id, slug, title_th, title_en, excerpt_th, excerpt_en, cover_image_url, tags, published_at, view_count")
