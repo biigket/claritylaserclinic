@@ -149,6 +149,51 @@ export type Database = {
         }
         Relationships: []
       }
+      knowledge_documents: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          extracted_text: string | null
+          file_name: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id: string
+          status: string
+          tags: string[] | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          extracted_text?: string | null
+          file_name: string
+          file_size?: number
+          file_type: string
+          file_url: string
+          id?: string
+          status?: string
+          tags?: string[] | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          extracted_text?: string | null
+          file_name?: string
+          file_size?: number
+          file_type?: string
+          file_url?: string
+          id?: string
+          status?: string
+          tags?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
