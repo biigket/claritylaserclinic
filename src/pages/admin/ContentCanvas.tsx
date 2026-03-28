@@ -406,6 +406,18 @@ const ContentCanvas = () => {
     }
   };
 
+  // Delete related topic from preview
+  const handleDeleteRelated = (index: number) => {
+    setArticleData((prev) => {
+      if (!prev || !prev.related_topics) return prev;
+      return {
+        ...prev,
+        related_topics: prev.related_topics.filter((_, i) => i !== index),
+      };
+    });
+    toast({ title: "ลบหัวข้อที่เกี่ยวข้องแล้ว" });
+  };
+
   // Generate related article (from preview)
   const handleGenerateRelated = (topic: { title_th: string; title_en: string; slug: string }) => {
     const newInput: CanvasInput = {
@@ -510,6 +522,7 @@ const ContentCanvas = () => {
             regeneratingSection={regeneratingSection}
             coverImageUrl={coverImageUrl || undefined}
             onGenerateRelated={handleGenerateRelated}
+            onDeleteRelated={handleDeleteRelated}
           />
         </>
       )}
