@@ -31,6 +31,7 @@ serve(async (req) => {
 
     // Fetch relevant reference images from database
     let referenceImageUrls: string[] = [];
+    let doctorImageUrl: string | null = null;
     try {
       // Build search terms from title/tags
       const searchTerms = [
@@ -46,8 +47,18 @@ serve(async (req) => {
         .limit(20);
 
       if (refImages && refImages.length > 0) {
-        // Score each image by relevance to article
-        const scored = refImages.map((img: any) => {
+        // Separate doctor images from others
+        const doctorImages = refImages.filter((img: any) => img.category === "doctor");
+        const nonDoctorImages = refImages.filter((img: any) => img.category !== "doctor");
+
+        // Always pick a random doctor image if any exist
+        if (doctorImages.length > 0) {
+          const randomIdx = Math.floor(Math.random() * doctorImages.length);
+          doctorImageUrl = doctorImages[randomIdx].image_url;
+        }
+
+        // Score non-doctor images by relevance to article
+        const scored = nonDoctorImages.map((img: any) => {
           let score = 0;
           const imgText = `${img.title} ${img.category} ${(img.tags || []).join(" ")}`.toLowerCase();
           for (const term of searchTerms) {
@@ -57,7 +68,6 @@ serve(async (req) => {
           if (img.category === "device" && articleContext.toLowerCase().match(/เครื่อง|laser|เลเซอร์|device|doublo|hifu|rf|ultraformer/)) score += 3;
           if (img.category === "result" && articleContext.toLowerCase().match(/ผลลัพธ์|result|before|after|รีวิว/)) score += 3;
           if (img.category === "clinic" && articleContext.toLowerCase().match(/คลินิก|clinic|clarity/)) score += 3;
-          if (img.category === "doctor" && articleContext.toLowerCase().match(/หมอ|แพทย์|doctor|dermatologist|ผู้เชี่ยวชาญ|specialist/)) score += 3;
           return { ...img, score };
         });
 
@@ -65,6 +75,7 @@ serve(async (req) => {
         scored.sort((a: any, b: any) => b.score - a.score);
         const topImages = scored.slice(0, 3);
         referenceImageUrls = topImages.map((img: any) => img.image_url);
+      }
       }
     } catch (e) {
       console.error("Failed to fetch reference images:", e);
@@ -88,14 +99,26 @@ RULE 2 — CAMERA DISTANCE (MOST IMPORTANT):
 RULE 3 — BACKGROUND ONLY:
 Design ONLY the background and environment around the untouched device. Use elegant clinic interiors, soft lighting, bokeh, color accents, and atmospheric effects to create a premium mood that matches the article topic.` : "";
 
+    const doctorBlock = doctorImageUrl ? `
+RULE 4 — DOCTOR/STAFF PLACEMENT (MANDATORY):
+I've also attached a photo of a doctor/staff member. You MUST include this person in the final image.
+- Place the doctor in the BOTTOM-RIGHT corner of the image.
+- The doctor's HEAD must NOT go above the horizontal center line (50% height) of the image.
+- Show them from roughly waist-up or chest-up, positioned naturally as if standing beside the device.
+- Reproduce the doctor's face, hair, clothing, and appearance EXACTLY as in the reference photo — do NOT change or stylize them.
+- The doctor should look professional, confident, and approachable.
+- The doctor is a SECONDARY element — the device remains the hero.` : "";
+
     const textPrompt = `You are a professional medical aesthetic blog cover designer.
 
 ${articleContext}
 
 ${referenceBlock}
+${doctorBlock}
 
 COMPOSITION:
 ${referenceImageUrls.length > 0 ? "- The reference device is the HERO element, shown in FULL from a DISTANT camera angle" : "- Create imagery that directly represents the article topic"}
+${doctorImageUrl ? "- Doctor/staff member positioned in the BOTTOM-RIGHT corner, head below the horizontal midline" : ""}
 - Premium clinic environment background
 - Wide shot, NOT close-up
 - 16:9 aspect ratio, ultra high resolution, photorealistic
@@ -108,16 +131,18 @@ STYLE:
 
 STRICT RULES:
 - No text, letters, logos, watermarks, or typography of any kind
-- No people or faces
 - No visible medical tools or needles
 - Keep minimal and elegant${extra_prompt ? `\n\nADDITIONAL STYLE INSTRUCTIONS FROM EDITOR:\n${extra_prompt}` : ""}`;
 
-    // Build message content - multimodal if we have reference images
+    // Build message content - multimodal if we have reference images or doctor image
+    const allImageUrls = [...referenceImageUrls];
+    if (doctorImageUrl) allImageUrls.push(doctorImageUrl);
+
     let messageContent: any;
-    if (referenceImageUrls.length > 0) {
+    if (allImageUrls.length > 0) {
       messageContent = [
         { type: "text", text: textPrompt },
-        ...referenceImageUrls.map(url => ({
+        ...allImageUrls.map(url => ({
           type: "image_url",
           image_url: { url },
         })),
