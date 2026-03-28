@@ -21,6 +21,7 @@ const ProgramCard = ({ program, index, t }: { program: any; index: number; t: an
         <img
           src={programImages[index]!}
           alt={t(program.name)}
+          loading="lazy"
           className="w-full h-full object-cover object-center"
         />
       </div>

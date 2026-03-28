@@ -26,6 +26,7 @@ const PhilosophySection = () => {
             <img
               src={clinicInterior}
               alt="Clarity Clinic interior"
+              loading="lazy"
               className="w-full h-[400px] md:h-[500px] object-cover grayscale-[20%] brightness-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-card/30 to-transparent" />

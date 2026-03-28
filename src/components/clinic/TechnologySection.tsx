@@ -28,6 +28,7 @@ const TechnologySection = () => {
           <img
             src={devicesImage}
             alt="Clarity Clinic laser devices"
+            loading="lazy"
             className="w-full h-auto object-cover brightness-105 contrast-[0.95] saturate-[0.85]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-card/40 to-transparent" />

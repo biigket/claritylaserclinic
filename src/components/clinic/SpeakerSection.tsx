@@ -117,6 +117,7 @@ const SpeakerSection = () => {
                     <img
                       src={slide.image}
                       alt={slide.title.en}
+                      loading="lazy"
                       className={`w-full h-full object-cover transition-transform duration-700 ease-out ${
                         i === 2 ? "object-[50%_25%]" : "object-center"
                       } ${isActive ? "scale-[1.03]" : "scale-100"}`}
