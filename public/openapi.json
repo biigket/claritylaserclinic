@@ -1,0 +1,51 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Clarity Laser & Aesthetic Clinic API",
+    "description": "Public information API for Clarity Laser & Aesthetic Clinic — acne scar treatment, skin care, filler & botox in Bangkok, Thailand.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://claritylaserclinic.com"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Clinic homepage",
+        "description": "Main landing page with clinic information, services, doctor profile, reviews, and technology details.",
+        "operationId": "getHomepage",
+        "responses": {
+          "200": {
+            "description": "HTML page with clinic information"
+          }
+        }
+      }
+    },
+    "/blog": {
+      "get": {
+        "summary": "Blog articles listing",
+        "description": "List of expert articles on skin care, acne scar treatment, laser procedures, filler & botox from Clarity Laser Clinic.",
+        "operationId": "getBlogList",
+        "responses": {
+          "200": {
+            "description": "HTML page with blog article listings"
+          }
+        }
+      }
+    },
+    "/scar-assessment": {
+      "get": {
+        "summary": "Acne scar assessment quiz",
+        "description": "Interactive quiz to assess acne scar severity and get personalized treatment recommendations.",
+        "operationId": "getScarAssessment",
+        "responses": {
+          "200": {
+            "description": "HTML page with interactive scar assessment quiz"
+          }
+        }
+      }
+    }
+  }
+}
