@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useSeoHead } from "@/hooks/useSeoHead";
 import Navbar from "@/components/clinic/Navbar";
 import FooterSection from "@/components/clinic/FooterSection";
 import ConsultationPopup from "@/components/clinic/ConsultationPopup";
@@ -60,11 +61,7 @@ const BlogArticle = () => {
           .update({ view_count: (data.view_count || 0) + 1 })
           .eq("slug", slug)
           .then(() => {});
-        // Set page title
-        const title = lang === "th"
-          ? (data.meta_title_th || data.title_th)
-          : (data.meta_title_en || data.title_en || data.title_th);
-        document.title = title;
+        // Title is now managed by useSeoHead
 
         // Fetch related articles (same tags, exclude current)
         const { data: related } = await supabase
@@ -235,6 +232,47 @@ const BlogArticle = () => {
 
   const title = lang === "th" ? article.title_th : (article.title_en || article.title_th);
   const content = lang === "th" ? article.content_th : (article.content_en || article.content_th);
+  const metaDesc = lang === "th" ? (article.meta_description_th || "") : (article.meta_description_en || article.meta_description_th || "");
+  const canonicalUrl = `https://claritylaserclinic.lovable.app/blog/${article.slug}`;
+
+  const jsonLdData = useMemo(() => [
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": title,
+      "description": metaDesc,
+      "image": article.cover_image_url || undefined,
+      "datePublished": article.published_at || undefined,
+      "dateModified": article.published_at || undefined,
+      "author": { "@type": "Organization", "name": "Clarity Laser & Aesthetic Clinic" },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Clarity Laser & Aesthetic Clinic",
+        "url": "https://claritylaserclinic.lovable.app",
+      },
+      "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl },
+      "keywords": (article.tags || []).join(", "),
+      "inLanguage": lang === "th" ? "th-TH" : "en-US",
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": lang === "th" ? "หน้าแรก" : "Home", "item": "https://claritylaserclinic.lovable.app/" },
+        { "@type": "ListItem", "position": 2, "name": lang === "th" ? "บทความ" : "Blog", "item": "https://claritylaserclinic.lovable.app/blog" },
+        { "@type": "ListItem", "position": 3, "name": title, "item": canonicalUrl },
+      ],
+    },
+  ], [article, lang, title, metaDesc, canonicalUrl]);
+
+  useSeoHead({
+    title: lang === "th" ? (article.meta_title_th || article.title_th) : (article.meta_title_en || article.title_en || article.title_th),
+    description: metaDesc,
+    canonical: canonicalUrl,
+    ogType: "article",
+    ogImage: article.cover_image_url || undefined,
+    jsonLd: jsonLdData,
+  });
 
   return (
     <div className="min-h-screen bg-background">
