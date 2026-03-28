@@ -458,6 +458,7 @@ const ContentCanvas = () => {
           <TopicBacklog
             topics={topicBacklog}
             onWrite={handleWriteFromBacklog}
+            onFillForm={handleFillFormFromBacklog}
             onDelete={handleDeleteTopic}
             isDeleting={deletingTopic}
           />
@@ -467,7 +468,7 @@ const ContentCanvas = () => {
       {/* Input Form */}
       {!articleData && !isGenerating && (
         <div className="bg-card rounded-xl border border-border p-6 mb-6">
-          <CanvasInputForm onGenerate={handleGenerate} isGenerating={isGenerating} />
+          <CanvasInputForm onGenerate={handleGenerate} isGenerating={isGenerating} externalFill={externalFill} />
         </div>
       )}
 
