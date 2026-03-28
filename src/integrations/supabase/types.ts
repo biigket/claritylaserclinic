@@ -329,6 +329,42 @@ export type Database = {
         }
         Relationships: []
       }
+      reference_images: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          file_name: string
+          file_size: number
+          id: string
+          image_url: string
+          tags: string[] | null
+          title: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          file_name: string
+          file_size?: number
+          id?: string
+          image_url: string
+          tags?: string[] | null
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          file_name?: string
+          file_size?: number
+          id?: string
+          image_url?: string
+          tags?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string

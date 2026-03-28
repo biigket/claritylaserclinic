@@ -17,6 +17,10 @@ serve(async (req) => {
 
     if (!title && !excerpt) throw new Error("ต้องมีชื่อบทความหรือบทคัดย่อเพื่อสร้างรูป");
 
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
     // Build rich article context for the AI
     const contextParts: string[] = [];
     if (title) contextParts.push(`Article Title: "${title}"`);
@@ -25,9 +29,51 @@ serve(async (req) => {
     if (content_summary) contextParts.push(`Content Preview: "${content_summary}"`);
     const articleContext = contextParts.join("\n");
 
-    const prompt = `You are a professional medical aesthetic blog cover designer. Analyze the following article details carefully and create a cover image that DIRECTLY represents the article's specific topic and content.
+    // Fetch relevant reference images from database
+    let referenceImageUrls: string[] = [];
+    try {
+      // Build search terms from title/tags
+      const searchTerms = [
+        ...(title ? title.toLowerCase().split(/\s+/) : []),
+        ...(tags ? tags.toLowerCase().split(",").map((t: string) => t.trim()) : []),
+      ].filter((t: string) => t.length > 2);
+
+      // Fetch all reference images
+      const { data: refImages } = await supabase
+        .from("reference_images")
+        .select("image_url, title, category, tags")
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (refImages && refImages.length > 0) {
+        // Score each image by relevance to article
+        const scored = refImages.map((img: any) => {
+          let score = 0;
+          const imgText = `${img.title} ${img.category} ${(img.tags || []).join(" ")}`.toLowerCase();
+          for (const term of searchTerms) {
+            if (imgText.includes(term)) score += 2;
+          }
+          // Category boost
+          if (img.category === "device" && articleContext.toLowerCase().match(/เครื่อง|laser|เลเซอร์|device|doublo|hifu|rf|ultraformer/)) score += 3;
+          if (img.category === "result" && articleContext.toLowerCase().match(/ผลลัพธ์|result|before|after|รีวิว/)) score += 3;
+          if (img.category === "clinic" && articleContext.toLowerCase().match(/คลินิก|clinic|clarity/)) score += 3;
+          return { ...img, score };
+        });
+
+        // Take top 2 most relevant (or just first 2 if no matches)
+        scored.sort((a: any, b: any) => b.score - a.score);
+        const topImages = scored.slice(0, 2).filter((img: any) => img.score > 0 || scored.every((s: any) => s.score === 0));
+        referenceImageUrls = topImages.map((img: any) => img.image_url);
+      }
+    } catch (e) {
+      console.error("Failed to fetch reference images:", e);
+    }
+
+    const textPrompt = `You are a professional medical aesthetic blog cover designer. Analyze the following article details carefully and create a cover image that DIRECTLY represents the article's specific topic and content.
 
 ${articleContext}
+
+${referenceImageUrls.length > 0 ? "REFERENCE IMAGES: I've attached reference images from the clinic. Use them as visual inspiration for the style, equipment, and environment when creating the cover image. Match the color tones, lighting, and atmosphere of these references." : ""}
 
 INSTRUCTIONS:
 1. First, identify the CORE SUBJECT of the article (e.g. acne treatment, laser skin, anti-aging, skincare ingredients, dermatology procedure, etc.)
@@ -54,6 +100,20 @@ STRICT RULES:
 - Keep minimal and elegant
 - The image MUST relate to the article topic, not be generic${extra_prompt ? `\n\nADDITIONAL STYLE INSTRUCTIONS FROM EDITOR:\n${extra_prompt}` : ""}`;
 
+    // Build message content - multimodal if we have reference images
+    let messageContent: any;
+    if (referenceImageUrls.length > 0) {
+      messageContent = [
+        { type: "text", text: textPrompt },
+        ...referenceImageUrls.map(url => ({
+          type: "image_url",
+          image_url: { url },
+        })),
+      ];
+    } else {
+      messageContent = textPrompt;
+    }
+
     // Retry up to 2 times if model returns text-only without an image
     let imageBase64: string | undefined;
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -65,7 +125,7 @@ STRICT RULES:
         },
         body: JSON.stringify({
           model: "google/gemini-2.5-flash-image",
-          messages: [{ role: "user", content: prompt }],
+          messages: [{ role: "user", content: messageContent }],
           modalities: ["image", "text"],
         }),
       });
@@ -92,9 +152,7 @@ STRICT RULES:
       const choice = data.choices?.[0];
 
       // Try multiple known response formats
-      // Format 1: images array (most common)
       imageBase64 = choice?.message?.images?.[0]?.image_url?.url;
-      // Format 2: inline_data in content parts
       if (!imageBase64 && Array.isArray(choice?.message?.content)) {
         const imgPart = choice.message.content.find((p: any) => p.type === "image_url" || p.type === "image" || p.inline_data);
         if (imgPart?.image_url?.url) imageBase64 = imgPart.image_url.url;
@@ -108,10 +166,6 @@ STRICT RULES:
     if (!imageBase64) throw new Error("ไม่สามารถสร้างรูปภาพได้ กรุณาลองใหม่");
 
     // Upload to Supabase Storage
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
     const binaryStr = atob(base64Data);
     const bytes = new Uint8Array(binaryStr.length);
