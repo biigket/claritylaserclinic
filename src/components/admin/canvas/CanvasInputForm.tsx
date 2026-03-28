@@ -45,7 +45,7 @@ const CanvasInputForm = ({ onGenerate, isGenerating }: Props) => {
     return {
       topic: "",
       brand: "Clarity Laser Clinic",
-      author: "",
+      author: "นพ.ฐิติคมน์ 61395, แพทย์ผู้เชี่ยวชาญด้านผิวหนังและเลเซอร์",
       audience: "",
       dataPoints: "",
       language: "Both",
@@ -122,7 +122,7 @@ const CanvasInputForm = ({ onGenerate, isGenerating }: Props) => {
           <Input value={form.brand} onChange={(e) => set("brand", e.target.value)} className="text-sm" />
         </Field>
         <Field label="ชื่อผู้เชี่ยวชาญ + ตำแหน่ง">
-          <Input value={form.author} onChange={(e) => set("author", e.target.value)} placeholder="เช่น นพ.ทิน, ผิวหนังเฉพาะทาง" className="text-sm" />
+          <Input value={form.author} readOnly className="text-sm bg-muted/50 cursor-default" />
         </Field>
       </div>
 
