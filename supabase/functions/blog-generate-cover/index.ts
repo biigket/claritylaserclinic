@@ -118,7 +118,7 @@ ${referenceBlock}
 ${doctorBlock}
 
 COMPOSITION:
-${referenceImageUrls.length > 0 ? "- The reference device is the HERO element, shown in FULL from a DISTANT camera angle" : "- Create imagery that directly represents the article topic"}
+${referenceImageUrls.length > 0 ? "- The reference device is the HERO element, shown in FULL from a DISTANT camera angle" : "- Create abstract, elegant imagery that represents the article topic — do NOT invent or fabricate any medical devices, machines, or equipment"}
 ${doctorImageUrl ? "- Doctor/staff member positioned on the RIGHT side, head at ~20% from top (tall, prominent)" : ""}
 - Premium clinic environment background
 - Wide shot, NOT close-up
@@ -131,6 +131,8 @@ STYLE:
 - Premium, trustworthy, clean clinical atmosphere
 
 STRICT RULES:
+- ABSOLUTELY NO PEOPLE in the image EXCEPT the doctor/staff from the reference photo (if provided). No patients, no models, no silhouettes, no human figures whatsoever.
+- NEVER create, invent, or fabricate medical devices or machines. Only use devices from reference photos. If no device reference is provided, use abstract visuals instead.
 - No text, letters, logos, watermarks, or typography of any kind
 - No visible medical tools or needles
 - Keep minimal and elegant${extra_prompt ? `\n\nADDITIONAL STYLE INSTRUCTIONS FROM EDITOR:\n${extra_prompt}` : ""}`;
