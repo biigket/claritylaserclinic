@@ -83,6 +83,48 @@ export type Database = {
         }
         Relationships: []
       }
+      content_topic_backlog: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description_en: string | null
+          description_th: string | null
+          id: string
+          source_article_id: string | null
+          source_article_title: string | null
+          status: string
+          suggested_slug: string | null
+          title_en: string | null
+          title_th: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description_en?: string | null
+          description_th?: string | null
+          id?: string
+          source_article_id?: string | null
+          source_article_title?: string | null
+          status?: string
+          suggested_slug?: string | null
+          title_en?: string | null
+          title_th: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description_en?: string | null
+          description_th?: string | null
+          id?: string
+          source_article_id?: string | null
+          source_article_title?: string | null
+          status?: string
+          suggested_slug?: string | null
+          title_en?: string | null
+          title_th?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
