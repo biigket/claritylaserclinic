@@ -92,6 +92,18 @@ const ContentCanvas = () => {
       .join("\n");
   }, [existingArticles, publishedArticles]);
 
+  const getKnowledgeContext = useCallback(async () => {
+    const { data } = await (supabase.from("knowledge_documents") as any)
+      .select("title, extracted_text, tags")
+      .eq("status", "ready")
+      .order("created_at", { ascending: false })
+      .limit(10);
+    if (!data?.length) return undefined;
+    return data
+      .map((d: any) => `### ${d.title}\n${(d.extracted_text || "").slice(0, 3000)}`)
+      .join("\n\n---\n\n");
+  }, []);
+
   const streamGenerate = useCallback(async (input: CanvasInput, sectionId?: string) => {
     if (sectionId) {
       setRegeneratingSection(sectionId);
@@ -104,6 +116,7 @@ const ContentCanvas = () => {
     let fullText = "";
 
     try {
+      const knowledgeContext = await getKnowledgeContext();
       const resp = await fetch(CANVAS_URL, {
         method: "POST",
         headers: {
@@ -114,6 +127,7 @@ const ContentCanvas = () => {
           ...input,
           sectionId,
           existingArticles: getExistingArticlesContext(),
+          knowledgeContext,
         }),
       });
 
