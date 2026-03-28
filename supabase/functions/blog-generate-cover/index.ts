@@ -69,36 +69,47 @@ serve(async (req) => {
       console.error("Failed to fetch reference images:", e);
     }
 
-    const textPrompt = `You are a professional medical aesthetic blog cover designer. Analyze the following article details carefully and create a cover image that DIRECTLY represents the article's specific topic and content.
+    const referenceBlock = referenceImageUrls.length > 0 ? `
+CRITICAL — REFERENCE IMAGES PROVIDED:
+I've attached actual photos of the clinic's real medical devices.
+
+RULE 1 — DO NOT MODIFY THE DEVICE:
+Reproduce each device/machine EXACTLY as it appears in the reference photos. Same shape, color, proportions, buttons, screens, handles, cables — EVERYTHING identical. Do NOT stylize, redesign, recolor, or reimagine the equipment in any way. Treat the device as a sacred object that cannot be changed.
+
+RULE 2 — CAMERA DISTANCE (MOST IMPORTANT):
+- Place the camera FAR AWAY so the ENTIRE device fits comfortably in the frame with generous space around it.
+- The device should occupy only about 40-50% of the image height, centered vertically.
+- There MUST be visible empty space above the device and on both sides.
+- Think "product catalog photo taken from 3 meters away" — NOT a close-up.
+- ABSOLUTELY FORBIDDEN: zooming in, close-up shots, cropping any part of the device.
+- If the 16:9 layout makes it tight, you may hide up to 20% of the bottom (base/wheels only), but NEVER crop top or sides.
+
+RULE 3 — BACKGROUND ONLY:
+Design ONLY the background and environment around the untouched device. Use elegant clinic interiors, soft lighting, bokeh, color accents, and atmospheric effects to create a premium mood that matches the article topic.` : "";
+
+    const textPrompt = `You are a professional medical aesthetic blog cover designer.
 
 ${articleContext}
 
-${referenceImageUrls.length > 0 ? "CRITICAL — REFERENCE IMAGES PROVIDED: I've attached actual photos from the clinic's real equipment and environment.\n\nRULE 1 — PRESERVE EXACTLY: You MUST reproduce each device/machine EXACTLY as it appears in the reference photos — same shape, same color, same proportions, same details. Do NOT alter, redesign, stylize, or reimagine the equipment. It must look IDENTICAL to the photo. Think of it as copy-pasting the device into a new scene.\n\nRULE 2 — FRAMING: Show the FULL body of each machine/device — do NOT zoom in or crop tightly. The entire device must be visible from top to bottom. If the 16:9 layout makes it awkward, you may crop up to 20% from the bottom (e.g. hide the base/wheels), but NEVER crop the top or sides. Do NOT zoom into details, panels, or screens.\n\nRULE 3 — SCENE COMPOSITION: Place the device(s) in an elegant, premium clinic environment. Design the BACKGROUND and SURROUNDINGS to complement the article topic — use lighting, color accents, subtle atmospheric effects (soft glow, bokeh, gradients) to create mood. The device itself stays untouched; only the environment around it is designed creatively." : ""}
+${referenceBlock}
 
-INSTRUCTIONS:
-1. First, identify the CORE SUBJECT of the article (e.g. acne treatment, laser skin, anti-aging, skincare ingredients, dermatology procedure, etc.)
-2. Then design a cover that visually represents THAT specific subject — not a generic medical image.
-
-VISUAL APPROACH — choose the most fitting for the article topic:
-- If about a specific skin condition → show abstract representation of skin texture, cellular patterns, or before/after concept
-- If about a treatment/procedure → show the concept through elegant medical-inspired abstract art (laser beams, light therapy glow, molecular structures)
-- If about skincare/ingredients → show beautiful product-inspired compositions, ingredient textures, botanical elements
-- If about beauty/anti-aging → show elegant, aspirational imagery with flowing forms, golden light, youthful energy
-- If about science/research → show data visualization aesthetics, molecular structures, DNA-inspired patterns
+COMPOSITION:
+${referenceImageUrls.length > 0 ? "- The reference device is the HERO element, shown in FULL from a DISTANT camera angle" : "- Create imagery that directly represents the article topic"}
+- Premium clinic environment background
+- Wide shot, NOT close-up
+- 16:9 aspect ratio, ultra high resolution, photorealistic
 
 STYLE:
 - Modern, minimal, luxury aesthetic medicine
 - Dark brown and taupe background palette with warm accents
 - Soft diffused cinematic lighting
 - Premium, trustworthy, clean clinical atmosphere
-- Ultra high resolution, photorealistic, 16:9 aspect ratio
 
 STRICT RULES:
 - No text, letters, logos, watermarks, or typography of any kind
 - No people or faces
 - No visible medical tools or needles
-- Keep minimal and elegant
-- The image MUST relate to the article topic, not be generic${extra_prompt ? `\n\nADDITIONAL STYLE INSTRUCTIONS FROM EDITOR:\n${extra_prompt}` : ""}`;
+- Keep minimal and elegant${extra_prompt ? `\n\nADDITIONAL STYLE INSTRUCTIONS FROM EDITOR:\n${extra_prompt}` : ""}`;
 
     // Build message content - multimodal if we have reference images
     let messageContent: any;
