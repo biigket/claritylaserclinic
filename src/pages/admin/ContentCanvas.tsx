@@ -11,6 +11,7 @@ import CanvasInputForm, { type CanvasInput } from "@/components/admin/canvas/Can
 import ArticlePreview, { type ArticleData, articleToMarkdown } from "@/components/admin/canvas/ArticlePreview";
 import TopicBacklog, { type TopicItem } from "@/components/admin/canvas/TopicBacklog";
 import AutoPublishSettings from "@/components/admin/canvas/AutoPublishSettings";
+import KnowledgeVault from "@/components/admin/canvas/KnowledgeVault";
 
 const CANVAS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/content-canvas-generate`;
 const COVER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/blog-generate-cover`;
@@ -91,6 +92,18 @@ const ContentCanvas = () => {
       .join("\n");
   }, [existingArticles, publishedArticles]);
 
+  const getKnowledgeContext = useCallback(async () => {
+    const { data } = await (supabase.from("knowledge_documents") as any)
+      .select("title, extracted_text, tags")
+      .eq("status", "ready")
+      .order("created_at", { ascending: false })
+      .limit(10);
+    if (!data?.length) return undefined;
+    return data
+      .map((d: any) => `### ${d.title}\n${(d.extracted_text || "").slice(0, 3000)}`)
+      .join("\n\n---\n\n");
+  }, []);
+
   const streamGenerate = useCallback(async (input: CanvasInput, sectionId?: string) => {
     if (sectionId) {
       setRegeneratingSection(sectionId);
@@ -103,6 +116,7 @@ const ContentCanvas = () => {
     let fullText = "";
 
     try {
+      const knowledgeContext = await getKnowledgeContext();
       const resp = await fetch(CANVAS_URL, {
         method: "POST",
         headers: {
@@ -113,6 +127,7 @@ const ContentCanvas = () => {
           ...input,
           sectionId,
           existingArticles: getExistingArticlesContext(),
+          knowledgeContext,
         }),
       });
 
@@ -490,9 +505,10 @@ const ContentCanvas = () => {
       </div>
 
       {/* Topic Backlog */}
-      {/* Auto-Publish Settings */}
+      {/* Knowledge Vault + Auto-Publish Settings */}
       {!articleData && !isGenerating && (
-        <div className="mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <KnowledgeVault />
           <AutoPublishSettings />
         </div>
       )}
