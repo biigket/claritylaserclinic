@@ -18,6 +18,7 @@ interface Article {
   cover_image_url: string | null;
   tags: string[];
   published_at: string | null;
+  updated_at: string | null;
   view_count: number;
   meta_title_th: string | null;
   meta_title_en: string | null;
