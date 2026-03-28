@@ -73,7 +73,7 @@ serve(async (req) => {
 
 ${articleContext}
 
-${referenceImageUrls.length > 0 ? "CRITICAL — REFERENCE IMAGES PROVIDED: I've attached actual photos from the clinic. You MUST use these reference images as the PRIMARY visual foundation for the cover. Incorporate the exact equipment, colors, textures, lighting, and environment shown in these photos. Do NOT ignore them. The final image should look like it was photographed in the same clinic with the same equipment." : ""}
+${referenceImageUrls.length > 0 ? "CRITICAL — REFERENCE IMAGES PROVIDED: I've attached actual photos from the clinic. You MUST use these reference images as the PRIMARY visual foundation for the cover. Incorporate the exact equipment, colors, textures, lighting, and environment shown in these photos. Do NOT ignore them. The final image should look like it was photographed in the same clinic with the same equipment.\n\nFRAMING RULE — MANDATORY: Show the FULL body of each machine/device — do NOT zoom in or crop tightly. The entire device must be visible from top to bottom. If the 16:9 layout makes it awkward, you may crop up to 20% from the bottom (e.g. hide the base/wheels), but NEVER crop the top or sides. Do NOT zoom into details, panels, or screens. Always show the whole machine in context." : ""}
 
 INSTRUCTIONS:
 1. First, identify the CORE SUBJECT of the article (e.g. acne treatment, laser skin, anti-aging, skincare ingredients, dermatology procedure, etc.)
