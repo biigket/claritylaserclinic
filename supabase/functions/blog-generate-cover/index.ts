@@ -73,7 +73,7 @@ serve(async (req) => {
 
 ${articleContext}
 
-${referenceImageUrls.length > 0 ? "REFERENCE IMAGES: I've attached reference images from the clinic. Use them as visual inspiration for the style, equipment, and environment when creating the cover image. Match the color tones, lighting, and atmosphere of these references." : ""}
+${referenceImageUrls.length > 0 ? "CRITICAL — REFERENCE IMAGES PROVIDED: I've attached actual photos from the clinic. You MUST use these reference images as the PRIMARY visual foundation for the cover. Incorporate the exact equipment, colors, textures, lighting, and environment shown in these photos. Do NOT ignore them. The final image should look like it was photographed in the same clinic with the same equipment." : ""}
 
 INSTRUCTIONS:
 1. First, identify the CORE SUBJECT of the article (e.g. acne treatment, laser skin, anti-aging, skincare ingredients, dermatology procedure, etc.)
