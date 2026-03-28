@@ -60,9 +60,9 @@ serve(async (req) => {
           return { ...img, score };
         });
 
-        // Take top 2 most relevant (or just first 2 if no matches)
+        // Always take top 2-3 reference images (force usage if any exist)
         scored.sort((a: any, b: any) => b.score - a.score);
-        const topImages = scored.slice(0, 2).filter((img: any) => img.score > 0 || scored.every((s: any) => s.score === 0));
+        const topImages = scored.slice(0, 3);
         referenceImageUrls = topImages.map((img: any) => img.image_url);
       }
     } catch (e) {
