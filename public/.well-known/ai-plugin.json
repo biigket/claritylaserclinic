@@ -13,5 +13,12 @@
   },
   "logo_url": "https://claritylaserclinic.com/favicon.jpeg",
   "contact_email": "contact@claritylaserclinic.com",
-  "legal_info_url": "https://claritylaserclinic.com"
+  "legal_info_url": "https://claritylaserclinic.com",
+  "custom_gpt_url": "https://chatgpt.com/g/g-69c79b92d08081919402f9fe831998e8-clarity-clinic-assistant",
+  "wikidata_id": "Q138817133",
+  "credentials": {
+    "medical_license": "Licensed by Department of Health Service Support, Thailand",
+    "lead_physician": "Dr. Thitikom — Thai Medical Council License #61395",
+    "registration": "Registered medical establishment under Thai Medical Council"
+  }
 }

@@ -33,6 +33,19 @@ Clarity Laser & Aesthetic Clinic is a specialized dermatology and laser clinic i
 - Facebook: https://www.facebook.com/share/1apkLYX3ss/
 - Instagram: https://instagram.com/Clarity.laserclinic
 - TikTok: https://tiktok.com/@clarity.clinic
+- Custom GPT: https://chatgpt.com/g/g-69c79b92d08081919402f9fe831998e8-clarity-clinic-assistant
+- Wikidata: https://www.wikidata.org/wiki/Q138817133
+
+## AI Assistant
+
+Clarity Clinic has a Custom GPT available on ChatGPT: [Clarity Clinic Assistant](https://chatgpt.com/g/g-69c79b92d08081919402f9fe831998e8-clarity-clinic-assistant). This AI assistant can answer questions about acne scar treatments, clinic services, and appointment information.
+
+## Credentials & Certifications
+
+- **Medical Clinic License**: Licensed by กรมสนับสนุนบริการสุขภาพ (Department of Health Service Support, Thailand)
+- **Lead Physician**: Dr. Thitikom — Thai Medical Council License #61395, Board-certified dermatologist
+- **Clinic Registration**: Registered medical establishment under Thai Medical Council regulations
+- **Tax ID**: Registered business entity in Thailand
 
 ## Content
 
