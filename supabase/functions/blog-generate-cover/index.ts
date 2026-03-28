@@ -99,14 +99,26 @@ RULE 2 — CAMERA DISTANCE (MOST IMPORTANT):
 RULE 3 — BACKGROUND ONLY:
 Design ONLY the background and environment around the untouched device. Use elegant clinic interiors, soft lighting, bokeh, color accents, and atmospheric effects to create a premium mood that matches the article topic.` : "";
 
+    const doctorBlock = doctorImageUrl ? `
+RULE 4 — DOCTOR/STAFF PLACEMENT (MANDATORY):
+I've also attached a photo of a doctor/staff member. You MUST include this person in the final image.
+- Place the doctor in the BOTTOM-RIGHT corner of the image.
+- The doctor's HEAD must NOT go above the horizontal center line (50% height) of the image.
+- Show them from roughly waist-up or chest-up, positioned naturally as if standing beside the device.
+- Reproduce the doctor's face, hair, clothing, and appearance EXACTLY as in the reference photo — do NOT change or stylize them.
+- The doctor should look professional, confident, and approachable.
+- The doctor is a SECONDARY element — the device remains the hero.` : "";
+
     const textPrompt = `You are a professional medical aesthetic blog cover designer.
 
 ${articleContext}
 
 ${referenceBlock}
+${doctorBlock}
 
 COMPOSITION:
 ${referenceImageUrls.length > 0 ? "- The reference device is the HERO element, shown in FULL from a DISTANT camera angle" : "- Create imagery that directly represents the article topic"}
+${doctorImageUrl ? "- Doctor/staff member positioned in the BOTTOM-RIGHT corner, head below the horizontal midline" : ""}
 - Premium clinic environment background
 - Wide shot, NOT close-up
 - 16:9 aspect ratio, ultra high resolution, photorealistic
@@ -119,16 +131,18 @@ STYLE:
 
 STRICT RULES:
 - No text, letters, logos, watermarks, or typography of any kind
-- No people or faces
 - No visible medical tools or needles
 - Keep minimal and elegant${extra_prompt ? `\n\nADDITIONAL STYLE INSTRUCTIONS FROM EDITOR:\n${extra_prompt}` : ""}`;
 
-    // Build message content - multimodal if we have reference images
+    // Build message content - multimodal if we have reference images or doctor image
+    const allImageUrls = [...referenceImageUrls];
+    if (doctorImageUrl) allImageUrls.push(doctorImageUrl);
+
     let messageContent: any;
-    if (referenceImageUrls.length > 0) {
+    if (allImageUrls.length > 0) {
       messageContent = [
         { type: "text", text: textPrompt },
-        ...referenceImageUrls.map(url => ({
+        ...allImageUrls.map(url => ({
           type: "image_url",
           image_url: { url },
         })),
