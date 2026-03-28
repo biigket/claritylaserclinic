@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/i18n/LanguageContext";
+import { useSeoHead } from "@/hooks/useSeoHead";
 import Navbar from "@/components/clinic/Navbar";
 import FooterSection from "@/components/clinic/FooterSection";
 import ConsultationPopup from "@/components/clinic/ConsultationPopup";
@@ -26,11 +27,24 @@ const BlogList = () => {
   const [loading, setLoading] = useState(true);
   const [popupOpen, setPopupOpen] = useState(false);
 
-  useEffect(() => {
-    document.title = lang === "th"
+  useSeoHead({
+    title: lang === "th"
       ? "บทความดูแลผิว & รักษาหลุมสิว | Clarity Laser Clinic"
-      : "Skin Care & Acne Scar Articles | Clarity Laser Clinic";
+      : "Skin Care & Acne Scar Articles | Clarity Laser Clinic",
+    description: lang === "th"
+      ? "รวมบทความความรู้ดูแลผิว รักษาหลุมสิว เลเซอร์ ฟิลเลอร์ โบท็อก จากแพทย์ผู้เชี่ยวชาญ Clarity Laser Clinic ราชเทวี กรุงเทพ"
+      : "Expert articles on skin care, acne scar treatment, laser, filler & botox from Clarity Laser Clinic Bangkok",
+    canonical: "https://claritylaserclinic.lovable.app/blog",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": lang === "th" ? "บทความดูแลผิว" : "Skin Care Articles",
+      "url": "https://claritylaserclinic.lovable.app/blog",
+      "isPartOf": { "@type": "WebSite", "name": "Clarity Laser & Aesthetic Clinic", "url": "https://claritylaserclinic.lovable.app" },
+    },
+  });
 
+  useEffect(() => {
     const fetchArticles = async () => {
       const { data } = await supabase
         .from("blog_articles")

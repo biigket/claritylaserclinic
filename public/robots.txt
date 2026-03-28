@@ -13,4 +13,6 @@ Allow: /
 User-agent: *
 Allow: /
 
+Disallow: /admin
+
 Sitemap: https://claritylaserclinic.lovable.app/sitemap.xml
