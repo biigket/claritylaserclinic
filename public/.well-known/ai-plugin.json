@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Clarity Laser & Aesthetic Clinic",
+  "name_for_model": "clarity_laser_clinic",
+  "description_for_human": "คลินิกเลเซอร์ผิวหนังเฉพาะทาง รักษาหลุมสิว ปรับคุณภาพผิว ฟิลเลอร์ โบท็อก โดยแพทย์ผู้เชี่ยวชาญ กรุงเทพ",
+  "description_for_model": "Clarity Laser & Aesthetic Clinic is a specialized dermatology clinic in Bangkok, Thailand. Services include acne scar treatment using Fotona SP Dynamis laser, Picosecond Laser, RF Microneedling, skin quality programs, filler and botox. Led by Dr. Thitikom (License #61395). Located at Spring Tower Floor B, near BTS Ratchathewi. Open Mon-Sat 10:00-19:00.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://claritylaserclinic.com/openapi.json"
+  },
+  "logo_url": "https://claritylaserclinic.com/favicon.jpeg",
+  "contact_email": "contact@claritylaserclinic.com",
+  "legal_info_url": "https://claritylaserclinic.com"
+}
