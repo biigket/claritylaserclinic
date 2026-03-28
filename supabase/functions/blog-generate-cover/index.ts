@@ -101,9 +101,9 @@ Design ONLY the background and environment around the untouched device. Use eleg
     const doctorBlock = doctorImageUrl ? `
 RULE 4 — DOCTOR/STAFF PLACEMENT (MANDATORY):
 I've also attached a photo of a doctor/staff member. You MUST include this person in the final image.
-- Place the doctor in the BOTTOM-RIGHT corner of the image.
-- The doctor's HEAD must NOT go above the horizontal center line (50% height) of the image.
-- Show them from roughly waist-up or chest-up, positioned naturally as if standing beside the device.
+- Place the doctor on the RIGHT side of the image.
+- The doctor's HEAD should be positioned at approximately 20% from the top of the image (80% above the horizontal center line).
+- Show them from roughly waist-up or chest-up, standing tall and prominently on the right side.
 - Reproduce the doctor's face, hair, clothing, and appearance EXACTLY as in the reference photo — do NOT change or stylize them.
 - The doctor should look professional, confident, and approachable.
 - The doctor is a SECONDARY element — the device remains the hero.` : "";
@@ -117,7 +117,7 @@ ${doctorBlock}
 
 COMPOSITION:
 ${referenceImageUrls.length > 0 ? "- The reference device is the HERO element, shown in FULL from a DISTANT camera angle" : "- Create imagery that directly represents the article topic"}
-${doctorImageUrl ? "- Doctor/staff member positioned in the BOTTOM-RIGHT corner, head below the horizontal midline" : ""}
+${doctorImageUrl ? "- Doctor/staff member positioned on the RIGHT side, head at ~20% from top (tall, prominent)" : ""}
 - Premium clinic environment background
 - Wide shot, NOT close-up
 - 16:9 aspect ratio, ultra high resolution, photorealistic
