@@ -6,9 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Sparkles } from "lucide-react";
+import { CalendarIcon, Sparkles, Wand2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 export interface CanvasInput {
   topic: string;
@@ -47,6 +48,8 @@ const CONTENT_TYPES = [
   { value: "knowledge", label: "Knowledge Article" },
 ];
 
+const AUTOFILL_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/canvas-autofill`;
+
 const Field = ({ label, sublabel, children }: { label: string; sublabel?: string; children: React.ReactNode }) => (
   <div>
     <Label className="text-xs text-muted-foreground uppercase tracking-wide">
@@ -57,6 +60,9 @@ const Field = ({ label, sublabel, children }: { label: string; sublabel?: string
 );
 
 const CanvasInputForm = ({ onGenerate, isGenerating }: Props) => {
+  const { toast } = useToast();
+  const [quickPrompt, setQuickPrompt] = useState("");
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
   const [form, setForm] = useState<CanvasInput>({
     topic: "",
     brand: "Clarity Laser Clinic",
@@ -79,8 +85,80 @@ const CanvasInputForm = ({ onGenerate, isGenerating }: Props) => {
     }
   };
 
+  const handleAutoFill = async () => {
+    if (!quickPrompt.trim()) {
+      toast({ title: "กรุณาพิมพ์ prompt ก่อน", variant: "destructive" });
+      return;
+    }
+    setIsAutoFilling(true);
+    try {
+      const resp = await fetch(AUTOFILL_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ prompt: quickPrompt }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || `Error ${resp.status}`);
+
+      setForm((prev) => ({
+        ...prev,
+        ...(data.topic && { topic: data.topic }),
+        ...(data.brand && { brand: data.brand }),
+        ...(data.author && { author: data.author }),
+        ...(data.industry && INDUSTRIES.includes(data.industry) && { industry: data.industry }),
+        ...(data.audience && { audience: data.audience }),
+        ...(data.language && ["Thai", "English", "Both"].includes(data.language) && { language: data.language }),
+        ...(data.contentType && ["blog", "press", "landing", "knowledge"].includes(data.contentType) && { contentType: data.contentType }),
+        ...(data.dataPoints && { dataPoints: data.dataPoints }),
+      }));
+      toast({ title: "AI กรอกฟอร์มให้แล้ว ✨", description: "ตรวจสอบและแก้ไขได้ก่อนกด Generate" });
+    } catch (e: any) {
+      toast({ title: "Auto-fill ล้มเหลว", description: e.message, variant: "destructive" });
+    } finally {
+      setIsAutoFilling(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
+      {/* AI Quick Fill */}
+      <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2">
+        <Label className="text-xs font-semibold text-primary flex items-center gap-1.5">
+          <Wand2 className="w-3.5 h-3.5" />
+          AI Auto-Fill — พิมพ์ prompt เดียว กรอกทุกช่องให้
+        </Label>
+        <div className="flex gap-2">
+          <Input
+            value={quickPrompt}
+            onChange={(e) => setQuickPrompt(e.target.value)}
+            placeholder="เช่น เขียนเรื่องหลุมสิว, Doublo treatment guide, ..."
+            className="text-sm flex-1"
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleAutoFill();
+              }
+            }}
+          />
+          <Button
+            variant="default"
+            size="sm"
+            className="gap-1.5 shrink-0"
+            onClick={handleAutoFill}
+            disabled={isAutoFilling || !quickPrompt.trim()}
+          >
+            {isAutoFilling ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Wand2 className="w-3.5 h-3.5" />}
+            {isAutoFilling ? "กำลัง Fill..." : "AI Fill"}
+          </Button>
+        </div>
+        <p className="text-[10px] text-muted-foreground">
+          พิมพ์หัวข้อหรือคำอธิบายสั้นๆ แล้ว AI จะกรอก Topic, Brand, Author, Audience, Data Points ให้อัตโนมัติ
+        </p>
+      </div>
+
       <Field label="Topic / Keyword" sublabel="หัวข้อหลัก">
         <Input
           value={form.topic}
