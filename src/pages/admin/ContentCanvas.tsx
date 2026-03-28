@@ -6,9 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CanvasInputForm, { type CanvasInput } from "@/components/admin/canvas/CanvasInputForm";
 import ArticlePreview, { type ArticleData, articleToMarkdown } from "@/components/admin/canvas/ArticlePreview";
+import TopicBacklog, { type TopicItem } from "@/components/admin/canvas/TopicBacklog";
 
 const CANVAS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/content-canvas-generate`;
 const COVER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/blog-generate-cover`;
@@ -41,6 +42,7 @@ const ContentCanvas = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin } = useAuth();
+  const queryClient = useQueryClient();
   const [articleData, setArticleData] = useState<ArticleData | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [regeneratingSection, setRegeneratingSection] = useState<string | null>(null);
@@ -51,6 +53,7 @@ const ContentCanvas = () => {
   const [generatingCover, setGeneratingCover] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishedArticles, setPublishedArticles] = useState<Array<{ title: string; slug: string }>>([]);
+  const [deletingTopic, setDeletingTopic] = useState<string | null>(null);
 
   // Fetch existing articles for internal linking
   const { data: existingArticles } = useQuery({
@@ -62,6 +65,18 @@ const ContentCanvas = () => {
         .order("created_at", { ascending: false })
         .limit(50);
       return data || [];
+    },
+  });
+
+  // Fetch topic backlog
+  const { data: topicBacklog = [] } = useQuery<TopicItem[]>({
+    queryKey: ["content-topic-backlog"],
+    queryFn: async () => {
+      const { data } = await (supabase.from("content_topic_backlog") as any)
+        .select("*")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
+      return (data || []) as TopicItem[];
     },
   });
 
@@ -206,6 +221,32 @@ const ContentCanvas = () => {
     if (currentInput) streamGenerate(currentInput, sectionId);
   };
 
+  // Save related topics to backlog
+  const saveRelatedTopicsToBacklog = async (
+    relatedTopics: ArticleData["related_topics"],
+    sourceArticleTitle: string,
+    sourceArticleId?: string
+  ) => {
+    if (!relatedTopics?.length) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const topicsToSave = relatedTopics.map((r) => ({
+      title_th: r.title_th,
+      title_en: r.title_en || null,
+      description_th: r.description_th || null,
+      description_en: r.description_en || null,
+      suggested_slug: r.suggested_slug || null,
+      source_article_id: sourceArticleId || null,
+      source_article_title: sourceArticleTitle,
+      status: "pending",
+      created_by: user?.id || null,
+    }));
+
+    await (supabase.from("content_topic_backlog") as any).insert(topicsToSave);
+    queryClient.invalidateQueries({ queryKey: ["content-topic-backlog"] });
+  };
+
   const handlePublish = async () => {
     if (!articleData || !currentInput) return;
     setPublishing(true);
@@ -283,7 +324,14 @@ const ContentCanvas = () => {
       // Track published article for internal linking
       setPublishedArticles((prev) => [...prev, { title: articleData.title_th || "", slug }]);
 
-      toast({ title: "เผยแพร่บทความ 2 ภาษาสำเร็จ ✨" });
+      // Save related topics to backlog
+      await saveRelatedTopicsToBacklog(
+        articleData.related_topics,
+        articleData.title_th || currentInput.topic,
+        data.id
+      );
+
+      toast({ title: "เผยแพร่บทความ 2 ภาษาสำเร็จ ✨", description: "หัวข้อที่เกี่ยวข้องถูกบันทึกไว้ในคิวเขียน" });
       navigate(`/admin/blogs/${data.id}`);
     } catch (e: any) {
       toast({ title: "เผยแพร่ล้มเหลว", description: e.message, variant: "destructive" });
@@ -292,7 +340,48 @@ const ContentCanvas = () => {
     }
   };
 
-  // Generate related article
+  // Write topic from backlog
+  const handleWriteFromBacklog = (topic: TopicItem) => {
+    const newInput: CanvasInput = {
+      topic: topic.title_th || topic.title_en || "",
+      brand: currentInput?.brand || "Clarity Laser Clinic",
+      author: currentInput?.author || "",
+      audience: currentInput?.audience || "",
+      dataPoints: "",
+      language: "Both",
+      length: currentInput?.length || "medium",
+    };
+    setCurrentInput(newInput);
+    setArticleData(null);
+    setCoverImageUrl(null);
+    streamGenerate(newInput);
+
+    // Mark as writing
+    (supabase.from("content_topic_backlog") as any)
+      .update({ status: "writing" })
+      .eq("id", topic.id)
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ["content-topic-backlog"] });
+      });
+
+    toast({ title: `กำลังสร้างบทความ: ${topic.title_th}` });
+  };
+
+  // Delete topic from backlog
+  const handleDeleteTopic = async (id: string) => {
+    setDeletingTopic(id);
+    try {
+      await (supabase.from("content_topic_backlog") as any).delete().eq("id", id);
+      queryClient.invalidateQueries({ queryKey: ["content-topic-backlog"] });
+      toast({ title: "ลบหัวข้อแล้ว" });
+    } catch {
+      toast({ title: "ลบไม่สำเร็จ", variant: "destructive" });
+    } finally {
+      setDeletingTopic(null);
+    }
+  };
+
+  // Generate related article (from preview)
   const handleGenerateRelated = (topic: { title_th: string; title_en: string; slug: string }) => {
     const newInput: CanvasInput = {
       topic: topic.title_th || topic.title_en,
@@ -340,6 +429,18 @@ const ContentCanvas = () => {
           </div>
         )}
       </div>
+
+      {/* Topic Backlog */}
+      {!articleData && !isGenerating && topicBacklog.length > 0 && (
+        <div className="mb-6">
+          <TopicBacklog
+            topics={topicBacklog}
+            onWrite={handleWriteFromBacklog}
+            onDelete={handleDeleteTopic}
+            isDeleting={deletingTopic}
+          />
+        </div>
+      )}
 
       {/* Input Form */}
       {!articleData && !isGenerating && (
