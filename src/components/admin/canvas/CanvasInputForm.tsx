@@ -48,12 +48,11 @@ const CanvasInputForm = ({ onGenerate, isGenerating }: Props) => {
       author: "",
       audience: "",
       dataPoints: "",
-      language: "Thai",
+      language: "Both",
       length: "medium",
     };
   });
 
-  // Save to localStorage on change
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
   }, [form]);
@@ -82,7 +81,6 @@ const CanvasInputForm = ({ onGenerate, isGenerating }: Props) => {
         ...(data.author && { author: data.author }),
         ...(data.audience && { audience: data.audience }),
         ...(data.dataPoints && { dataPoints: data.dataPoints }),
-        ...(data.language && ["Thai", "English"].includes(data.language) && { language: data.language }),
       }));
       toast({ title: "AI กรอกฟอร์มให้แล้ว ✨" });
     } catch (e: any) {
@@ -136,31 +134,26 @@ const CanvasInputForm = ({ onGenerate, isGenerating }: Props) => {
         <Textarea value={form.dataPoints} onChange={(e) => set("dataPoints", e.target.value)} placeholder="ตัวเลข เคส ผลลัพธ์ที่อยากใส่ในบทความ..." rows={3} className="text-sm" />
       </Field>
 
-      <div className="grid grid-cols-2 gap-4">
-        <Field label="ภาษา">
-          <Select value={form.language} onValueChange={(v) => set("language", v)}>
-            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Thai">ไทย</SelectItem>
-              <SelectItem value="English">English</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
-        <Field label="ความยาว">
-          <Select value={form.length} onValueChange={(v) => set("length", v)}>
-            <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="short">สั้น ~800 คำ</SelectItem>
-              <SelectItem value="medium">กลาง ~1,500 คำ</SelectItem>
-              <SelectItem value="long">ยาว ~2,500 คำ</SelectItem>
-            </SelectContent>
-          </Select>
-        </Field>
+      <Field label="ความยาว">
+        <Select value={form.length} onValueChange={(v) => set("length", v)}>
+          <SelectTrigger className="text-sm"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="short">สั้น ~800 คำ/ภาษา</SelectItem>
+            <SelectItem value="medium">กลาง ~1,500 คำ/ภาษา</SelectItem>
+            <SelectItem value="long">ยาว ~2,500 คำ/ภาษา</SelectItem>
+          </SelectContent>
+        </Select>
+      </Field>
+
+      <div className="bg-muted/50 rounded-lg p-3 text-[10px] text-muted-foreground space-y-1">
+        <p>🌐 <strong>บทความจะสร้าง 2 ภาษาอัตโนมัติ</strong> (ไทย + อังกฤษ)</p>
+        <p>📍 สอดแทรก Local SEO: ราชเทวี, พญาไท, สยาม, Clarity Laser Clinic</p>
+        <p>🔗 Internal links จากบทความที่เผยแพร่แล้วจะถูกสอดแทรกอัตโนมัติ</p>
       </div>
 
       <Button onClick={() => onGenerate(form)} disabled={!form.topic.trim() || isGenerating} className="w-full gap-2 h-12 text-base" size="lg">
         <Sparkles className="w-5 h-5" />
-        {isGenerating ? "กำลังสร้างบทความ..." : "สร้างบทความ"}
+        {isGenerating ? "กำลังสร้างบทความ 2 ภาษา..." : "สร้างบทความ (TH + EN)"}
       </Button>
     </div>
   );
