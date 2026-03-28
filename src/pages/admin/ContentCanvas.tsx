@@ -56,6 +56,7 @@ const ContentCanvas = () => {
   const [publishedArticles, setPublishedArticles] = useState<Array<{ title: string; slug: string }>>([]);
   const [deletingTopic, setDeletingTopic] = useState<string | null>(null);
   const [externalFill, setExternalFill] = useState<Partial<CanvasInput> | null>(null);
+  const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
 
   // Fetch existing articles for internal linking
   const { data: existingArticles } = useQuery({
@@ -213,10 +214,19 @@ const ContentCanvas = () => {
     }
   };
 
+  const markActiveTopicAsWritten = useCallback(async () => {
+    if (!activeTopicId) return;
+    await (supabase.from("content_topic_backlog") as any)
+      .update({ status: "writing" })
+      .eq("id", activeTopicId);
+    queryClient.invalidateQueries({ queryKey: ["content-topic-backlog"] });
+    setActiveTopicId(null);
+  }, [activeTopicId, queryClient]);
+
   const handleGenerate = (input: CanvasInput) => {
     setCurrentInput(input);
     setCoverImageUrl(null);
-    streamGenerate(input);
+    streamGenerate(input).then(() => markActiveTopicAsWritten());
   };
 
   const handleRegenerateSection = (sectionId: string) => {
@@ -375,6 +385,7 @@ const ContentCanvas = () => {
     setExternalFill({
       topic: topic.title_th || topic.title_en || "",
     });
+    setActiveTopicId(topic.id);
     toast({ title: `กรอกหัวข้อ "${topic.title_th}" ในฟอร์มแล้ว — ปรับแต่งได้เลย` });
     // Scroll to form
     setTimeout(() => {
