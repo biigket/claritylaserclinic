@@ -38,13 +38,15 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { prompt } = await req.json();
+    const { prompt, mode, count } = await req.json();
     if (!prompt || typeof prompt !== "string" || prompt.trim().length === 0) {
       return new Response(JSON.stringify({ error: "prompt is required" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const isBulkMode = mode === "bulk_topics" && typeof count === "number" && count > 0;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
