@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Trash2, PenLine, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, Trash2, PenLine, Clock, ChevronDown, ChevronUp, Wand2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface TopicItem {
