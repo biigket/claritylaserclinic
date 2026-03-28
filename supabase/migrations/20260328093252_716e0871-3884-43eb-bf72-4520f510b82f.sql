@@ -1,0 +1,1 @@
+UPDATE knowledge_documents SET status = 'processing' WHERE id = '562f5240-640a-4038-b418-9ff8eb12eb22';
