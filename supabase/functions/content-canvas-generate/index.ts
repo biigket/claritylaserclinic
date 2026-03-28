@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -94,6 +95,31 @@ serve(async (req) => {
     const body = await req.json();
     const { topic, brand, author, audience, dataPoints, length, sectionId, existingArticles, knowledgeContext } = body;
 
+    // Fetch pinned articles as RAG context
+    let pinnedContext = "";
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+      const supabase = createClient(supabaseUrl, supabaseKey);
+
+      const { data: pinnedArticles } = await supabase
+        .from("blog_articles")
+        .select("title_th, title_en, content_th, excerpt_th, tags")
+        .eq("is_pinned", true)
+        .limit(5);
+
+      if (pinnedArticles && pinnedArticles.length > 0) {
+        const summaries = pinnedArticles.map((a: any, i: number) => {
+          // Use excerpt + first 1500 chars of content as context to keep token usage manageable
+          const contentPreview = a.content_th ? a.content_th.substring(0, 1500) : "";
+          return `--- ต้นแบบ #${i + 1}: ${a.title_th} ---\nTags: ${(a.tags || []).join(", ")}\nExcerpt: ${a.excerpt_th || ""}\nContent:\n${contentPreview}`;
+        }).join("\n\n");
+        pinnedContext = `\n## บทความต้นแบบที่ปักหมุด (Pinned Reference Articles)\nบทความต่อไปนี้เป็นต้นแบบที่ผู้ดูแลเลือกไว้ ให้เรียนรู้สไตล์การเขียน น้ำเสียง โครงสร้าง และวิธีนำเสนอข้อมูลจากบทความเหล่านี้ รวมถึงดึงข้อมูลอ้างอิงที่เกี่ยวข้องมาใช้:\n\n${summaries}`;
+      }
+    } catch (e) {
+      console.error("Failed to fetch pinned articles:", e);
+    }
+
     if (!topic) {
       return new Response(JSON.stringify({ error: "Topic is required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -132,8 +158,9 @@ Return JSON: {"id": "${sectionId}", "heading_th": "...", "heading_en": "...", "c
 วันที่: ${new Date().toLocaleDateString("th-TH", { year: "numeric", month: "long", day: "numeric" })}
 ${existingArticles ? `\nบทความที่มีอยู่แล้ว (ใช้สร้าง internal links):\n${existingArticles}` : ""}
 ${knowledgeContext ? `\n## คลังความรู้อ้างอิง (ใช้ข้อมูลเหล่านี้เป็นแหล่งอ้างอิงในการเขียน ดึงข้อมูล สถิติ ข้อเท็จจริงที่เกี่ยวข้องมาใช้):\n${knowledgeContext}` : ""}
+${pinnedContext}
 
-สำคัญ: ต้องเขียนทั้งภาษาไทยและอังกฤษ สอดแทรก Local SEO keywords ราชเทวี พญาไท สยาม${knowledgeContext ? "\nสำคัญเพิ่มเติม: ใช้ข้อมูลจากคลังความรู้อ้างอิง ดึงตัวเลข ข้อมูลเฉพาะ ผลวิจัย มาสอดแทรกในบทความให้มากที่สุด" : ""}`;
+สำคัญ: ต้องเขียนทั้งภาษาไทยและอังกฤษ สอดแทรก Local SEO keywords ราชเทวี พญาไท สยาม${knowledgeContext ? "\nสำคัญเพิ่มเติม: ใช้ข้อมูลจากคลังความรู้อ้างอิง ดึงตัวเลข ข้อมูลเฉพาะ ผลวิจัย มาสอดแทรกในบทความให้มากที่สุด" : ""}${pinnedContext ? "\nสำคัญเพิ่มเติม: เรียนรู้สไตล์การเขียน น้ำเสียง โครงสร้าง และวิธีนำเสนอจากบทความต้นแบบที่ปักหมุด ดึงข้อมูลอ้างอิงที่เกี่ยวข้องมาใช้ด้วย" : ""}`;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
