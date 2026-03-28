@@ -76,7 +76,6 @@ serve(async (req) => {
         const topImages = scored.slice(0, 3);
         referenceImageUrls = topImages.map((img: any) => img.image_url);
       }
-      }
     } catch (e) {
       console.error("Failed to fetch reference images:", e);
     }
