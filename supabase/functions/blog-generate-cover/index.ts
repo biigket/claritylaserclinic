@@ -117,7 +117,7 @@ ${doctorBlock}
 
 COMPOSITION:
 ${referenceImageUrls.length > 0 ? "- The reference device is the HERO element, shown in FULL from a DISTANT camera angle" : "- Create imagery that directly represents the article topic"}
-${doctorImageUrl ? "- Doctor/staff member positioned in the BOTTOM-RIGHT corner, head below the horizontal midline" : ""}
+${doctorImageUrl ? "- Doctor/staff member positioned on the RIGHT side, head at ~20% from top (tall, prominent)" : ""}
 - Premium clinic environment background
 - Wide shot, NOT close-up
 - 16:9 aspect ratio, ultra high resolution, photorealistic
