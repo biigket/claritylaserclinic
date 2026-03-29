@@ -40,6 +40,7 @@ const BlogsList = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedTag, setSelectedTag] = useState<string>("all");
 
   const { data: articles = [], isLoading } = useQuery({
     queryKey: ["admin-blogs"],
@@ -53,6 +54,11 @@ const BlogsList = () => {
     },
   });
 
+  // Collect all unique tags
+  const allTags = Array.from(
+    new Set(articles.flatMap((a) => a.tags || []))
+  ).sort();
+
   const filtered = articles.filter((a) => {
     const matchSearch =
       !search ||
@@ -60,8 +66,13 @@ const BlogsList = () => {
       a.title_en?.toLowerCase().includes(search.toLowerCase()) ||
       a.slug?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === "all" || a.status === statusFilter;
-    return matchSearch && matchStatus;
+    const matchTag = selectedTag === "all" || (a.tags || []).includes(selectedTag);
+    return matchSearch && matchStatus && matchTag;
   });
+
+  const totalCount = articles.length;
+  const publishedCount = articles.filter((a) => a.status === "published").length;
+  const draftCount = articles.filter((a) => a.status === "draft").length;
 
   const handleTogglePublish = async (a: Article) => {
     const newStatus = a.status === "published" ? "draft" : "published";
@@ -98,7 +109,11 @@ const BlogsList = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="font-display text-2xl text-foreground">บทความ</h1>
-          <p className="text-xs text-muted-foreground mt-1">จัดการ Blog Articles สำหรับ SEO</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            ทั้งหมด <span className="font-semibold text-foreground">{totalCount}</span> บทความ
+            {" · "}เผยแพร่ <span className="font-semibold text-green-600">{publishedCount}</span>
+            {" · "}ร่าง <span className="font-semibold text-muted-foreground">{draftCount}</span>
+          </p>
         </div>
         <div className="flex gap-2">
           <BulkArticleGenerator />
@@ -133,6 +148,18 @@ const BlogsList = () => {
             </Button>
           ))}
         </div>
+        {allTags.length > 0 && (
+          <select
+            value={selectedTag}
+            onChange={(e) => setSelectedTag(e.target.value)}
+            className="text-xs border border-border rounded-md px-2 py-1.5 bg-background text-foreground"
+          >
+            <option value="all">แท็กทั้งหมด</option>
+            {allTags.map((tag) => (
+              <option key={tag} value={tag}>{tag}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* List */}
