@@ -148,7 +148,18 @@ const BlogsList = () => {
             </Button>
           ))}
         </div>
-      </div>
+        {allTags.length > 0 && (
+          <select
+            value={selectedTag}
+            onChange={(e) => setSelectedTag(e.target.value)}
+            className="text-xs border border-border rounded-md px-2 py-1.5 bg-background text-foreground"
+          >
+            <option value="all">แท็กทั้งหมด</option>
+            {allTags.map((tag) => (
+              <option key={tag} value={tag}>{tag}</option>
+            ))}
+          </select>
+        )}
 
       {/* List */}
       {isLoading ? (
