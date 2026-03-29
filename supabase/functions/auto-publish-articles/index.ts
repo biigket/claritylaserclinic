@@ -128,7 +128,24 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
     const body = await req.json().catch(() => ({}));
-    const batchSize = body.batch_size || 3;
+    const isScheduled = body.scheduled === true;
+
+    // Check auto-publish settings
+    const { data: settings } = await supabase
+      .from("auto_publish_settings")
+      .select("*")
+      .eq("id", "default")
+      .single();
+
+    // If called by cron and auto-publish is disabled, skip
+    if (isScheduled && settings && !settings.enabled) {
+      console.log("[auto-publish] Disabled, skipping scheduled run");
+      return new Response(JSON.stringify({ message: "Auto-publish is disabled", processed: 0 }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const batchSize = body.batch_size || settings?.batch_size || 3;
 
     // Fetch pending topics
     const { data: pendingTopics, error: fetchErr } = await supabase

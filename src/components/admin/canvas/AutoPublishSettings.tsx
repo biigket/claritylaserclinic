@@ -80,6 +80,16 @@ const AutoPublishSettings = () => {
         .eq("id", "default");
 
       if (error) throw error;
+
+      // Update cron schedule in database
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      await supabase.rpc("update_auto_publish_cron" as any, {
+        _cron_expression: cronExpression,
+        _supabase_url: supabaseUrl,
+        _anon_key: anonKey,
+      });
+
       toast({ title: "บันทึกการตั้งค่าแล้ว ✅" });
     } catch (e: any) {
       toast({ title: "บันทึกล้มเหลว", description: e.message, variant: "destructive" });
