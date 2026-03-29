@@ -160,6 +160,7 @@ const BlogsList = () => {
             ))}
           </select>
         )}
+      </div>
 
       {/* List */}
       {isLoading ? (
