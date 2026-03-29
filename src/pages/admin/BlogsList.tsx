@@ -40,6 +40,7 @@ const BlogsList = () => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selectedTag, setSelectedTag] = useState<string>("all");
 
   const { data: articles = [], isLoading } = useQuery({
     queryKey: ["admin-blogs"],
@@ -53,6 +54,11 @@ const BlogsList = () => {
     },
   });
 
+  // Collect all unique tags
+  const allTags = Array.from(
+    new Set(articles.flatMap((a) => a.tags || []))
+  ).sort();
+
   const filtered = articles.filter((a) => {
     const matchSearch =
       !search ||
@@ -60,8 +66,13 @@ const BlogsList = () => {
       a.title_en?.toLowerCase().includes(search.toLowerCase()) ||
       a.slug?.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === "all" || a.status === statusFilter;
-    return matchSearch && matchStatus;
+    const matchTag = selectedTag === "all" || (a.tags || []).includes(selectedTag);
+    return matchSearch && matchStatus && matchTag;
   });
+
+  const totalCount = articles.length;
+  const publishedCount = articles.filter((a) => a.status === "published").length;
+  const draftCount = articles.filter((a) => a.status === "draft").length;
 
   const handleTogglePublish = async (a: Article) => {
     const newStatus = a.status === "published" ? "draft" : "published";
