@@ -399,6 +399,14 @@ export type Database = {
         Returns: boolean
       }
       is_admin_or_editor: { Args: { _user_id: string }; Returns: boolean }
+      update_auto_publish_cron: {
+        Args: {
+          _anon_key: string
+          _cron_expression: string
+          _supabase_url: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "editor"
