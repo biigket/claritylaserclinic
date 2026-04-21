@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.blog-generate-cover]
 verify_jwt = false
+
+[functions.seo-agent-create-draft]
+verify_jwt = false
