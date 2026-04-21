@@ -9,5 +9,5 @@ verify_jwt = false
 [functions.seo-agent-create-draft]
 verify_jwt = false
 
-[functions._seo-agent-test]
+[functions.seo-agent-test-tmp]
 verify_jwt = false
