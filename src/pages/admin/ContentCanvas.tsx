@@ -1,14 +1,14 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, Upload, Eye } from "lucide-react";
+import { ArrowLeft, Loader2, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import CanvasInputForm, { type CanvasInput } from "@/components/admin/canvas/CanvasInputForm";
-import ArticlePreview, { type ArticleData, articleToMarkdown } from "@/components/admin/canvas/ArticlePreview";
+import ArticlePreview, { type ArticleData } from "@/components/admin/canvas/ArticlePreview";
 import TopicBacklog, { type TopicItem } from "@/components/admin/canvas/TopicBacklog";
 import AutoPublishSettings from "@/components/admin/canvas/AutoPublishSettings";
 import KnowledgeVault from "@/components/admin/canvas/KnowledgeVault";
@@ -328,7 +328,7 @@ const ContentCanvas = () => {
 
       const payload = {
         slug,
-        status: "published" as const,
+        status: "draft" as const,
         title_th: articleData.title_th || currentInput.topic,
         title_en: articleData.title_en || null,
         content_th: buildContent("th"),
@@ -341,7 +341,7 @@ const ContentCanvas = () => {
         meta_title_en: articleData.meta_title_en || null,
         meta_description_th: articleData.meta_description_th || null,
         meta_description_en: articleData.meta_description_en || null,
-        published_at: new Date().toISOString(),
+        published_at: null,
         created_by: user?.id,
       };
 
@@ -350,7 +350,7 @@ const ContentCanvas = () => {
 
       if (error) throw error;
 
-      // Track published article for internal linking
+      // Track drafted article for internal linking in the current session only.
       setPublishedArticles((prev) => [...prev, { title: articleData.title_th || "", slug }]);
 
       // Save related topics to backlog
@@ -360,10 +360,10 @@ const ContentCanvas = () => {
         data.id
       );
 
-      toast({ title: "เผยแพร่บทความ 2 ภาษาสำเร็จ ✨", description: "หัวข้อที่เกี่ยวข้องถูกบันทึกไว้ในคิวเขียน" });
+      toast({ title: "บันทึกร่างบทความ 2 ภาษาสำเร็จ ✨", description: "บทความถูกบันทึกเป็นร่างแล้ว กรุณาตรวจทานในหน้าแก้ไขก่อนเผยแพร่" });
       navigate(`/admin/blogs/${data.id}`);
     } catch (e: any) {
-      toast({ title: "เผยแพร่ล้มเหลว", description: e.message, variant: "destructive" });
+      toast({ title: "บันทึกร่างล้มเหลว", description: e.message, variant: "destructive" });
     } finally {
       setPublishing(false);
     }
@@ -499,7 +499,7 @@ const ContentCanvas = () => {
             {isAdmin && (
               <Button onClick={handlePublish} disabled={publishing} className="gap-1.5 text-xs" size="sm">
                 {publishing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                {publishing ? "กำลังเผยแพร่..." : "เผยแพร่ (TH + EN)"}
+                {publishing ? "กำลังบันทึกร่าง..." : "บันทึกร่างเพื่อส่งตรวจ (TH + EN)"}
               </Button>
             )}
           </div>
