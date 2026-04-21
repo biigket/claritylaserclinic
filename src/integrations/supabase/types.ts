@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      article_visual_assets: {
+        Row: {
+          alt_text: string | null
+          article_id: string
+          asset_url: string
+          caption: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          position: number
+          role: string
+        }
+        Insert: {
+          alt_text?: string | null
+          article_id: string
+          asset_url: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          position?: number
+          role?: string
+        }
+        Update: {
+          alt_text?: string | null
+          article_id?: string
+          asset_url?: string
+          caption?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          position?: number
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_visual_assets_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "blog_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       auto_publish_settings: {
         Row: {
           batch_size: number
@@ -40,6 +84,9 @@ export type Database = {
       }
       blog_articles: {
         Row: {
+          aeo_score: number | null
+          answer_summary: string | null
+          citations: Json
           content_en: string | null
           content_th: string
           cover_image_url: string | null
@@ -47,6 +94,7 @@ export type Database = {
           created_by: string | null
           excerpt_en: string | null
           excerpt_th: string | null
+          geo_score: number | null
           id: string
           is_pinned: boolean
           meta_description_en: string | null
@@ -54,15 +102,28 @@ export type Database = {
           meta_title_en: string | null
           meta_title_th: string | null
           published_at: string | null
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          safety_score: number | null
+          schema_jsonld: Json | null
+          seo_score: number | null
           slug: string
+          source_system: string
           status: string
           tags: string[] | null
+          target_intent: string | null
+          target_keyword: string | null
           title_en: string | null
           title_th: string
           updated_at: string
           view_count: number
+          workflow_status: string
         }
         Insert: {
+          aeo_score?: number | null
+          answer_summary?: string | null
+          citations?: Json
           content_en?: string | null
           content_th: string
           cover_image_url?: string | null
@@ -70,6 +131,7 @@ export type Database = {
           created_by?: string | null
           excerpt_en?: string | null
           excerpt_th?: string | null
+          geo_score?: number | null
           id?: string
           is_pinned?: boolean
           meta_description_en?: string | null
@@ -77,15 +139,28 @@ export type Database = {
           meta_title_en?: string | null
           meta_title_th?: string | null
           published_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          safety_score?: number | null
+          schema_jsonld?: Json | null
+          seo_score?: number | null
           slug: string
+          source_system?: string
           status?: string
           tags?: string[] | null
+          target_intent?: string | null
+          target_keyword?: string | null
           title_en?: string | null
           title_th: string
           updated_at?: string
           view_count?: number
+          workflow_status?: string
         }
         Update: {
+          aeo_score?: number | null
+          answer_summary?: string | null
+          citations?: Json
           content_en?: string | null
           content_th?: string
           cover_image_url?: string | null
@@ -93,6 +168,7 @@ export type Database = {
           created_by?: string | null
           excerpt_en?: string | null
           excerpt_th?: string | null
+          geo_score?: number | null
           id?: string
           is_pinned?: boolean
           meta_description_en?: string | null
@@ -100,15 +176,66 @@ export type Database = {
           meta_title_en?: string | null
           meta_title_th?: string | null
           published_at?: string | null
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          safety_score?: number | null
+          schema_jsonld?: Json | null
+          seo_score?: number | null
           slug?: string
+          source_system?: string
           status?: string
           tags?: string[] | null
+          target_intent?: string | null
+          target_keyword?: string | null
           title_en?: string | null
           title_th?: string
           updated_at?: string
           view_count?: number
+          workflow_status?: string
         }
         Relationships: []
+      }
+      content_approval_events: {
+        Row: {
+          actor_id: string | null
+          actor_label: string | null
+          article_id: string
+          created_at: string
+          event_type: string
+          id: string
+          notes: string | null
+          snapshot: Json | null
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_label?: string | null
+          article_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          notes?: string | null
+          snapshot?: Json | null
+        }
+        Update: {
+          actor_id?: string | null
+          actor_label?: string | null
+          article_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          notes?: string | null
+          snapshot?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_approval_events_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "blog_articles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_topic_backlog: {
         Row: {
