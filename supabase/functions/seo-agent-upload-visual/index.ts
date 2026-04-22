@@ -136,11 +136,27 @@ serve(async (req) => {
 
     const { error: upErr } = await supabase.storage
       .from(bucket)
-      .upload(safePath, bytes, { contentType, upsert: true });
+      .upload(safePath, new Blob([bytes], { type: contentType }), {
+        contentType,
+        upsert: true,
+      });
 
     if (upErr) {
       console.error("Upload error:", upErr.message);
-      return json({ error: "Upload failed" }, 500);
+      // Temporary debug details (no secrets) to diagnose storage failures
+      return json(
+        {
+          error: "Upload failed",
+          debug: {
+            message: upErr.message,
+            bucket,
+            safePath,
+            contentType,
+            bytesLength: bytes.length,
+          },
+        },
+        500,
+      );
     }
 
     const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(safePath);
