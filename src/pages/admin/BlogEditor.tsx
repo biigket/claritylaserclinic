@@ -174,9 +174,16 @@ const BlogEditor = () => {
   const [insertingVisuals, setInsertingVisuals] = useState(false);
   const [copiedAssetId, setCopiedAssetId] = useState<string | null>(null);
   const [editingAsset, setEditingAsset] = useState<string | null>(null);
-  const [assetEditDraft, setAssetEditDraft] = useState<{ alt_text: string; caption: string }>({
+  const [assetEditDraft, setAssetEditDraft] = useState<{
+    alt_text: string;
+    caption: string;
+    alt_text_en: string;
+    caption_en: string;
+  }>({
     alt_text: "",
     caption: "",
+    alt_text_en: "",
+    caption_en: "",
   });
   const [savingAsset, setSavingAsset] = useState(false);
 
@@ -201,21 +208,35 @@ const BlogEditor = () => {
     setAssetEditDraft({
       alt_text: asset.alt_text ?? "",
       caption: asset.caption ?? "",
+      alt_text_en: asset.metadata?.alt_text_en ?? "",
+      caption_en: asset.metadata?.caption_en ?? "",
     });
   };
 
   const cancelEditAsset = () => {
     setEditingAsset(null);
-    setAssetEditDraft({ alt_text: "", caption: "" });
+    setAssetEditDraft({ alt_text: "", caption: "", alt_text_en: "", caption_en: "" });
   };
 
   const saveAssetEdit = async (assetId: string) => {
     setSavingAsset(true);
     try {
+      // Fetch current metadata so we don't clobber other keys
+      const current = visualAssets.find((x: any) => x.id === assetId);
+      const baseMeta =
+        current && current.metadata && typeof current.metadata === "object"
+          ? { ...current.metadata }
+          : {};
+      if (assetEditDraft.alt_text_en) baseMeta.alt_text_en = assetEditDraft.alt_text_en;
+      else delete baseMeta.alt_text_en;
+      if (assetEditDraft.caption_en) baseMeta.caption_en = assetEditDraft.caption_en;
+      else delete baseMeta.caption_en;
+
       const { error } = await (supabase.from("article_visual_assets") as any)
         .update({
           alt_text: assetEditDraft.alt_text || null,
           caption: assetEditDraft.caption || null,
+          metadata: baseMeta,
         })
         .eq("id", assetId);
       if (error) throw error;
