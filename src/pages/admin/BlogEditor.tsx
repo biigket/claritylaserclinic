@@ -167,6 +167,7 @@ const BlogEditor = () => {
   const pendingAiSave = useRef(false);
   const [checklist, setChecklist] = useState<Record<string, boolean>>({});
   const [confirmUnsafe, setConfirmUnsafe] = useState(false);
+  const [insertingVisuals, setInsertingVisuals] = useState(false);
 
   const isSeoAgent =
     form.source_system === "seo_agent_mcp" || form.workflow_status === "needs_review";
