@@ -70,6 +70,7 @@ export default {
       fontFamily: {
         display: ['"Prompt"', 'sans-serif'],
         body: ['"Prompt"', 'sans-serif'],
+        anuphan: ['"Anuphan"', 'sans-serif'],
       },
       borderRadius: {
         lg: "var(--radius)",
