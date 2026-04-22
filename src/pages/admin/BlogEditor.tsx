@@ -9,7 +9,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Eye, Upload, X, Loader2, ExternalLink, Sparkles } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  ArrowLeft,
+  Save,
+  Eye,
+  Upload,
+  X,
+  Loader2,
+  ExternalLink,
+  Sparkles,
+  ShieldAlert,
+  ShieldCheck,
+  ClipboardCheck,
+  FileJson,
+  Image as ImageIcon,
+  Bot,
+} from "lucide-react";
 import BlogAiAssistant, { type BlogInsertData } from "@/components/admin/BlogAiAssistant";
 
 const blogTable = () => supabase.from("blog_articles") as any;
@@ -27,6 +43,46 @@ const Field = ({ label, sublabel, children }: { label: string; sublabel?: string
     <div className="mt-1">{children}</div>
   </div>
 );
+
+const ScoreBadge = ({ label, value }: { label: string; value: number | null | undefined }) => {
+  const v = typeof value === "number" ? value : null;
+  const tone =
+    v === null
+      ? "bg-muted text-muted-foreground"
+      : v >= 80
+        ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30"
+        : v >= 60
+          ? "bg-amber-500/10 text-amber-700 border-amber-500/30"
+          : "bg-destructive/10 text-destructive border-destructive/30";
+  return (
+    <div className={`rounded-lg border px-3 py-2 ${tone}`}>
+      <div className="text-[10px] uppercase tracking-wider opacity-80">{label}</div>
+      <div className="font-display text-xl">{v === null ? "—" : v}</div>
+    </div>
+  );
+};
+
+const JsonPreview = ({ title, value }: { title: string; value: any }) => {
+  if (!value || (Array.isArray(value) && value.length === 0)) return null;
+  return (
+    <div className="rounded-lg border border-border bg-muted/30 p-3">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+        <FileJson className="w-3 h-3" /> {title}
+      </div>
+      <pre className="text-[11px] font-mono whitespace-pre-wrap break-all max-h-64 overflow-auto text-foreground/80">
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </div>
+  );
+};
+
+const APPROVAL_CHECKLIST = [
+  { key: "content", label: "ตรวจเนื้อหา (Content reviewed)" },
+  { key: "medical", label: "ตรวจข้อมูลทางการแพทย์ (Medical claims reviewed)" },
+  { key: "seo", label: "ตรวจ SEO metadata" },
+  { key: "links", label: "ตรวจ Internal links" },
+  { key: "visuals", label: "ตรวจรูปภาพ & alt text (Visuals/alt text reviewed)" },
+] as const;
 
 const BlogEditor = () => {
   const { id } = useParams();
@@ -51,6 +107,17 @@ const BlogEditor = () => {
     meta_title_en: "",
     meta_description_th: "",
     meta_description_en: "",
+    source_system: "manual",
+    workflow_status: "none",
+    seo_score: null,
+    aeo_score: null,
+    geo_score: null,
+    safety_score: null,
+    citations: [],
+    schema_jsonld: null,
+    answer_summary: "",
+    target_intent: "",
+    target_keyword: "",
   });
 
   const [saving, setSaving] = useState(false);
@@ -60,6 +127,25 @@ const BlogEditor = () => {
   const [coverPrompt, setCoverPrompt] = useState("");
   const [autoSaveStatus, setAutoSaveStatus] = useState<string | null>(null);
   const pendingAiSave = useRef(false);
+  const [checklist, setChecklist] = useState<Record<string, boolean>>({});
+  const [confirmUnsafe, setConfirmUnsafe] = useState(false);
+
+  const isSeoAgent =
+    form.source_system === "seo_agent_mcp" || form.workflow_status === "needs_review";
+
+  const { data: visualAssets = [] } = useQuery({
+    queryKey: ["article-visual-assets", id],
+    queryFn: async () => {
+      if (isNew) return [] as any[];
+      const { data, error } = await (supabase.from("article_visual_assets") as any)
+        .select("*")
+        .eq("article_id", id)
+        .order("position", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !isNew,
+  });
 
   const { data: existing } = useQuery({
     queryKey: ["blog-article", id],
@@ -160,6 +246,25 @@ const BlogEditor = () => {
       toast({ title: "ต้องมีชื่อบทความ (TH) เพื่อเผยแพร่", variant: "destructive" });
       return;
     }
+    if (publish && isSeoAgent) {
+      const allChecked = APPROVAL_CHECKLIST.every((c) => checklist[c.key]);
+      if (!allChecked) {
+        toast({
+          title: "กรุณาทำรายการตรวจสอบให้ครบก่อนเผยแพร่",
+          description: "Approval checklist incomplete",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (typeof form.safety_score === "number" && form.safety_score < 80 && !confirmUnsafe) {
+        toast({
+          title: "Safety score < 80 — ต้องยืนยันก่อนเผยแพร่",
+          description: "Tick the manual safety confirmation in the Approval tab.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
@@ -184,13 +289,20 @@ const BlogEditor = () => {
 
     if (publish && form.status !== "published") {
       payload.published_at = new Date().toISOString();
+      if (isSeoAgent) {
+        payload.workflow_status = "published";
+        payload.reviewed_at = new Date().toISOString();
+        payload.reviewed_by = user?.id ?? null;
+      }
     }
 
     let error;
+    let savedId: string | undefined = isNew ? undefined : (id as string);
     if (isNew) {
       const res = await blogTable().insert(payload).select("id").single();
       error = res.error;
       if (!error && res.data?.id) {
+        savedId = res.data.id;
         queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
         toast({ title: publish ? "เผยแพร่แล้ว" : "บันทึกสำเร็จ" });
         navigate(`/admin/blogs/${res.data.id}`, { replace: true });
@@ -206,6 +318,30 @@ const BlogEditor = () => {
     if (error) {
       toast({ title: "บันทึกล้มเหลว", description: error.message, variant: "destructive" });
     } else {
+      if (publish && savedId) {
+        try {
+          await (supabase.from("content_approval_events") as any).insert({
+            article_id: savedId,
+            event_type: isSeoAgent ? "seo_agent_published" : "published",
+            actor_id: user?.id ?? null,
+            actor_label: user?.email ?? null,
+            notes: isSeoAgent
+              ? `Approved via editor checklist${confirmUnsafe ? " (safety override)" : ""}`
+              : null,
+            snapshot: {
+              source_system: form.source_system,
+              workflow_status: "published",
+              seo_score: form.seo_score,
+              aeo_score: form.aeo_score,
+              geo_score: form.geo_score,
+              safety_score: form.safety_score,
+              checklist,
+            },
+          });
+        } catch (e) {
+          console.warn("approval event insert failed", e);
+        }
+      }
       queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
       toast({ title: publish ? "เผยแพร่แล้ว" : "บันทึกสำเร็จ" });
     }
@@ -330,10 +466,22 @@ const BlogEditor = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="content" className="space-y-6">
-        <TabsList className="bg-muted/50">
+        <TabsList className="bg-muted/50 flex-wrap h-auto">
           <TabsTrigger value="content" className="text-xs">เนื้อหา</TabsTrigger>
           <TabsTrigger value="media" className="text-xs">รูปภาพ & Tags</TabsTrigger>
           <TabsTrigger value="seo" className="text-xs">SEO</TabsTrigger>
+          {isSeoAgent && (
+            <>
+              <TabsTrigger value="seo-review" className="text-xs gap-1">
+                <Bot className="w-3 h-3" /> SEO Review
+              </TabsTrigger>
+              <TabsTrigger value="structured" className="text-xs">Structured Data</TabsTrigger>
+              <TabsTrigger value="visuals" className="text-xs">Visual Assets</TabsTrigger>
+              <TabsTrigger value="approval" className="text-xs gap-1">
+                <ClipboardCheck className="w-3 h-3" /> Approval
+              </TabsTrigger>
+            </>
+          )}
         </TabsList>
 
         {/* Content Tab */}
@@ -478,6 +626,220 @@ const BlogEditor = () => {
             </Field>
           </div>
         </TabsContent>
+
+        {/* SEO Review Tab */}
+        {isSeoAgent && (
+          <TabsContent value="seo-review" className="space-y-5">
+            <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+              <div className="flex flex-wrap gap-3 items-center text-xs">
+                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                  source: {form.source_system || "manual"}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 border border-amber-500/20">
+                  workflow: {form.workflow_status || "none"}
+                </span>
+                {form.target_keyword && (
+                  <span className="text-muted-foreground">
+                    keyword: <span className="text-foreground">{form.target_keyword}</span>
+                  </span>
+                )}
+                {form.target_intent && (
+                  <span className="text-muted-foreground">
+                    intent: <span className="text-foreground">{form.target_intent}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <ScoreBadge label="SEO" value={form.seo_score} />
+              <ScoreBadge label="AEO" value={form.aeo_score} />
+              <ScoreBadge label="GEO" value={form.geo_score} />
+              <ScoreBadge label="Safety" value={form.safety_score} />
+            </div>
+
+            {typeof form.safety_score === "number" && form.safety_score < 80 && (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 flex gap-3">
+                <ShieldAlert className="w-5 h-5 text-destructive shrink-0" />
+                <div className="text-xs text-destructive">
+                  <div className="font-medium mb-1">Safety score ต่ำกว่า 80</div>
+                  <div className="text-destructive/80">
+                    บทความนี้อาจมีเนื้อหาทางการแพทย์ที่ต้องตรวจสอบเพิ่มเติม ต้องยืนยันด้วยตนเองในแท็บ Approval ก่อนเผยแพร่
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {(() => {
+              const issues = (form as any).score_issues_json ?? (form as any).score_issues;
+              if (!issues) return null;
+              const list = Array.isArray(issues) ? issues : [];
+              if (list.length === 0) return null;
+              const grouped = list.reduce((acc: Record<string, any[]>, it: any) => {
+                const k = `${it.category ?? "general"} · ${it.severity ?? "info"}`;
+                (acc[k] ||= []).push(it);
+                return acc;
+              }, {});
+              return (
+                <div className="space-y-2">
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground">Issues checklist</div>
+                  {Object.entries(grouped).map(([group, items]) => (
+                    <div key={group} className="rounded-lg border border-border p-3">
+                      <div className="text-[11px] font-medium text-foreground mb-2">{group}</div>
+                      <ul className="space-y-1.5">
+                        {(items as any[]).map((it, i) => (
+                          <li key={i} className="flex items-start gap-2 text-xs">
+                            <span className="mt-1 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                            <span className="text-foreground/80">{it.message ?? it.title ?? JSON.stringify(it)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {(() => {
+              const recs = (form as any).score_recommendations_json ?? (form as any).score_recommendations;
+              const list = Array.isArray(recs) ? recs : [];
+              if (list.length === 0) return null;
+              return (
+                <div className="rounded-lg border border-border p-3">
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Recommendations</div>
+                  <ul className="space-y-1.5 text-xs">
+                    {list.map((r: any, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <ShieldCheck className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                        <span className="text-foreground/80">{typeof r === "string" ? r : r.message ?? JSON.stringify(r)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
+
+            {form.answer_summary && (
+              <Field label="Answer summary" sublabel="AEO">
+                <div className="rounded-md border border-border bg-muted/30 p-3 text-xs text-foreground/80 whitespace-pre-wrap">
+                  {form.answer_summary}
+                </div>
+              </Field>
+            )}
+          </TabsContent>
+        )}
+
+        {/* Structured Data Tab */}
+        {isSeoAgent && (
+          <TabsContent value="structured" className="space-y-4">
+            <JsonPreview title="FAQ JSON" value={(form as any).faq_json} />
+            <JsonPreview title="Schema JSON" value={(form as any).schema_json} />
+            <JsonPreview title="Schema JSON-LD" value={form.schema_jsonld} />
+            <JsonPreview title="Internal Links" value={(form as any).internal_links_json} />
+            <JsonPreview title="Citations" value={form.citations} />
+            {!form.schema_jsonld &&
+              !(form as any).faq_json &&
+              !(form as any).schema_json &&
+              !(form as any).internal_links_json &&
+              (!form.citations || (Array.isArray(form.citations) && form.citations.length === 0)) && (
+                <div className="text-xs text-muted-foreground italic">ยังไม่มีข้อมูล structured data</div>
+              )}
+          </TabsContent>
+        )}
+
+        {/* Visual Assets Tab */}
+        {isSeoAgent && (
+          <TabsContent value="visuals" className="space-y-4">
+            <JsonPreview title="visual_assets_json (raw)" value={(form as any).visual_assets_json} />
+            {visualAssets.length === 0 ? (
+              <div className="text-xs text-muted-foreground italic flex items-center gap-2">
+                <ImageIcon className="w-4 h-4" /> ยังไม่มีรูปภาพประกอบที่ผูกกับบทความนี้
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {visualAssets.map((a: any) => (
+                  <div key={a.id} className="rounded-lg border border-border overflow-hidden bg-muted/20">
+                    {a.asset_url && (
+                      <div className="aspect-video bg-muted flex items-center justify-center">
+                        <img
+                          src={a.asset_url}
+                          alt={a.alt_text ?? ""}
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      </div>
+                    )}
+                    <div className="p-3 space-y-1 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="px-1.5 py-0.5 rounded bg-muted text-[10px] uppercase tracking-wider">
+                          {a.role ?? "inline"}
+                        </span>
+                        <span className="text-muted-foreground">#{a.position ?? 0}</span>
+                      </div>
+                      {a.alt_text && (
+                        <div>
+                          <span className="text-muted-foreground">alt: </span>
+                          <span className="text-foreground/80">{a.alt_text}</span>
+                        </div>
+                      )}
+                      {a.caption && (
+                        <div>
+                          <span className="text-muted-foreground">caption: </span>
+                          <span className="text-foreground/80">{a.caption}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        )}
+
+        {/* Approval Tab */}
+        {isSeoAgent && (
+          <TabsContent value="approval" className="space-y-5">
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Editor checklist</div>
+              <div className="space-y-2.5">
+                {APPROVAL_CHECKLIST.map((item) => (
+                  <label key={item.key} className="flex items-start gap-2.5 text-sm cursor-pointer">
+                    <Checkbox
+                      checked={!!checklist[item.key]}
+                      onCheckedChange={(v) =>
+                        setChecklist((prev) => ({ ...prev, [item.key]: v === true }))
+                      }
+                    />
+                    <span className="text-foreground/80 leading-tight">{item.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {typeof form.safety_score === "number" && form.safety_score < 80 && (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 space-y-2">
+                <div className="flex items-center gap-2 text-destructive text-sm font-medium">
+                  <ShieldAlert className="w-4 h-4" /> Manual safety confirmation required
+                </div>
+                <label className="flex items-start gap-2.5 text-xs cursor-pointer text-destructive/90">
+                  <Checkbox
+                    checked={confirmUnsafe}
+                    onCheckedChange={(v) => setConfirmUnsafe(v === true)}
+                  />
+                  <span>
+                    ฉันได้ตรวจสอบเนื้อหาทางการแพทย์ด้วยตนเองและยืนยันว่าปลอดภัยสำหรับเผยแพร่
+                  </span>
+                </label>
+              </div>
+            )}
+
+            <div className="text-[11px] text-muted-foreground">
+              บทความจะอยู่สถานะ <span className="font-medium text-foreground">draft</span> จนกว่าจะกดปุ่ม
+              <span className="font-medium text-foreground"> "เผยแพร่" </span> ด้านบน เมื่อเผยแพร่แล้ว ระบบจะตั้งค่า
+              <code className="mx-1 px-1 py-0.5 rounded bg-muted text-[10px]">workflow_status = "published"</code>
+              และบันทึก approval event อัตโนมัติ
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
