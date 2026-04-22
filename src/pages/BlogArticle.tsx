@@ -472,7 +472,7 @@ const BlogArticle = () => {
 
   const jsonLdData = useMemo(() => {
     if (!article) return undefined;
-    return [
+    const base = [
       {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
@@ -515,6 +515,13 @@ const BlogArticle = () => {
         ],
       },
     ];
+    // Inject custom schema_jsonld stored on the article (SEO Agent output).
+    // Only published articles reach this code path because the fetch query already filters status = "published".
+    if (article.schema_jsonld) {
+      const extras = Array.isArray(article.schema_jsonld) ? article.schema_jsonld : [article.schema_jsonld];
+      return [...base, ...extras.filter(Boolean)];
+    }
+    return base;
   }, [article, lang, title, metaDesc, canonicalUrl]);
 
   useSeoHead({
