@@ -26,6 +26,7 @@ interface Article {
   meta_description_en: string | null;
   excerpt_th: string | null;
   excerpt_en: string | null;
+  schema_jsonld?: any;
 }
 
 interface RelatedArticle {
@@ -438,7 +439,8 @@ const BlogArticle = () => {
                 src={src}
                 alt={alt}
                 loading="lazy"
-                className="w-full rounded-lg border border-border bg-card object-contain"
+                className="border border-border bg-card"
+                style={{ maxWidth: "100%", height: "auto", borderRadius: "16px", display: "block", margin: "0 auto" }}
               />
               {caption && (
                 <figcaption className="mt-2 text-xs text-muted-foreground text-center italic">
