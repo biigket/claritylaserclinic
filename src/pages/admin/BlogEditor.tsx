@@ -1075,7 +1075,7 @@ const BlogEditor = () => {
                         {isEditing ? (
                           <div className="space-y-2">
                             <div>
-                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">alt text</Label>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">alt text (TH)</Label>
                               <Input
                                 value={assetEditDraft.alt_text}
                                 onChange={(e) => setAssetEditDraft((p) => ({ ...p, alt_text: e.target.value }))}
@@ -1083,10 +1083,31 @@ const BlogEditor = () => {
                               />
                             </div>
                             <div>
-                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">caption</Label>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">caption (TH)</Label>
                               <Textarea
                                 value={assetEditDraft.caption}
                                 onChange={(e) => setAssetEditDraft((p) => ({ ...p, caption: e.target.value }))}
+                                rows={2}
+                                className="text-xs mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                                alt text (EN) — stored in metadata.alt_text_en
+                              </Label>
+                              <Input
+                                value={assetEditDraft.alt_text_en}
+                                onChange={(e) => setAssetEditDraft((p) => ({ ...p, alt_text_en: e.target.value }))}
+                                className="text-xs h-8 mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                                caption (EN) — stored in metadata.caption_en
+                              </Label>
+                              <Textarea
+                                value={assetEditDraft.caption_en}
+                                onChange={(e) => setAssetEditDraft((p) => ({ ...p, caption_en: e.target.value }))}
                                 rows={2}
                                 className="text-xs mt-1"
                               />
