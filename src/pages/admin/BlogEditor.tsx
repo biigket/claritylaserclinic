@@ -107,6 +107,17 @@ const BlogEditor = () => {
     meta_title_en: "",
     meta_description_th: "",
     meta_description_en: "",
+    source_system: "manual",
+    workflow_status: "none",
+    seo_score: null,
+    aeo_score: null,
+    geo_score: null,
+    safety_score: null,
+    citations: [],
+    schema_jsonld: null,
+    answer_summary: "",
+    target_intent: "",
+    target_keyword: "",
   });
 
   const [saving, setSaving] = useState(false);
@@ -116,6 +127,25 @@ const BlogEditor = () => {
   const [coverPrompt, setCoverPrompt] = useState("");
   const [autoSaveStatus, setAutoSaveStatus] = useState<string | null>(null);
   const pendingAiSave = useRef(false);
+  const [checklist, setChecklist] = useState<Record<string, boolean>>({});
+  const [confirmUnsafe, setConfirmUnsafe] = useState(false);
+
+  const isSeoAgent =
+    form.source_system === "seo_agent_mcp" || form.workflow_status === "needs_review";
+
+  const { data: visualAssets = [] } = useQuery({
+    queryKey: ["article-visual-assets", id],
+    queryFn: async () => {
+      if (isNew) return [] as any[];
+      const { data, error } = await (supabase.from("article_visual_assets") as any)
+        .select("*")
+        .eq("article_id", id)
+        .order("position", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !isNew,
+  });
 
   const { data: existing } = useQuery({
     queryKey: ["blog-article", id],
