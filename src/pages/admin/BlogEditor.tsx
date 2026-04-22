@@ -25,6 +25,10 @@ import {
   FileJson,
   Image as ImageIcon,
   Bot,
+  Copy,
+  ImagePlus,
+  Check,
+  Pencil,
 } from "lucide-react";
 import BlogAiAssistant, { type BlogInsertData } from "@/components/admin/BlogAiAssistant";
 
