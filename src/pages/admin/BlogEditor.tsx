@@ -249,6 +249,33 @@ const BlogEditor = () => {
   const isSeoAgent =
     form.source_system === "seo_agent_mcp" || form.workflow_status === "needs_review";
 
+  // Bilingual completion — required fields per language for SEO Agent drafts.
+  const thFields: Record<string, string> = {
+    title_th: form.title_th,
+    content_th: form.content_th,
+    meta_title_th: form.meta_title_th,
+    meta_description_th: form.meta_description_th,
+    excerpt_th: form.excerpt_th,
+  };
+  const enFields: Record<string, string> = {
+    title_en: form.title_en,
+    content_en: form.content_en,
+    meta_title_en: form.meta_title_en,
+    meta_description_en: form.meta_description_en,
+    excerpt_en: form.excerpt_en,
+  };
+  const missingTh = Object.entries(thFields)
+    .filter(([, v]) => !v || (typeof v === "string" && v.trim() === ""))
+    .map(([k]) => k);
+  const missingEn = Object.entries(enFields)
+    .filter(([, v]) => !v || (typeof v === "string" && v.trim() === ""))
+    .map(([k]) => k);
+  const thComplete = missingTh.length === 0;
+  const enComplete = missingEn.length === 0;
+  // Bilingual review approvals (separate TH/EN sign-off, optional but tracked).
+  const [reviewedTh, setReviewedTh] = useState(false);
+  const [reviewedEn, setReviewedEn] = useState(false);
+
   const { data: visualAssets = [] } = useQuery({
     queryKey: ["article-visual-assets", id],
     queryFn: async () => {
