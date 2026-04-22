@@ -172,6 +172,7 @@ const BlogEditor = () => {
   const [checklist, setChecklist] = useState<Record<string, boolean>>({});
   const [confirmUnsafe, setConfirmUnsafe] = useState(false);
   const [insertingVisuals, setInsertingVisuals] = useState(false);
+  const [insertingVisualsEn, setInsertingVisualsEn] = useState(false);
   const [copiedAssetId, setCopiedAssetId] = useState<string | null>(null);
   const [editingAsset, setEditingAsset] = useState<string | null>(null);
   const [assetEditDraft, setAssetEditDraft] = useState<{ alt_text: string; caption: string }>({
