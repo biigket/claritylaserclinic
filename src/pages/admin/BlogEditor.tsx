@@ -1126,14 +1126,26 @@ const BlogEditor = () => {
                           <>
                             {a.alt_text && (
                               <div>
-                                <span className="text-muted-foreground">alt: </span>
+                                <span className="text-muted-foreground">alt (TH): </span>
                                 <span className="text-foreground/80">{a.alt_text}</span>
                               </div>
                             )}
                             {a.caption && (
                               <div>
-                                <span className="text-muted-foreground">caption: </span>
+                                <span className="text-muted-foreground">caption (TH): </span>
                                 <span className="text-foreground/80">{a.caption}</span>
+                              </div>
+                            )}
+                            {a.metadata?.alt_text_en && (
+                              <div>
+                                <span className="text-muted-foreground">alt (EN): </span>
+                                <span className="text-foreground/80">{a.metadata.alt_text_en}</span>
+                              </div>
+                            )}
+                            {a.metadata?.caption_en && (
+                              <div>
+                                <span className="text-muted-foreground">caption (EN): </span>
+                                <span className="text-foreground/80">{a.metadata.caption_en}</span>
                               </div>
                             )}
                             {url && (
