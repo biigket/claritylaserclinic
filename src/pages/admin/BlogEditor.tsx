@@ -1019,22 +1019,37 @@ const BlogEditor = () => {
               <>
                 <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 p-3">
                   <div className="text-xs text-muted-foreground">
-                    แทรกรูปภาพทั้งหมดเป็น Markdown ใน <span className="font-medium text-foreground">content_th</span> ใต้หัวข้อ
-                    <span className="font-medium text-foreground"> "## ภาพประกอบในบทความ"</span>
+                    แทรกรูปภาพเป็น Markdown ระหว่างหัวข้อ H2 — แยกตามภาษา
+                    <span className="font-medium text-foreground"> (TH ใช้ alt/caption ภาษาไทย, EN ใช้ค่าใน metadata.alt_text_en / caption_en)</span>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleInsertVisuals}
-                    disabled={insertingVisuals}
-                  >
-                    {insertingVisuals ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <ImageIcon className="w-3.5 h-3.5" />
-                    )}
-                    Insert visuals into content
-                  </Button>
+                  <div className="flex gap-1.5 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleInsertVisuals("th")}
+                      disabled={insertingVisuals}
+                    >
+                      {insertingVisuals ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <ImageIcon className="w-3.5 h-3.5" />
+                      )}
+                      Insert (TH)
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleInsertVisuals("en")}
+                      disabled={insertingVisuals}
+                    >
+                      {insertingVisuals ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <ImageIcon className="w-3.5 h-3.5" />
+                      )}
+                      Insert (EN)
+                    </Button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {visualAssets.map((a: any) => {
