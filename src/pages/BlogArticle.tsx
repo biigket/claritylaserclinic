@@ -415,6 +415,41 @@ const BlogArticle = () => {
           continue;
         }
 
+        // Standalone image: ![alt](url)
+        const imgMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)\s*$/);
+        if (imgMatch) {
+          const alt = imgMatch[1];
+          const src = imgMatch[2];
+          // Optional caption on next non-empty line: *caption*
+          let caption = "";
+          let j = i + 1;
+          while (j < lines.length && lines[j].trim() === "") j++;
+          const next = j < lines.length ? lines[j].trim() : "";
+          const capMatch = next.match(/^\*([^*].*?)\*$/);
+          if (capMatch) {
+            caption = capMatch[1];
+            i = j + 1;
+          } else {
+            i++;
+          }
+          elements.push(
+            <figure key={`img-${blockIdx}-${i}`} className="my-6">
+              <img
+                src={src}
+                alt={alt}
+                loading="lazy"
+                className="w-full rounded-lg border border-border bg-card object-contain"
+              />
+              {caption && (
+                <figcaption className="mt-2 text-xs text-muted-foreground text-center italic">
+                  {caption}
+                </figcaption>
+              )}
+            </figure>
+          );
+          continue;
+        }
+
         // Regular paragraph
         elements.push(
           <p key={`p-${blockIdx}-${i}`} className="text-sm text-muted-foreground leading-relaxed mb-3">
