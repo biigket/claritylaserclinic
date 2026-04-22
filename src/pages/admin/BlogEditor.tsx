@@ -477,6 +477,35 @@ const BlogEditor = () => {
       return;
     }
     if (publish && isSeoAgent) {
+      // Bilingual completeness gate for SEO Agent drafts
+      const thFields: Record<string, string> = {
+        title_th: form.title_th || "",
+        content_th: form.content_th || "",
+        meta_title_th: form.meta_title_th || "",
+        meta_description_th: form.meta_description_th || "",
+        excerpt_th: form.excerpt_th || "",
+      };
+      const enFields: Record<string, string> = {
+        title_en: form.title_en || "",
+        content_en: form.content_en || "",
+        meta_title_en: form.meta_title_en || "",
+        meta_description_en: form.meta_description_en || "",
+        excerpt_en: form.excerpt_en || "",
+      };
+      const missingTh = Object.entries(thFields)
+        .filter(([, v]) => !v.trim())
+        .map(([k]) => k);
+      const missingEn = Object.entries(enFields)
+        .filter(([, v]) => !v.trim())
+        .map(([k]) => k);
+      if (missingTh.length > 0 || missingEn.length > 0) {
+        toast({
+          title: "ข้อมูลสองภาษาไม่ครบ — ไม่สามารถเผยแพร่ได้",
+          description: `Missing TH: ${missingTh.join(", ") || "—"} | Missing EN: ${missingEn.join(", ") || "—"}`,
+          variant: "destructive",
+        });
+        return;
+      }
       const allChecked = APPROVAL_CHECKLIST.every((c) => checklist[c.key]);
       if (!allChecked) {
         toast({
