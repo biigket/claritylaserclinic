@@ -506,6 +506,15 @@ const BlogEditor = () => {
         });
         return;
       }
+      // Bilingual completeness gate: SEO Agent articles must have both TH and EN fields.
+      if (!thComplete || !enComplete) {
+        toast({
+          title: "ข้อมูลสองภาษาไม่ครบ",
+          description: `Missing TH: ${missingTh.join(", ") || "—"} | Missing EN: ${missingEn.join(", ") || "—"}`,
+          variant: "destructive",
+        });
+        return;
+      }
       if (typeof form.safety_score === "number" && form.safety_score < 80 && !confirmUnsafe) {
         toast({
           title: "Safety score < 80 — ต้องยืนยันก่อนเผยแพร่",
@@ -672,6 +681,30 @@ const BlogEditor = () => {
         <div className="flex gap-2">
           {autoSaveStatus && (
             <span className="text-[10px] text-muted-foreground self-center animate-pulse">{autoSaveStatus}</span>
+          )}
+          {isSeoAgent && (
+            <div className="flex items-center gap-1.5 self-center">
+              <span
+                className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border ${
+                  thComplete
+                    ? "border-emerald-500/30 text-emerald-700 bg-emerald-500/10"
+                    : "border-amber-500/30 text-amber-700 bg-amber-500/10"
+                }`}
+                title={thComplete ? "TH content complete" : `Missing: ${missingTh.join(", ")}`}
+              >
+                TH {thComplete ? "✓" : `· ${missingTh.length}`}
+              </span>
+              <span
+                className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border ${
+                  enComplete
+                    ? "border-emerald-500/30 text-emerald-700 bg-emerald-500/10"
+                    : "border-amber-500/30 text-amber-700 bg-amber-500/10"
+                }`}
+                title={enComplete ? "EN content complete" : `Missing: ${missingEn.join(", ")}`}
+              >
+                EN {enComplete ? "✓" : `· ${missingEn.length}`}
+              </span>
+            </div>
           )}
           <BlogAiAssistant
             onInsert={(data: BlogInsertData) => {
@@ -1010,22 +1043,21 @@ const BlogEditor = () => {
               <>
                 <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 p-3">
                   <div className="text-xs text-muted-foreground">
-                    แทรกรูปภาพทั้งหมดเป็น Markdown ใน <span className="font-medium text-foreground">content_th</span> ใต้หัวข้อ
-                    <span className="font-medium text-foreground"> "## ภาพประกอบในบทความ"</span>
+                    แทรกรูปภาพระหว่าง section ของบทความ — ใช้ alt/caption ภาษาไทยสำหรับ
+                    <span className="font-medium text-foreground"> content_th</span> และภาษาอังกฤษ
+                    (<span className="font-mono">metadata.alt_text_en</span> / <span className="font-mono">metadata.caption_en</span>) สำหรับ
+                    <span className="font-medium text-foreground"> content_en</span>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleInsertVisuals}
-                    disabled={insertingVisuals}
-                  >
-                    {insertingVisuals ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <ImageIcon className="w-3.5 h-3.5" />
-                    )}
-                    Insert visuals into content
-                  </Button>
+                  <div className="flex gap-1.5 shrink-0">
+                    <Button size="sm" variant="outline" onClick={handleInsertVisuals} disabled={insertingVisuals}>
+                      {insertingVisuals ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
+                      Insert (TH)
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={handleInsertVisualsEn} disabled={insertingVisualsEn}>
+                      {insertingVisualsEn ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
+                      Insert (EN)
+                    </Button>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {visualAssets.map((a: any) => {
