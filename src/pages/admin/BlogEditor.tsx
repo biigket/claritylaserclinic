@@ -596,6 +596,9 @@ const BlogEditor = () => {
               geo_score: form.geo_score,
               safety_score: form.safety_score,
               checklist,
+              reviewed_th: reviewedTh,
+              reviewed_en: reviewedEn,
+              bilingual_complete: { th: thComplete, en: enComplete },
             },
           });
         } catch (e) {
@@ -942,6 +945,37 @@ const BlogEditor = () => {
               <ScoreBadge label="Safety" value={form.safety_score} />
             </div>
 
+            {/* Bilingual completeness review issues */}
+            {(missingTh.length > 0 || missingEn.length > 0) && (
+              <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 space-y-2">
+                <div className="text-xs uppercase tracking-wider text-amber-700 font-medium">
+                  Bilingual completeness
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <div className="font-medium text-foreground mb-1">TH {thComplete ? "✓" : "·"} Missing</div>
+                    {thComplete ? (
+                      <div className="text-emerald-700">All required fields present</div>
+                    ) : (
+                      <ul className="space-y-0.5 text-foreground/80">
+                        {missingTh.map((f) => <li key={f}>• <span className="font-mono">{f}</span></li>)}
+                      </ul>
+                    )}
+                  </div>
+                  <div>
+                    <div className="font-medium text-foreground mb-1">EN {enComplete ? "✓" : "·"} Missing</div>
+                    {enComplete ? (
+                      <div className="text-emerald-700">All required fields present</div>
+                    ) : (
+                      <ul className="space-y-0.5 text-foreground/80">
+                        {missingEn.map((f) => <li key={f}>• <span className="font-mono">{f}</span></li>)}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {typeof form.safety_score === "number" && form.safety_score < 80 && (
               <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 flex gap-3">
                 <ShieldAlert className="w-5 h-5 text-destructive shrink-0" />
@@ -1215,6 +1249,39 @@ const BlogEditor = () => {
                     <span className="text-foreground/80 leading-tight">{item.label}</span>
                   </label>
                 ))}
+              </div>
+            </div>
+
+            {/* Bilingual sign-off (separate TH / EN approval). Optional, audit-only. */}
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Bilingual sign-off</div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <label className={`flex items-start gap-2.5 text-sm cursor-pointer rounded-md border p-3 transition-colors ${reviewedTh ? "border-emerald-500/40 bg-emerald-500/5" : "border-border"}`}>
+                  <Checkbox
+                    checked={reviewedTh}
+                    onCheckedChange={(v) => setReviewedTh(v === true)}
+                    disabled={!thComplete}
+                  />
+                  <span className="text-foreground/80 leading-tight">
+                    <span className="block font-medium">เนื้อหาภาษาไทย (TH) ตรวจสอบแล้ว</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {thComplete ? "Required fields present" : `Missing: ${missingTh.join(", ")}`}
+                    </span>
+                  </span>
+                </label>
+                <label className={`flex items-start gap-2.5 text-sm cursor-pointer rounded-md border p-3 transition-colors ${reviewedEn ? "border-emerald-500/40 bg-emerald-500/5" : "border-border"}`}>
+                  <Checkbox
+                    checked={reviewedEn}
+                    onCheckedChange={(v) => setReviewedEn(v === true)}
+                    disabled={!enComplete}
+                  />
+                  <span className="text-foreground/80 leading-tight">
+                    <span className="block font-medium">English content (EN) reviewed</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {enComplete ? "Required fields present" : `Missing: ${missingEn.join(", ")}`}
+                    </span>
+                  </span>
+                </label>
               </div>
             </div>
 
