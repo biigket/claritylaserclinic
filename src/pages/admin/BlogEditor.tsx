@@ -964,34 +964,107 @@ const BlogEditor = () => {
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {visualAssets.map((a: any) => (
-                  <div key={a.id} className="rounded-lg border border-border overflow-hidden bg-muted/20">
-                    <VisualAssetPreview
-                      url={a.asset_url ?? a.metadata?.uploaded_asset_url ?? null}
-                      alt={a.alt_text ?? ""}
-                    />
-                    <div className="p-3 space-y-1 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="px-1.5 py-0.5 rounded bg-muted text-[10px] uppercase tracking-wider">
-                          {a.role ?? "inline"}
-                        </span>
-                        <span className="text-muted-foreground">#{a.position ?? 0}</span>
+                {visualAssets.map((a: any) => {
+                  const url = a.asset_url ?? a.metadata?.uploaded_asset_url ?? null;
+                  const isEditing = editingAsset === a.id;
+                  const isCover = url && form.cover_image_url === url;
+                  return (
+                    <div key={a.id} className="rounded-lg border border-border overflow-hidden bg-muted/20">
+                      <VisualAssetPreview url={url} alt={a.alt_text ?? ""} />
+                      <div className="p-3 space-y-2 text-xs">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="px-1.5 py-0.5 rounded bg-muted text-[10px] uppercase tracking-wider">
+                            {a.role ?? "inline"}
+                          </span>
+                          <span className="text-muted-foreground">#{a.position ?? 0}</span>
+                          {isCover && (
+                            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 text-[10px] uppercase tracking-wider">
+                              cover
+                            </span>
+                          )}
+                        </div>
+
+                        {isEditing ? (
+                          <div className="space-y-2">
+                            <div>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">alt text</Label>
+                              <Input
+                                value={assetEditDraft.alt_text}
+                                onChange={(e) => setAssetEditDraft((p) => ({ ...p, alt_text: e.target.value }))}
+                                className="text-xs h-8 mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">caption</Label>
+                              <Textarea
+                                value={assetEditDraft.caption}
+                                onChange={(e) => setAssetEditDraft((p) => ({ ...p, caption: e.target.value }))}
+                                rows={2}
+                                className="text-xs mt-1"
+                              />
+                            </div>
+                            <div className="flex gap-1.5">
+                              <Button size="sm" variant="default" className="h-7 text-[10px]" onClick={() => saveAssetEdit(a.id)} disabled={savingAsset}>
+                                {savingAsset ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                บันทึก
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-7 text-[10px]" onClick={cancelEditAsset} disabled={savingAsset}>
+                                ยกเลิก
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {a.alt_text && (
+                              <div>
+                                <span className="text-muted-foreground">alt: </span>
+                                <span className="text-foreground/80">{a.alt_text}</span>
+                              </div>
+                            )}
+                            {a.caption && (
+                              <div>
+                                <span className="text-muted-foreground">caption: </span>
+                                <span className="text-foreground/80">{a.caption}</span>
+                              </div>
+                            )}
+                            {url && (
+                              <div className="flex flex-wrap gap-1.5 pt-1.5 border-t border-border/50">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-[10px] gap-1"
+                                  onClick={() => handleCopyAssetUrl(url, a.id)}
+                                >
+                                  {copiedAssetId === a.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                  Copy URL
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-[10px] gap-1"
+                                  onClick={() => handleSetAsCover(url)}
+                                  disabled={isCover}
+                                >
+                                  <ImagePlus className="w-3 h-3" />
+                                  {isCover ? "Cover" : "Set as cover"}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 text-[10px] gap-1"
+                                  onClick={() => startEditAsset(a)}
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                  Edit
+                                </Button>
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
-                      {a.alt_text && (
-                        <div>
-                          <span className="text-muted-foreground">alt: </span>
-                          <span className="text-foreground/80">{a.alt_text}</span>
-                        </div>
-                      )}
-                      {a.caption && (
-                        <div>
-                          <span className="text-muted-foreground">caption: </span>
-                          <span className="text-foreground/80">{a.caption}</span>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 </div>
               </>
             )}
