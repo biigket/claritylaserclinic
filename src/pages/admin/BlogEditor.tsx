@@ -262,30 +262,56 @@ const BlogEditor = () => {
       }
 
       const currentContent = form.content_th || "";
-      const firstUrl = list[0].asset_url ?? list[0].metadata?.uploaded_asset_url;
-      if (firstUrl && currentContent.includes(firstUrl)) {
+      // Filter out images already present in content
+      const pending = list.filter((a: any) => {
+        const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
+        return url && !currentContent.includes(url);
+      });
+      if (pending.length === 0) {
         toast({ title: "Visuals already inserted" });
         return;
       }
 
-      const blocks = list
-        .map((a: any) => {
-          const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
-          if (!url) return null;
-          if (currentContent.includes(url)) return null;
-          const alt = (a.alt_text ?? "").replace(/[\[\]]/g, "");
-          const caption = a.caption ? `\n\n*${a.caption}*` : "";
-          return `![${alt}](${url})${caption}`;
-        })
-        .filter(Boolean);
+      const buildBlock = (a: any) => {
+        const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
+        const alt = (a.alt_text ?? "").replace(/[\[\]]/g, "");
+        const caption = a.caption ? `\n\n*${a.caption}*` : "";
+        return `![${alt}](${url})${caption}`;
+      };
 
-      if (blocks.length === 0) {
-        toast({ title: "Visuals already inserted" });
-        return;
+      // Interleave between H2 sections (skip the first H2 to avoid putting an image before the intro).
+      const lines = currentContent.split("\n");
+      const h2Indices: number[] = [];
+      lines.forEach((ln, idx) => {
+        if (ln.trim().startsWith("## ")) h2Indices.push(idx);
+      });
+
+      let newContent: string;
+      if (h2Indices.length >= 2) {
+        // Insertion slots = positions just before each H2 starting from the 2nd.
+        const slots = h2Indices.slice(1);
+        const result: string[] = [];
+        let assetIdx = 0;
+        for (let i = 0; i < lines.length; i++) {
+          if (slots.includes(i) && assetIdx < pending.length) {
+            result.push("", buildBlock(pending[assetIdx]), "");
+            assetIdx++;
+          }
+          result.push(lines[i]);
+        }
+        // Any remaining images go under a trailing section.
+        if (assetIdx < pending.length) {
+          result.push("", "## ภาพประกอบเพิ่มเติม", "");
+          for (let j = assetIdx; j < pending.length; j++) {
+            result.push(buildBlock(pending[j]), "");
+          }
+        }
+        newContent = result.join("\n");
+      } else {
+        // Fallback: append under a dedicated section.
+        const separator = currentContent.endsWith("\n") ? "\n" : "\n\n";
+        newContent = `${currentContent}${separator}## ภาพประกอบในบทความ\n\n${pending.map(buildBlock).join("\n\n")}\n`;
       }
-
-      const separator = currentContent.endsWith("\n") ? "\n" : "\n\n";
-      const newContent = `${currentContent}${separator}## ภาพประกอบในบทความ\n\n${blocks.join("\n\n")}\n`;
 
       const { error: updateErr } = await blogTable()
         .update({ content_th: newContent })
@@ -294,7 +320,7 @@ const BlogEditor = () => {
 
       set("content_th", newContent);
       queryClient.invalidateQueries({ queryKey: ["blog-article", id] });
-      toast({ title: `แทรกรูปภาพ ${blocks.length} รายการสำเร็จ` });
+      toast({ title: `แทรกรูปภาพ ${pending.length} รายการสำเร็จ` });
     } catch (err: any) {
       toast({ title: "แทรกรูปภาพล้มเหลว", description: err.message, variant: "destructive" });
     } finally {
