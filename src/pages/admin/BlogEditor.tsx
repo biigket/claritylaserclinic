@@ -857,7 +857,27 @@ const BlogEditor = () => {
                 <ImageIcon className="w-4 h-4" /> ยังไม่มีรูปภาพประกอบที่ผูกกับบทความนี้
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <>
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 p-3">
+                  <div className="text-xs text-muted-foreground">
+                    แทรกรูปภาพทั้งหมดเป็น Markdown ใน <span className="font-medium text-foreground">content_th</span> ใต้หัวข้อ
+                    <span className="font-medium text-foreground"> "## ภาพประกอบในบทความ"</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleInsertVisuals}
+                    disabled={insertingVisuals}
+                  >
+                    {insertingVisuals ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <ImageIcon className="w-3.5 h-3.5" />
+                    )}
+                    Insert visuals into content
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {visualAssets.map((a: any) => (
                   <div key={a.id} className="rounded-lg border border-border overflow-hidden bg-muted/20">
                     <VisualAssetPreview
@@ -886,7 +906,8 @@ const BlogEditor = () => {
                     </div>
                   </div>
                 ))}
-              </div>
+                </div>
+              </>
             )}
           </TabsContent>
         )}
