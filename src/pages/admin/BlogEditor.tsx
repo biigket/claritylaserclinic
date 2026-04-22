@@ -44,6 +44,46 @@ const Field = ({ label, sublabel, children }: { label: string; sublabel?: string
   </div>
 );
 
+const ScoreBadge = ({ label, value }: { label: string; value: number | null | undefined }) => {
+  const v = typeof value === "number" ? value : null;
+  const tone =
+    v === null
+      ? "bg-muted text-muted-foreground"
+      : v >= 80
+        ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/30"
+        : v >= 60
+          ? "bg-amber-500/10 text-amber-700 border-amber-500/30"
+          : "bg-destructive/10 text-destructive border-destructive/30";
+  return (
+    <div className={`rounded-lg border px-3 py-2 ${tone}`}>
+      <div className="text-[10px] uppercase tracking-wider opacity-80">{label}</div>
+      <div className="font-display text-xl">{v === null ? "—" : v}</div>
+    </div>
+  );
+};
+
+const JsonPreview = ({ title, value }: { title: string; value: any }) => {
+  if (!value || (Array.isArray(value) && value.length === 0)) return null;
+  return (
+    <div className="rounded-lg border border-border bg-muted/30 p-3">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5 flex items-center gap-1.5">
+        <FileJson className="w-3 h-3" /> {title}
+      </div>
+      <pre className="text-[11px] font-mono whitespace-pre-wrap break-all max-h-64 overflow-auto text-foreground/80">
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    </div>
+  );
+};
+
+const APPROVAL_CHECKLIST = [
+  { key: "content", label: "ตรวจเนื้อหา (Content reviewed)" },
+  { key: "medical", label: "ตรวจข้อมูลทางการแพทย์ (Medical claims reviewed)" },
+  { key: "seo", label: "ตรวจ SEO metadata" },
+  { key: "links", label: "ตรวจ Internal links" },
+  { key: "visuals", label: "ตรวจรูปภาพ & alt text (Visuals/alt text reviewed)" },
+] as const;
+
 const BlogEditor = () => {
   const { id } = useParams();
   const isNew = !id || id === "new";
