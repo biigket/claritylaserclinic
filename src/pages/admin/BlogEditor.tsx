@@ -291,8 +291,9 @@ const BlogEditor = () => {
       payload.published_at = new Date().toISOString();
       if (isSeoAgent) {
         payload.workflow_status = "published";
-        payload.reviewed_at = new Date().toISOString();
-        payload.reviewed_by = user?.id ?? null;
+        // Approval timestamp/actor are recorded in content_approval_events.
+        // We intentionally do NOT write final_approved_at/final_approved_by here
+        // because those columns are not present in the current blog_articles schema.
       }
     }
 
