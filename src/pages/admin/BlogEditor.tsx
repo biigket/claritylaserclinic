@@ -760,15 +760,10 @@ const BlogEditor = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {visualAssets.map((a: any) => (
                   <div key={a.id} className="rounded-lg border border-border overflow-hidden bg-muted/20">
-                    {a.asset_url && (
-                      <div className="aspect-video bg-muted flex items-center justify-center">
-                        <img
-                          src={a.asset_url}
-                          alt={a.alt_text ?? ""}
-                          className="max-w-full max-h-full object-contain"
-                        />
-                      </div>
-                    )}
+                    <VisualAssetPreview
+                      url={a.asset_url ?? a.metadata?.uploaded_asset_url ?? null}
+                      alt={a.alt_text ?? ""}
+                    />
                     <div className="p-3 space-y-1 text-xs">
                       <div className="flex items-center gap-2">
                         <span className="px-1.5 py-0.5 rounded bg-muted text-[10px] uppercase tracking-wider">
