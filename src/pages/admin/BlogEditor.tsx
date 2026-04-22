@@ -318,7 +318,7 @@ const BlogEditor = () => {
     set("tags", (form.tags as string[]).filter((x) => x !== t));
   };
 
-  const handleInsertVisuals = async () => {
+  const handleInsertVisuals = async (targetLang: "th" | "en" = "th") => {
     if (isNew || !id) {
       toast({ title: "กรุณาบันทึกบทความก่อน", variant: "destructive" });
       return;
@@ -338,7 +338,16 @@ const BlogEditor = () => {
         return;
       }
 
-      const currentContent = form.content_th || "";
+      const contentField = targetLang === "en" ? "content_en" : "content_th";
+      const currentContent = (form[contentField] as string) || "";
+      if (targetLang === "en" && !currentContent.trim()) {
+        toast({
+          title: "ยังไม่มี content_en",
+          description: "กรุณาเพิ่มเนื้อหาภาษาอังกฤษก่อนแทรกรูปภาพ",
+          variant: "destructive",
+        });
+        return;
+      }
       // Filter out images already present in content
       const pending = list.filter((a: any) => {
         const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
@@ -351,8 +360,16 @@ const BlogEditor = () => {
 
       const buildBlock = (a: any) => {
         const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
-        const alt = (a.alt_text ?? "").replace(/[\[\]]/g, "");
-        const caption = a.caption ? `\n\n*${a.caption}*` : "";
+        const altRaw =
+          targetLang === "en"
+            ? a.metadata?.alt_text_en ?? a.alt_text ?? ""
+            : a.alt_text ?? "";
+        const captionRaw =
+          targetLang === "en"
+            ? a.metadata?.caption_en ?? a.caption ?? ""
+            : a.caption ?? "";
+        const alt = String(altRaw).replace(/[\[\]]/g, "");
+        const caption = captionRaw ? `\n\n*${captionRaw}*` : "";
         return `![${alt}](${url})${caption}`;
       };
 
@@ -364,6 +381,10 @@ const BlogEditor = () => {
       });
 
       let newContent: string;
+      const trailingHeading =
+        targetLang === "en" ? "## Additional visuals" : "## ภาพประกอบเพิ่มเติม";
+      const fallbackHeading =
+        targetLang === "en" ? "## Visuals" : "## ภาพประกอบในบทความ";
       if (h2Indices.length >= 2) {
         // Insertion slots = positions just before each H2 starting from the 2nd.
         const slots = h2Indices.slice(1);
@@ -378,7 +399,7 @@ const BlogEditor = () => {
         }
         // Any remaining images go under a trailing section.
         if (assetIdx < pending.length) {
-          result.push("", "## ภาพประกอบเพิ่มเติม", "");
+          result.push("", trailingHeading, "");
           for (let j = assetIdx; j < pending.length; j++) {
             result.push(buildBlock(pending[j]), "");
           }
@@ -387,17 +408,19 @@ const BlogEditor = () => {
       } else {
         // Fallback: append under a dedicated section.
         const separator = currentContent.endsWith("\n") ? "\n" : "\n\n";
-        newContent = `${currentContent}${separator}## ภาพประกอบในบทความ\n\n${pending.map(buildBlock).join("\n\n")}\n`;
+        newContent = `${currentContent}${separator}${fallbackHeading}\n\n${pending.map(buildBlock).join("\n\n")}\n`;
       }
 
       const { error: updateErr } = await blogTable()
-        .update({ content_th: newContent })
+        .update({ [contentField]: newContent })
         .eq("id", id);
       if (updateErr) throw updateErr;
 
-      set("content_th", newContent);
+      set(contentField, newContent);
       queryClient.invalidateQueries({ queryKey: ["blog-article", id] });
-      toast({ title: `แทรกรูปภาพ ${pending.length} รายการสำเร็จ` });
+      toast({
+        title: `แทรกรูปภาพ ${pending.length} รายการสำเร็จ (${targetLang.toUpperCase()})`,
+      });
     } catch (err: any) {
       toast({ title: "แทรกรูปภาพล้มเหลว", description: err.message, variant: "destructive" });
     } finally {
