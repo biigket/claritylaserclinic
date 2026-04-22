@@ -84,6 +84,44 @@ const APPROVAL_CHECKLIST = [
   { key: "visuals", label: "ตรวจรูปภาพ & alt text (Visuals/alt text reviewed)" },
 ] as const;
 
+const VisualAssetPreview = ({ url, alt }: { url: string | null; alt: string }) => {
+  const [errored, setErrored] = useState(false);
+
+  if (!url) {
+    return (
+      <div className="aspect-video bg-muted flex items-center justify-center text-xs text-muted-foreground">
+        No asset URL
+      </div>
+    );
+  }
+
+  if (errored) {
+    return (
+      <div className="aspect-video bg-muted flex flex-col items-center justify-center gap-1 text-xs text-destructive p-3 text-center">
+        <span>Image failed to load</span>
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="underline break-all text-foreground/70 hover:text-foreground"
+        >
+          {url}
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={url}
+      alt={alt}
+      loading="lazy"
+      onError={() => setErrored(true)}
+      className="w-full aspect-video object-contain bg-white"
+    />
+  );
+};
+
 const BlogEditor = () => {
   const { id } = useParams();
   const isNew = !id || id === "new";
