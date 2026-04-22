@@ -167,6 +167,7 @@ const BlogEditor = () => {
   const pendingAiSave = useRef(false);
   const [checklist, setChecklist] = useState<Record<string, boolean>>({});
   const [confirmUnsafe, setConfirmUnsafe] = useState(false);
+  const [insertingVisuals, setInsertingVisuals] = useState(false);
 
   const isSeoAgent =
     form.source_system === "seo_agent_mcp" || form.workflow_status === "needs_review";
@@ -234,6 +235,67 @@ const BlogEditor = () => {
 
   const removeTag = (t: string) => {
     set("tags", (form.tags as string[]).filter((x) => x !== t));
+  };
+
+  const handleInsertVisuals = async () => {
+    if (isNew || !id) {
+      toast({ title: "กรุณาบันทึกบทความก่อน", variant: "destructive" });
+      return;
+    }
+    setInsertingVisuals(true);
+    try {
+      const { data: assets, error } = await (supabase.from("article_visual_assets") as any)
+        .select("*")
+        .eq("article_id", id)
+        .order("position", { ascending: true });
+      if (error) throw error;
+      const list = (assets ?? []).filter(
+        (a: any) => a.asset_url || a.metadata?.uploaded_asset_url
+      );
+      if (list.length === 0) {
+        toast({ title: "ไม่มีรูปภาพประกอบให้แทรก", variant: "destructive" });
+        return;
+      }
+
+      const currentContent = form.content_th || "";
+      const firstUrl = list[0].asset_url ?? list[0].metadata?.uploaded_asset_url;
+      if (firstUrl && currentContent.includes(firstUrl)) {
+        toast({ title: "Visuals already inserted" });
+        return;
+      }
+
+      const blocks = list
+        .map((a: any) => {
+          const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
+          if (!url) return null;
+          if (currentContent.includes(url)) return null;
+          const alt = (a.alt_text ?? "").replace(/[\[\]]/g, "");
+          const caption = a.caption ? `\n\n*${a.caption}*` : "";
+          return `![${alt}](${url})${caption}`;
+        })
+        .filter(Boolean);
+
+      if (blocks.length === 0) {
+        toast({ title: "Visuals already inserted" });
+        return;
+      }
+
+      const separator = currentContent.endsWith("\n") ? "\n" : "\n\n";
+      const newContent = `${currentContent}${separator}## ภาพประกอบในบทความ\n\n${blocks.join("\n\n")}\n`;
+
+      const { error: updateErr } = await blogTable()
+        .update({ content_th: newContent })
+        .eq("id", id);
+      if (updateErr) throw updateErr;
+
+      set("content_th", newContent);
+      queryClient.invalidateQueries({ queryKey: ["blog-article", id] });
+      toast({ title: `แทรกรูปภาพ ${blocks.length} รายการสำเร็จ` });
+    } catch (err: any) {
+      toast({ title: "แทรกรูปภาพล้มเหลว", description: err.message, variant: "destructive" });
+    } finally {
+      setInsertingVisuals(false);
+    }
   };
 
   const handleGenerateCover = async () => {
@@ -795,7 +857,27 @@ const BlogEditor = () => {
                 <ImageIcon className="w-4 h-4" /> ยังไม่มีรูปภาพประกอบที่ผูกกับบทความนี้
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <>
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 p-3">
+                  <div className="text-xs text-muted-foreground">
+                    แทรกรูปภาพทั้งหมดเป็น Markdown ใน <span className="font-medium text-foreground">content_th</span> ใต้หัวข้อ
+                    <span className="font-medium text-foreground"> "## ภาพประกอบในบทความ"</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleInsertVisuals}
+                    disabled={insertingVisuals}
+                  >
+                    {insertingVisuals ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <ImageIcon className="w-3.5 h-3.5" />
+                    )}
+                    Insert visuals into content
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {visualAssets.map((a: any) => (
                   <div key={a.id} className="rounded-lg border border-border overflow-hidden bg-muted/20">
                     <VisualAssetPreview
@@ -824,7 +906,8 @@ const BlogEditor = () => {
                     </div>
                   </div>
                 ))}
-              </div>
+                </div>
+              </>
             )}
           </TabsContent>
         )}
