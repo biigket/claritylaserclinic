@@ -298,12 +298,13 @@ const BlogEditor = () => {
     set("tags", (form.tags as string[]).filter((x) => x !== t));
   };
 
-  const handleInsertVisuals = async () => {
+  const handleInsertVisualsForLang = async (targetLang: "th" | "en") => {
     if (isNew || !id) {
       toast({ title: "กรุณาบันทึกบทความก่อน", variant: "destructive" });
       return;
     }
-    setInsertingVisuals(true);
+    if (targetLang === "th") setInsertingVisuals(true);
+    else setInsertingVisualsEn(true);
     try {
       const { data: assets, error } = await (supabase.from("article_visual_assets") as any)
         .select("*")
@@ -318,7 +319,12 @@ const BlogEditor = () => {
         return;
       }
 
-      const currentContent = form.content_th || "";
+      const contentField = targetLang === "th" ? "content_th" : "content_en";
+      const currentContent = (form as any)[contentField] || "";
+      if (targetLang === "en" && !currentContent) {
+        toast({ title: "ยังไม่มีเนื้อหา EN — กรุณาเพิ่มเนื้อหาภาษาอังกฤษก่อน", variant: "destructive" });
+        return;
+      }
       // Filter out images already present in content
       const pending = list.filter((a: any) => {
         const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
@@ -331,8 +337,17 @@ const BlogEditor = () => {
 
       const buildBlock = (a: any) => {
         const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
-        const alt = (a.alt_text ?? "").replace(/[\[\]]/g, "");
-        const caption = a.caption ? `\n\n*${a.caption}*` : "";
+        // Bilingual metadata resolution.
+        // Schema currently only has alt_text/caption (Thai default).
+        // English overrides live in metadata.alt_text_en / metadata.caption_en.
+        const altTh = a.alt_text ?? "";
+        const captionTh = a.caption ?? "";
+        const altEn = a.metadata?.alt_text_en ?? "";
+        const captionEn = a.metadata?.caption_en ?? "";
+        const rawAlt = targetLang === "en" ? (altEn || altTh) : altTh;
+        const rawCaption = targetLang === "en" ? (captionEn || captionTh) : captionTh;
+        const alt = String(rawAlt).replace(/[\[\]]/g, "");
+        const caption = rawCaption ? `\n\n*${rawCaption}*` : "";
         return `![${alt}](${url})${caption}`;
       };
 
@@ -358,7 +373,7 @@ const BlogEditor = () => {
         }
         // Any remaining images go under a trailing section.
         if (assetIdx < pending.length) {
-          result.push("", "## ภาพประกอบเพิ่มเติม", "");
+          result.push("", targetLang === "en" ? "## Additional visuals" : "## ภาพประกอบเพิ่มเติม", "");
           for (let j = assetIdx; j < pending.length; j++) {
             result.push(buildBlock(pending[j]), "");
           }
@@ -367,23 +382,28 @@ const BlogEditor = () => {
       } else {
         // Fallback: append under a dedicated section.
         const separator = currentContent.endsWith("\n") ? "\n" : "\n\n";
-        newContent = `${currentContent}${separator}## ภาพประกอบในบทความ\n\n${pending.map(buildBlock).join("\n\n")}\n`;
+        const heading = targetLang === "en" ? "## Visuals in this article" : "## ภาพประกอบในบทความ";
+        newContent = `${currentContent}${separator}${heading}\n\n${pending.map(buildBlock).join("\n\n")}\n`;
       }
 
       const { error: updateErr } = await blogTable()
-        .update({ content_th: newContent })
+        .update({ [contentField]: newContent })
         .eq("id", id);
       if (updateErr) throw updateErr;
 
-      set("content_th", newContent);
+      set(contentField, newContent);
       queryClient.invalidateQueries({ queryKey: ["blog-article", id] });
-      toast({ title: `แทรกรูปภาพ ${pending.length} รายการสำเร็จ` });
+      toast({ title: `แทรกรูปภาพ ${pending.length} รายการสำเร็จ (${targetLang.toUpperCase()})` });
     } catch (err: any) {
       toast({ title: "แทรกรูปภาพล้มเหลว", description: err.message, variant: "destructive" });
     } finally {
-      setInsertingVisuals(false);
+      if (targetLang === "th") setInsertingVisuals(false);
+      else setInsertingVisualsEn(false);
     }
   };
+
+  const handleInsertVisuals = () => handleInsertVisualsForLang("th");
+  const handleInsertVisualsEn = () => handleInsertVisualsForLang("en");
 
   const handleGenerateCover = async () => {
     if (!form.title_th && !form.title_en) {
