@@ -246,6 +246,25 @@ const BlogEditor = () => {
       toast({ title: "ต้องมีชื่อบทความ (TH) เพื่อเผยแพร่", variant: "destructive" });
       return;
     }
+    if (publish && isSeoAgent) {
+      const allChecked = APPROVAL_CHECKLIST.every((c) => checklist[c.key]);
+      if (!allChecked) {
+        toast({
+          title: "กรุณาทำรายการตรวจสอบให้ครบก่อนเผยแพร่",
+          description: "Approval checklist incomplete",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (typeof form.safety_score === "number" && form.safety_score < 80 && !confirmUnsafe) {
+        toast({
+          title: "Safety score < 80 — ต้องยืนยันก่อนเผยแพร่",
+          description: "Tick the manual safety confirmation in the Approval tab.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
@@ -270,13 +289,20 @@ const BlogEditor = () => {
 
     if (publish && form.status !== "published") {
       payload.published_at = new Date().toISOString();
+      if (isSeoAgent) {
+        payload.workflow_status = "published";
+        payload.reviewed_at = new Date().toISOString();
+        payload.reviewed_by = user?.id ?? null;
+      }
     }
 
     let error;
+    let savedId: string | undefined = isNew ? undefined : (id as string);
     if (isNew) {
       const res = await blogTable().insert(payload).select("id").single();
       error = res.error;
       if (!error && res.data?.id) {
+        savedId = res.data.id;
         queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
         toast({ title: publish ? "เผยแพร่แล้ว" : "บันทึกสำเร็จ" });
         navigate(`/admin/blogs/${res.data.id}`, { replace: true });
@@ -292,6 +318,30 @@ const BlogEditor = () => {
     if (error) {
       toast({ title: "บันทึกล้มเหลว", description: error.message, variant: "destructive" });
     } else {
+      if (publish && savedId) {
+        try {
+          await (supabase.from("content_approval_events") as any).insert({
+            article_id: savedId,
+            event_type: isSeoAgent ? "seo_agent_published" : "published",
+            actor_id: user?.id ?? null,
+            actor_label: user?.email ?? null,
+            notes: isSeoAgent
+              ? `Approved via editor checklist${confirmUnsafe ? " (safety override)" : ""}`
+              : null,
+            snapshot: {
+              source_system: form.source_system,
+              workflow_status: "published",
+              seo_score: form.seo_score,
+              aeo_score: form.aeo_score,
+              geo_score: form.geo_score,
+              safety_score: form.safety_score,
+              checklist,
+            },
+          });
+        } catch (e) {
+          console.warn("approval event insert failed", e);
+        }
+      }
       queryClient.invalidateQueries({ queryKey: ["admin-blogs"] });
       toast({ title: publish ? "เผยแพร่แล้ว" : "บันทึกสำเร็จ" });
     }
