@@ -25,6 +25,10 @@ import {
   FileJson,
   Image as ImageIcon,
   Bot,
+  Copy,
+  ImagePlus,
+  Check,
+  Pencil,
 } from "lucide-react";
 import BlogAiAssistant, { type BlogInsertData } from "@/components/admin/BlogAiAssistant";
 
@@ -168,6 +172,62 @@ const BlogEditor = () => {
   const [checklist, setChecklist] = useState<Record<string, boolean>>({});
   const [confirmUnsafe, setConfirmUnsafe] = useState(false);
   const [insertingVisuals, setInsertingVisuals] = useState(false);
+  const [copiedAssetId, setCopiedAssetId] = useState<string | null>(null);
+  const [editingAsset, setEditingAsset] = useState<string | null>(null);
+  const [assetEditDraft, setAssetEditDraft] = useState<{ alt_text: string; caption: string }>({
+    alt_text: "",
+    caption: "",
+  });
+  const [savingAsset, setSavingAsset] = useState(false);
+
+  const handleCopyAssetUrl = async (url: string, assetId: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedAssetId(assetId);
+      setTimeout(() => setCopiedAssetId(null), 1500);
+      toast({ title: "คัดลอก URL แล้ว" });
+    } catch {
+      toast({ title: "คัดลอกไม่สำเร็จ", variant: "destructive" });
+    }
+  };
+
+  const handleSetAsCover = (url: string) => {
+    set("cover_image_url", url);
+    toast({ title: "ตั้งเป็นรูปปกแล้ว", description: "อย่าลืมกดบันทึก" });
+  };
+
+  const startEditAsset = (asset: any) => {
+    setEditingAsset(asset.id);
+    setAssetEditDraft({
+      alt_text: asset.alt_text ?? "",
+      caption: asset.caption ?? "",
+    });
+  };
+
+  const cancelEditAsset = () => {
+    setEditingAsset(null);
+    setAssetEditDraft({ alt_text: "", caption: "" });
+  };
+
+  const saveAssetEdit = async (assetId: string) => {
+    setSavingAsset(true);
+    try {
+      const { error } = await (supabase.from("article_visual_assets") as any)
+        .update({
+          alt_text: assetEditDraft.alt_text || null,
+          caption: assetEditDraft.caption || null,
+        })
+        .eq("id", assetId);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["article-visual-assets", id] });
+      toast({ title: "บันทึก alt/caption สำเร็จ" });
+      cancelEditAsset();
+    } catch (err: any) {
+      toast({ title: "บันทึกล้มเหลว", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingAsset(false);
+    }
+  };
 
   const isSeoAgent =
     form.source_system === "seo_agent_mcp" || form.workflow_status === "needs_review";
@@ -258,30 +318,56 @@ const BlogEditor = () => {
       }
 
       const currentContent = form.content_th || "";
-      const firstUrl = list[0].asset_url ?? list[0].metadata?.uploaded_asset_url;
-      if (firstUrl && currentContent.includes(firstUrl)) {
+      // Filter out images already present in content
+      const pending = list.filter((a: any) => {
+        const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
+        return url && !currentContent.includes(url);
+      });
+      if (pending.length === 0) {
         toast({ title: "Visuals already inserted" });
         return;
       }
 
-      const blocks = list
-        .map((a: any) => {
-          const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
-          if (!url) return null;
-          if (currentContent.includes(url)) return null;
-          const alt = (a.alt_text ?? "").replace(/[\[\]]/g, "");
-          const caption = a.caption ? `\n\n*${a.caption}*` : "";
-          return `![${alt}](${url})${caption}`;
-        })
-        .filter(Boolean);
+      const buildBlock = (a: any) => {
+        const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
+        const alt = (a.alt_text ?? "").replace(/[\[\]]/g, "");
+        const caption = a.caption ? `\n\n*${a.caption}*` : "";
+        return `![${alt}](${url})${caption}`;
+      };
 
-      if (blocks.length === 0) {
-        toast({ title: "Visuals already inserted" });
-        return;
+      // Interleave between H2 sections (skip the first H2 to avoid putting an image before the intro).
+      const lines = currentContent.split("\n");
+      const h2Indices: number[] = [];
+      lines.forEach((ln, idx) => {
+        if (ln.trim().startsWith("## ")) h2Indices.push(idx);
+      });
+
+      let newContent: string;
+      if (h2Indices.length >= 2) {
+        // Insertion slots = positions just before each H2 starting from the 2nd.
+        const slots = h2Indices.slice(1);
+        const result: string[] = [];
+        let assetIdx = 0;
+        for (let i = 0; i < lines.length; i++) {
+          if (slots.includes(i) && assetIdx < pending.length) {
+            result.push("", buildBlock(pending[assetIdx]), "");
+            assetIdx++;
+          }
+          result.push(lines[i]);
+        }
+        // Any remaining images go under a trailing section.
+        if (assetIdx < pending.length) {
+          result.push("", "## ภาพประกอบเพิ่มเติม", "");
+          for (let j = assetIdx; j < pending.length; j++) {
+            result.push(buildBlock(pending[j]), "");
+          }
+        }
+        newContent = result.join("\n");
+      } else {
+        // Fallback: append under a dedicated section.
+        const separator = currentContent.endsWith("\n") ? "\n" : "\n\n";
+        newContent = `${currentContent}${separator}## ภาพประกอบในบทความ\n\n${pending.map(buildBlock).join("\n\n")}\n`;
       }
-
-      const separator = currentContent.endsWith("\n") ? "\n" : "\n\n";
-      const newContent = `${currentContent}${separator}## ภาพประกอบในบทความ\n\n${blocks.join("\n\n")}\n`;
 
       const { error: updateErr } = await blogTable()
         .update({ content_th: newContent })
@@ -290,7 +376,7 @@ const BlogEditor = () => {
 
       set("content_th", newContent);
       queryClient.invalidateQueries({ queryKey: ["blog-article", id] });
-      toast({ title: `แทรกรูปภาพ ${blocks.length} รายการสำเร็จ` });
+      toast({ title: `แทรกรูปภาพ ${pending.length} รายการสำเร็จ` });
     } catch (err: any) {
       toast({ title: "แทรกรูปภาพล้มเหลว", description: err.message, variant: "destructive" });
     } finally {
@@ -878,34 +964,107 @@ const BlogEditor = () => {
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {visualAssets.map((a: any) => (
-                  <div key={a.id} className="rounded-lg border border-border overflow-hidden bg-muted/20">
-                    <VisualAssetPreview
-                      url={a.asset_url ?? a.metadata?.uploaded_asset_url ?? null}
-                      alt={a.alt_text ?? ""}
-                    />
-                    <div className="p-3 space-y-1 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="px-1.5 py-0.5 rounded bg-muted text-[10px] uppercase tracking-wider">
-                          {a.role ?? "inline"}
-                        </span>
-                        <span className="text-muted-foreground">#{a.position ?? 0}</span>
+                {visualAssets.map((a: any) => {
+                  const url = a.asset_url ?? a.metadata?.uploaded_asset_url ?? null;
+                  const isEditing = editingAsset === a.id;
+                  const isCover = url && form.cover_image_url === url;
+                  return (
+                    <div key={a.id} className="rounded-lg border border-border overflow-hidden bg-muted/20">
+                      <VisualAssetPreview url={url} alt={a.alt_text ?? ""} />
+                      <div className="p-3 space-y-2 text-xs">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="px-1.5 py-0.5 rounded bg-muted text-[10px] uppercase tracking-wider">
+                            {a.role ?? "inline"}
+                          </span>
+                          <span className="text-muted-foreground">#{a.position ?? 0}</span>
+                          {isCover && (
+                            <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 text-[10px] uppercase tracking-wider">
+                              cover
+                            </span>
+                          )}
+                        </div>
+
+                        {isEditing ? (
+                          <div className="space-y-2">
+                            <div>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">alt text</Label>
+                              <Input
+                                value={assetEditDraft.alt_text}
+                                onChange={(e) => setAssetEditDraft((p) => ({ ...p, alt_text: e.target.value }))}
+                                className="text-xs h-8 mt-1"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">caption</Label>
+                              <Textarea
+                                value={assetEditDraft.caption}
+                                onChange={(e) => setAssetEditDraft((p) => ({ ...p, caption: e.target.value }))}
+                                rows={2}
+                                className="text-xs mt-1"
+                              />
+                            </div>
+                            <div className="flex gap-1.5">
+                              <Button size="sm" variant="default" className="h-7 text-[10px]" onClick={() => saveAssetEdit(a.id)} disabled={savingAsset}>
+                                {savingAsset ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                                บันทึก
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-7 text-[10px]" onClick={cancelEditAsset} disabled={savingAsset}>
+                                ยกเลิก
+                              </Button>
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {a.alt_text && (
+                              <div>
+                                <span className="text-muted-foreground">alt: </span>
+                                <span className="text-foreground/80">{a.alt_text}</span>
+                              </div>
+                            )}
+                            {a.caption && (
+                              <div>
+                                <span className="text-muted-foreground">caption: </span>
+                                <span className="text-foreground/80">{a.caption}</span>
+                              </div>
+                            )}
+                            {url && (
+                              <div className="flex flex-wrap gap-1.5 pt-1.5 border-t border-border/50">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-[10px] gap-1"
+                                  onClick={() => handleCopyAssetUrl(url, a.id)}
+                                >
+                                  {copiedAssetId === a.id ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                  Copy URL
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-[10px] gap-1"
+                                  onClick={() => handleSetAsCover(url)}
+                                  disabled={isCover}
+                                >
+                                  <ImagePlus className="w-3 h-3" />
+                                  {isCover ? "Cover" : "Set as cover"}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 text-[10px] gap-1"
+                                  onClick={() => startEditAsset(a)}
+                                >
+                                  <Pencil className="w-3 h-3" />
+                                  Edit
+                                </Button>
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
-                      {a.alt_text && (
-                        <div>
-                          <span className="text-muted-foreground">alt: </span>
-                          <span className="text-foreground/80">{a.alt_text}</span>
-                        </div>
-                      )}
-                      {a.caption && (
-                        <div>
-                          <span className="text-muted-foreground">caption: </span>
-                          <span className="text-foreground/80">{a.caption}</span>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 </div>
               </>
             )}

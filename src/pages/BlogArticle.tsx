@@ -26,6 +26,7 @@ interface Article {
   meta_description_en: string | null;
   excerpt_th: string | null;
   excerpt_en: string | null;
+  schema_jsonld?: any;
 }
 
 interface RelatedArticle {
@@ -438,7 +439,8 @@ const BlogArticle = () => {
                 src={src}
                 alt={alt}
                 loading="lazy"
-                className="w-full rounded-lg border border-border bg-card object-contain"
+                className="border border-border bg-card"
+                style={{ maxWidth: "100%", height: "auto", borderRadius: "16px", display: "block", margin: "0 auto" }}
               />
               {caption && (
                 <figcaption className="mt-2 text-xs text-muted-foreground text-center italic">
@@ -470,7 +472,7 @@ const BlogArticle = () => {
 
   const jsonLdData = useMemo(() => {
     if (!article) return undefined;
-    return [
+    const base = [
       {
         "@context": "https://schema.org",
         "@type": "BlogPosting",
@@ -513,6 +515,13 @@ const BlogArticle = () => {
         ],
       },
     ];
+    // Inject custom schema_jsonld stored on the article (SEO Agent output).
+    // Only published articles reach this code path because the fetch query already filters status = "published".
+    if (article.schema_jsonld) {
+      const extras = Array.isArray(article.schema_jsonld) ? article.schema_jsonld : [article.schema_jsonld];
+      return [...base, ...extras.filter(Boolean)];
+    }
+    return base;
   }, [article, lang, title, metaDesc, canonicalUrl]);
 
   useSeoHead({
