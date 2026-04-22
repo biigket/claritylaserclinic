@@ -84,6 +84,44 @@ const APPROVAL_CHECKLIST = [
   { key: "visuals", label: "ตรวจรูปภาพ & alt text (Visuals/alt text reviewed)" },
 ] as const;
 
+const VisualAssetPreview = ({ url, alt }: { url: string | null; alt: string }) => {
+  const [errored, setErrored] = useState(false);
+
+  if (!url) {
+    return (
+      <div className="aspect-video bg-muted flex items-center justify-center text-xs text-muted-foreground">
+        No asset URL
+      </div>
+    );
+  }
+
+  if (errored) {
+    return (
+      <div className="aspect-video bg-muted flex flex-col items-center justify-center gap-1 text-xs text-destructive p-3 text-center">
+        <span>Image failed to load</span>
+        <a
+          href={url}
+          target="_blank"
+          rel="noreferrer"
+          className="underline break-all text-foreground/70 hover:text-foreground"
+        >
+          {url}
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={url}
+      alt={alt}
+      loading="lazy"
+      onError={() => setErrored(true)}
+      className="w-full aspect-video object-contain bg-white"
+    />
+  );
+};
+
 const BlogEditor = () => {
   const { id } = useParams();
   const isNew = !id || id === "new";
@@ -760,15 +798,10 @@ const BlogEditor = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {visualAssets.map((a: any) => (
                   <div key={a.id} className="rounded-lg border border-border overflow-hidden bg-muted/20">
-                    {a.asset_url && (
-                      <div className="aspect-video bg-muted flex items-center justify-center">
-                        <img
-                          src={a.asset_url}
-                          alt={a.alt_text ?? ""}
-                          className="max-w-full max-h-full object-contain"
-                        />
-                      </div>
-                    )}
+                    <VisualAssetPreview
+                      url={a.asset_url ?? a.metadata?.uploaded_asset_url ?? null}
+                      alt={a.alt_text ?? ""}
+                    />
                     <div className="p-3 space-y-1 text-xs">
                       <div className="flex items-center gap-2">
                         <span className="px-1.5 py-0.5 rounded bg-muted text-[10px] uppercase tracking-wider">
