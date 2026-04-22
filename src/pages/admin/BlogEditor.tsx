@@ -172,6 +172,62 @@ const BlogEditor = () => {
   const [checklist, setChecklist] = useState<Record<string, boolean>>({});
   const [confirmUnsafe, setConfirmUnsafe] = useState(false);
   const [insertingVisuals, setInsertingVisuals] = useState(false);
+  const [copiedAssetId, setCopiedAssetId] = useState<string | null>(null);
+  const [editingAsset, setEditingAsset] = useState<string | null>(null);
+  const [assetEditDraft, setAssetEditDraft] = useState<{ alt_text: string; caption: string }>({
+    alt_text: "",
+    caption: "",
+  });
+  const [savingAsset, setSavingAsset] = useState(false);
+
+  const handleCopyAssetUrl = async (url: string, assetId: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedAssetId(assetId);
+      setTimeout(() => setCopiedAssetId(null), 1500);
+      toast({ title: "คัดลอก URL แล้ว" });
+    } catch {
+      toast({ title: "คัดลอกไม่สำเร็จ", variant: "destructive" });
+    }
+  };
+
+  const handleSetAsCover = (url: string) => {
+    set("cover_image_url", url);
+    toast({ title: "ตั้งเป็นรูปปกแล้ว", description: "อย่าลืมกดบันทึก" });
+  };
+
+  const startEditAsset = (asset: any) => {
+    setEditingAsset(asset.id);
+    setAssetEditDraft({
+      alt_text: asset.alt_text ?? "",
+      caption: asset.caption ?? "",
+    });
+  };
+
+  const cancelEditAsset = () => {
+    setEditingAsset(null);
+    setAssetEditDraft({ alt_text: "", caption: "" });
+  };
+
+  const saveAssetEdit = async (assetId: string) => {
+    setSavingAsset(true);
+    try {
+      const { error } = await (supabase.from("article_visual_assets") as any)
+        .update({
+          alt_text: assetEditDraft.alt_text || null,
+          caption: assetEditDraft.caption || null,
+        })
+        .eq("id", assetId);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ["article-visual-assets", id] });
+      toast({ title: "บันทึก alt/caption สำเร็จ" });
+      cancelEditAsset();
+    } catch (err: any) {
+      toast({ title: "บันทึกล้มเหลว", description: err.message, variant: "destructive" });
+    } finally {
+      setSavingAsset(false);
+    }
+  };
 
   const isSeoAgent =
     form.source_system === "seo_agent_mcp" || form.workflow_status === "needs_review";
