@@ -9,7 +9,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Save, Eye, Upload, X, Loader2, ExternalLink, Sparkles } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  ArrowLeft,
+  Save,
+  Eye,
+  Upload,
+  X,
+  Loader2,
+  ExternalLink,
+  Sparkles,
+  ShieldAlert,
+  ShieldCheck,
+  ClipboardCheck,
+  FileJson,
+  Image as ImageIcon,
+  Bot,
+} from "lucide-react";
 import BlogAiAssistant, { type BlogInsertData } from "@/components/admin/BlogAiAssistant";
 
 const blogTable = () => supabase.from("blog_articles") as any;
