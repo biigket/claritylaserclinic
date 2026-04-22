@@ -175,9 +175,16 @@ const BlogEditor = () => {
   const [insertingVisualsEn, setInsertingVisualsEn] = useState(false);
   const [copiedAssetId, setCopiedAssetId] = useState<string | null>(null);
   const [editingAsset, setEditingAsset] = useState<string | null>(null);
-  const [assetEditDraft, setAssetEditDraft] = useState<{ alt_text: string; caption: string }>({
+  const [assetEditDraft, setAssetEditDraft] = useState<{
+    alt_text: string;
+    caption: string;
+    alt_text_en: string;
+    caption_en: string;
+  }>({
     alt_text: "",
     caption: "",
+    alt_text_en: "",
+    caption_en: "",
   });
   const [savingAsset, setSavingAsset] = useState(false);
 
@@ -202,21 +209,30 @@ const BlogEditor = () => {
     setAssetEditDraft({
       alt_text: asset.alt_text ?? "",
       caption: asset.caption ?? "",
+      alt_text_en: asset.metadata?.alt_text_en ?? "",
+      caption_en: asset.metadata?.caption_en ?? "",
     });
   };
 
   const cancelEditAsset = () => {
     setEditingAsset(null);
-    setAssetEditDraft({ alt_text: "", caption: "" });
+    setAssetEditDraft({ alt_text: "", caption: "", alt_text_en: "", caption_en: "" });
   };
 
-  const saveAssetEdit = async (assetId: string) => {
+  const saveAssetEdit = async (assetId: string, currentMetadata: Record<string, any> | null | undefined) => {
     setSavingAsset(true);
     try {
+      // Preserve any existing metadata fields (e.g. uploaded_asset_url) and merge bilingual overrides.
+      const mergedMetadata = {
+        ...(currentMetadata ?? {}),
+        alt_text_en: assetEditDraft.alt_text_en || null,
+        caption_en: assetEditDraft.caption_en || null,
+      };
       const { error } = await (supabase.from("article_visual_assets") as any)
         .update({
           alt_text: assetEditDraft.alt_text || null,
           caption: assetEditDraft.caption || null,
+          metadata: mergedMetadata,
         })
         .eq("id", assetId);
       if (error) throw error;
