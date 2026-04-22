@@ -626,6 +626,220 @@ const BlogEditor = () => {
             </Field>
           </div>
         </TabsContent>
+
+        {/* SEO Review Tab */}
+        {isSeoAgent && (
+          <TabsContent value="seo-review" className="space-y-5">
+            <div className="rounded-lg border border-border bg-muted/30 p-4 space-y-3">
+              <div className="flex flex-wrap gap-3 items-center text-xs">
+                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                  source: {form.source_system || "manual"}
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 border border-amber-500/20">
+                  workflow: {form.workflow_status || "none"}
+                </span>
+                {form.target_keyword && (
+                  <span className="text-muted-foreground">
+                    keyword: <span className="text-foreground">{form.target_keyword}</span>
+                  </span>
+                )}
+                {form.target_intent && (
+                  <span className="text-muted-foreground">
+                    intent: <span className="text-foreground">{form.target_intent}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <ScoreBadge label="SEO" value={form.seo_score} />
+              <ScoreBadge label="AEO" value={form.aeo_score} />
+              <ScoreBadge label="GEO" value={form.geo_score} />
+              <ScoreBadge label="Safety" value={form.safety_score} />
+            </div>
+
+            {typeof form.safety_score === "number" && form.safety_score < 80 && (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 flex gap-3">
+                <ShieldAlert className="w-5 h-5 text-destructive shrink-0" />
+                <div className="text-xs text-destructive">
+                  <div className="font-medium mb-1">Safety score ต่ำกว่า 80</div>
+                  <div className="text-destructive/80">
+                    บทความนี้อาจมีเนื้อหาทางการแพทย์ที่ต้องตรวจสอบเพิ่มเติม ต้องยืนยันด้วยตนเองในแท็บ Approval ก่อนเผยแพร่
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {(() => {
+              const issues = (form as any).score_issues_json ?? (form as any).score_issues;
+              if (!issues) return null;
+              const list = Array.isArray(issues) ? issues : [];
+              if (list.length === 0) return null;
+              const grouped = list.reduce((acc: Record<string, any[]>, it: any) => {
+                const k = `${it.category ?? "general"} · ${it.severity ?? "info"}`;
+                (acc[k] ||= []).push(it);
+                return acc;
+              }, {});
+              return (
+                <div className="space-y-2">
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground">Issues checklist</div>
+                  {Object.entries(grouped).map(([group, items]) => (
+                    <div key={group} className="rounded-lg border border-border p-3">
+                      <div className="text-[11px] font-medium text-foreground mb-2">{group}</div>
+                      <ul className="space-y-1.5">
+                        {(items as any[]).map((it, i) => (
+                          <li key={i} className="flex items-start gap-2 text-xs">
+                            <span className="mt-1 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                            <span className="text-foreground/80">{it.message ?? it.title ?? JSON.stringify(it)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {(() => {
+              const recs = (form as any).score_recommendations_json ?? (form as any).score_recommendations;
+              const list = Array.isArray(recs) ? recs : [];
+              if (list.length === 0) return null;
+              return (
+                <div className="rounded-lg border border-border p-3">
+                  <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Recommendations</div>
+                  <ul className="space-y-1.5 text-xs">
+                    {list.map((r: any, i: number) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <ShieldCheck className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" />
+                        <span className="text-foreground/80">{typeof r === "string" ? r : r.message ?? JSON.stringify(r)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })()}
+
+            {form.answer_summary && (
+              <Field label="Answer summary" sublabel="AEO">
+                <div className="rounded-md border border-border bg-muted/30 p-3 text-xs text-foreground/80 whitespace-pre-wrap">
+                  {form.answer_summary}
+                </div>
+              </Field>
+            )}
+          </TabsContent>
+        )}
+
+        {/* Structured Data Tab */}
+        {isSeoAgent && (
+          <TabsContent value="structured" className="space-y-4">
+            <JsonPreview title="FAQ JSON" value={(form as any).faq_json} />
+            <JsonPreview title="Schema JSON" value={(form as any).schema_json} />
+            <JsonPreview title="Schema JSON-LD" value={form.schema_jsonld} />
+            <JsonPreview title="Internal Links" value={(form as any).internal_links_json} />
+            <JsonPreview title="Citations" value={form.citations} />
+            {!form.schema_jsonld &&
+              !(form as any).faq_json &&
+              !(form as any).schema_json &&
+              !(form as any).internal_links_json &&
+              (!form.citations || (Array.isArray(form.citations) && form.citations.length === 0)) && (
+                <div className="text-xs text-muted-foreground italic">ยังไม่มีข้อมูล structured data</div>
+              )}
+          </TabsContent>
+        )}
+
+        {/* Visual Assets Tab */}
+        {isSeoAgent && (
+          <TabsContent value="visuals" className="space-y-4">
+            <JsonPreview title="visual_assets_json (raw)" value={(form as any).visual_assets_json} />
+            {visualAssets.length === 0 ? (
+              <div className="text-xs text-muted-foreground italic flex items-center gap-2">
+                <ImageIcon className="w-4 h-4" /> ยังไม่มีรูปภาพประกอบที่ผูกกับบทความนี้
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {visualAssets.map((a: any) => (
+                  <div key={a.id} className="rounded-lg border border-border overflow-hidden bg-muted/20">
+                    {a.asset_url && (
+                      <div className="aspect-video bg-muted flex items-center justify-center">
+                        <img
+                          src={a.asset_url}
+                          alt={a.alt_text ?? ""}
+                          className="max-w-full max-h-full object-contain"
+                        />
+                      </div>
+                    )}
+                    <div className="p-3 space-y-1 text-xs">
+                      <div className="flex items-center gap-2">
+                        <span className="px-1.5 py-0.5 rounded bg-muted text-[10px] uppercase tracking-wider">
+                          {a.role ?? "inline"}
+                        </span>
+                        <span className="text-muted-foreground">#{a.position ?? 0}</span>
+                      </div>
+                      {a.alt_text && (
+                        <div>
+                          <span className="text-muted-foreground">alt: </span>
+                          <span className="text-foreground/80">{a.alt_text}</span>
+                        </div>
+                      )}
+                      {a.caption && (
+                        <div>
+                          <span className="text-muted-foreground">caption: </span>
+                          <span className="text-foreground/80">{a.caption}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        )}
+
+        {/* Approval Tab */}
+        {isSeoAgent && (
+          <TabsContent value="approval" className="space-y-5">
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">Editor checklist</div>
+              <div className="space-y-2.5">
+                {APPROVAL_CHECKLIST.map((item) => (
+                  <label key={item.key} className="flex items-start gap-2.5 text-sm cursor-pointer">
+                    <Checkbox
+                      checked={!!checklist[item.key]}
+                      onCheckedChange={(v) =>
+                        setChecklist((prev) => ({ ...prev, [item.key]: v === true }))
+                      }
+                    />
+                    <span className="text-foreground/80 leading-tight">{item.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {typeof form.safety_score === "number" && form.safety_score < 80 && (
+              <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 space-y-2">
+                <div className="flex items-center gap-2 text-destructive text-sm font-medium">
+                  <ShieldAlert className="w-4 h-4" /> Manual safety confirmation required
+                </div>
+                <label className="flex items-start gap-2.5 text-xs cursor-pointer text-destructive/90">
+                  <Checkbox
+                    checked={confirmUnsafe}
+                    onCheckedChange={(v) => setConfirmUnsafe(v === true)}
+                  />
+                  <span>
+                    ฉันได้ตรวจสอบเนื้อหาทางการแพทย์ด้วยตนเองและยืนยันว่าปลอดภัยสำหรับเผยแพร่
+                  </span>
+                </label>
+              </div>
+            )}
+
+            <div className="text-[11px] text-muted-foreground">
+              บทความจะอยู่สถานะ <span className="font-medium text-foreground">draft</span> จนกว่าจะกดปุ่ม
+              <span className="font-medium text-foreground"> "เผยแพร่" </span> ด้านบน เมื่อเผยแพร่แล้ว ระบบจะตั้งค่า
+              <code className="mx-1 px-1 py-0.5 rounded bg-muted text-[10px]">workflow_status = "published"</code>
+              และบันทึก approval event อัตโนมัติ
+            </div>
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
