@@ -466,10 +466,22 @@ const BlogEditor = () => {
 
       {/* Tabs */}
       <Tabs defaultValue="content" className="space-y-6">
-        <TabsList className="bg-muted/50">
+        <TabsList className="bg-muted/50 flex-wrap h-auto">
           <TabsTrigger value="content" className="text-xs">เนื้อหา</TabsTrigger>
           <TabsTrigger value="media" className="text-xs">รูปภาพ & Tags</TabsTrigger>
           <TabsTrigger value="seo" className="text-xs">SEO</TabsTrigger>
+          {isSeoAgent && (
+            <>
+              <TabsTrigger value="seo-review" className="text-xs gap-1">
+                <Bot className="w-3 h-3" /> SEO Review
+              </TabsTrigger>
+              <TabsTrigger value="structured" className="text-xs">Structured Data</TabsTrigger>
+              <TabsTrigger value="visuals" className="text-xs">Visual Assets</TabsTrigger>
+              <TabsTrigger value="approval" className="text-xs gap-1">
+                <ClipboardCheck className="w-3 h-3" /> Approval
+              </TabsTrigger>
+            </>
+          )}
         </TabsList>
 
         {/* Content Tab */}
