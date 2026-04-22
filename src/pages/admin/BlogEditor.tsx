@@ -237,6 +237,67 @@ const BlogEditor = () => {
     set("tags", (form.tags as string[]).filter((x) => x !== t));
   };
 
+  const handleInsertVisuals = async () => {
+    if (isNew || !id) {
+      toast({ title: "กรุณาบันทึกบทความก่อน", variant: "destructive" });
+      return;
+    }
+    setInsertingVisuals(true);
+    try {
+      const { data: assets, error } = await (supabase.from("article_visual_assets") as any)
+        .select("*")
+        .eq("article_id", id)
+        .order("position", { ascending: true });
+      if (error) throw error;
+      const list = (assets ?? []).filter(
+        (a: any) => a.asset_url || a.metadata?.uploaded_asset_url
+      );
+      if (list.length === 0) {
+        toast({ title: "ไม่มีรูปภาพประกอบให้แทรก", variant: "destructive" });
+        return;
+      }
+
+      const currentContent = form.content_th || "";
+      const firstUrl = list[0].asset_url ?? list[0].metadata?.uploaded_asset_url;
+      if (firstUrl && currentContent.includes(firstUrl)) {
+        toast({ title: "Visuals already inserted" });
+        return;
+      }
+
+      const blocks = list
+        .map((a: any) => {
+          const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
+          if (!url) return null;
+          if (currentContent.includes(url)) return null;
+          const alt = (a.alt_text ?? "").replace(/[\[\]]/g, "");
+          const caption = a.caption ? `\n\n*${a.caption}*` : "";
+          return `![${alt}](${url})${caption}`;
+        })
+        .filter(Boolean);
+
+      if (blocks.length === 0) {
+        toast({ title: "Visuals already inserted" });
+        return;
+      }
+
+      const separator = currentContent.endsWith("\n") ? "\n" : "\n\n";
+      const newContent = `${currentContent}${separator}## ภาพประกอบในบทความ\n\n${blocks.join("\n\n")}\n`;
+
+      const { error: updateErr } = await blogTable()
+        .update({ content_th: newContent })
+        .eq("id", id);
+      if (updateErr) throw updateErr;
+
+      set("content_th", newContent);
+      queryClient.invalidateQueries({ queryKey: ["blog-article", id] });
+      toast({ title: `แทรกรูปภาพ ${blocks.length} รายการสำเร็จ` });
+    } catch (err: any) {
+      toast({ title: "แทรกรูปภาพล้มเหลว", description: err.message, variant: "destructive" });
+    } finally {
+      setInsertingVisuals(false);
+    }
+  };
+
   const handleGenerateCover = async () => {
     if (!form.title_th && !form.title_en) {
       toast({ title: "กรุณากรอกชื่อบทความก่อนสร้างรูปปก", variant: "destructive" });
