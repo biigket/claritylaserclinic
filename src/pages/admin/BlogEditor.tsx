@@ -1024,7 +1024,7 @@ const BlogEditor = () => {
                         {isEditing ? (
                           <div className="space-y-2">
                             <div>
-                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">alt text</Label>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">alt text (TH)</Label>
                               <Input
                                 value={assetEditDraft.alt_text}
                                 onChange={(e) => setAssetEditDraft((p) => ({ ...p, alt_text: e.target.value }))}
@@ -1032,7 +1032,7 @@ const BlogEditor = () => {
                               />
                             </div>
                             <div>
-                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">caption</Label>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">caption (TH)</Label>
                               <Textarea
                                 value={assetEditDraft.caption}
                                 onChange={(e) => setAssetEditDraft((p) => ({ ...p, caption: e.target.value }))}
@@ -1040,8 +1040,27 @@ const BlogEditor = () => {
                                 className="text-xs mt-1"
                               />
                             </div>
+                            <div>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">alt text (EN)</Label>
+                              <Input
+                                value={assetEditDraft.alt_text_en}
+                                onChange={(e) => setAssetEditDraft((p) => ({ ...p, alt_text_en: e.target.value }))}
+                                className="text-xs h-8 mt-1"
+                                placeholder="English alt text (stored in metadata.alt_text_en)"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">caption (EN)</Label>
+                              <Textarea
+                                value={assetEditDraft.caption_en}
+                                onChange={(e) => setAssetEditDraft((p) => ({ ...p, caption_en: e.target.value }))}
+                                rows={2}
+                                className="text-xs mt-1"
+                                placeholder="English caption (stored in metadata.caption_en)"
+                              />
+                            </div>
                             <div className="flex gap-1.5">
-                              <Button size="sm" variant="default" className="h-7 text-[10px]" onClick={() => saveAssetEdit(a.id)} disabled={savingAsset}>
+                              <Button size="sm" variant="default" className="h-7 text-[10px]" onClick={() => saveAssetEdit(a.id, a.metadata)} disabled={savingAsset}>
                                 {savingAsset ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                                 บันทึก
                               </Button>
@@ -1054,14 +1073,26 @@ const BlogEditor = () => {
                           <>
                             {a.alt_text && (
                               <div>
-                                <span className="text-muted-foreground">alt: </span>
+                                <span className="text-muted-foreground">alt (TH): </span>
                                 <span className="text-foreground/80">{a.alt_text}</span>
                               </div>
                             )}
                             {a.caption && (
                               <div>
-                                <span className="text-muted-foreground">caption: </span>
+                                <span className="text-muted-foreground">caption (TH): </span>
                                 <span className="text-foreground/80">{a.caption}</span>
+                              </div>
+                            )}
+                            {a.metadata?.alt_text_en && (
+                              <div>
+                                <span className="text-muted-foreground">alt (EN): </span>
+                                <span className="text-foreground/80">{a.metadata.alt_text_en}</span>
+                              </div>
+                            )}
+                            {a.metadata?.caption_en && (
+                              <div>
+                                <span className="text-muted-foreground">caption (EN): </span>
+                                <span className="text-foreground/80">{a.metadata.caption_en}</span>
                               </div>
                             )}
                             {url && (
