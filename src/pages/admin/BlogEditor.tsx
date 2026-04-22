@@ -172,7 +172,6 @@ const BlogEditor = () => {
   const [checklist, setChecklist] = useState<Record<string, boolean>>({});
   const [confirmUnsafe, setConfirmUnsafe] = useState(false);
   const [insertingVisuals, setInsertingVisuals] = useState(false);
-  const [insertingVisualsEn, setInsertingVisualsEn] = useState(false);
   const [copiedAssetId, setCopiedAssetId] = useState<string | null>(null);
   const [editingAsset, setEditingAsset] = useState<string | null>(null);
   const [assetEditDraft, setAssetEditDraft] = useState<{
@@ -219,20 +218,25 @@ const BlogEditor = () => {
     setAssetEditDraft({ alt_text: "", caption: "", alt_text_en: "", caption_en: "" });
   };
 
-  const saveAssetEdit = async (assetId: string, currentMetadata: Record<string, any> | null | undefined) => {
+  const saveAssetEdit = async (assetId: string) => {
     setSavingAsset(true);
     try {
-      // Preserve any existing metadata fields (e.g. uploaded_asset_url) and merge bilingual overrides.
-      const mergedMetadata = {
-        ...(currentMetadata ?? {}),
-        alt_text_en: assetEditDraft.alt_text_en || null,
-        caption_en: assetEditDraft.caption_en || null,
-      };
+      // Fetch current metadata so we don't clobber other keys
+      const current = visualAssets.find((x: any) => x.id === assetId);
+      const baseMeta =
+        current && current.metadata && typeof current.metadata === "object"
+          ? { ...current.metadata }
+          : {};
+      if (assetEditDraft.alt_text_en) baseMeta.alt_text_en = assetEditDraft.alt_text_en;
+      else delete baseMeta.alt_text_en;
+      if (assetEditDraft.caption_en) baseMeta.caption_en = assetEditDraft.caption_en;
+      else delete baseMeta.caption_en;
+
       const { error } = await (supabase.from("article_visual_assets") as any)
         .update({
           alt_text: assetEditDraft.alt_text || null,
           caption: assetEditDraft.caption || null,
-          metadata: mergedMetadata,
+          metadata: baseMeta,
         })
         .eq("id", assetId);
       if (error) throw error;
@@ -248,33 +252,6 @@ const BlogEditor = () => {
 
   const isSeoAgent =
     form.source_system === "seo_agent_mcp" || form.workflow_status === "needs_review";
-
-  // Bilingual completion — required fields per language for SEO Agent drafts.
-  const thFields: Record<string, string> = {
-    title_th: form.title_th,
-    content_th: form.content_th,
-    meta_title_th: form.meta_title_th,
-    meta_description_th: form.meta_description_th,
-    excerpt_th: form.excerpt_th,
-  };
-  const enFields: Record<string, string> = {
-    title_en: form.title_en,
-    content_en: form.content_en,
-    meta_title_en: form.meta_title_en,
-    meta_description_en: form.meta_description_en,
-    excerpt_en: form.excerpt_en,
-  };
-  const missingTh = Object.entries(thFields)
-    .filter(([, v]) => !v || (typeof v === "string" && v.trim() === ""))
-    .map(([k]) => k);
-  const missingEn = Object.entries(enFields)
-    .filter(([, v]) => !v || (typeof v === "string" && v.trim() === ""))
-    .map(([k]) => k);
-  const thComplete = missingTh.length === 0;
-  const enComplete = missingEn.length === 0;
-  // Bilingual review approvals (separate TH/EN sign-off, optional but tracked).
-  const [reviewedTh, setReviewedTh] = useState(false);
-  const [reviewedEn, setReviewedEn] = useState(false);
 
   const { data: visualAssets = [] } = useQuery({
     queryKey: ["article-visual-assets", id],
@@ -341,13 +318,12 @@ const BlogEditor = () => {
     set("tags", (form.tags as string[]).filter((x) => x !== t));
   };
 
-  const handleInsertVisualsForLang = async (targetLang: "th" | "en") => {
+  const handleInsertVisuals = async (targetLang: "th" | "en" = "th") => {
     if (isNew || !id) {
       toast({ title: "กรุณาบันทึกบทความก่อน", variant: "destructive" });
       return;
     }
-    if (targetLang === "th") setInsertingVisuals(true);
-    else setInsertingVisualsEn(true);
+    setInsertingVisuals(true);
     try {
       const { data: assets, error } = await (supabase.from("article_visual_assets") as any)
         .select("*")
@@ -362,10 +338,14 @@ const BlogEditor = () => {
         return;
       }
 
-      const contentField = targetLang === "th" ? "content_th" : "content_en";
-      const currentContent = (form as any)[contentField] || "";
-      if (targetLang === "en" && !currentContent) {
-        toast({ title: "ยังไม่มีเนื้อหา EN — กรุณาเพิ่มเนื้อหาภาษาอังกฤษก่อน", variant: "destructive" });
+      const contentField = targetLang === "en" ? "content_en" : "content_th";
+      const currentContent = (form[contentField] as string) || "";
+      if (targetLang === "en" && !currentContent.trim()) {
+        toast({
+          title: "ยังไม่มี content_en",
+          description: "กรุณาเพิ่มเนื้อหาภาษาอังกฤษก่อนแทรกรูปภาพ",
+          variant: "destructive",
+        });
         return;
       }
       // Filter out images already present in content
@@ -380,17 +360,16 @@ const BlogEditor = () => {
 
       const buildBlock = (a: any) => {
         const url = a.asset_url ?? a.metadata?.uploaded_asset_url;
-        // Bilingual metadata resolution.
-        // Schema currently only has alt_text/caption (Thai default).
-        // English overrides live in metadata.alt_text_en / metadata.caption_en.
-        const altTh = a.alt_text ?? "";
-        const captionTh = a.caption ?? "";
-        const altEn = a.metadata?.alt_text_en ?? "";
-        const captionEn = a.metadata?.caption_en ?? "";
-        const rawAlt = targetLang === "en" ? (altEn || altTh) : altTh;
-        const rawCaption = targetLang === "en" ? (captionEn || captionTh) : captionTh;
-        const alt = String(rawAlt).replace(/[\[\]]/g, "");
-        const caption = rawCaption ? `\n\n*${rawCaption}*` : "";
+        const altRaw =
+          targetLang === "en"
+            ? a.metadata?.alt_text_en ?? a.alt_text ?? ""
+            : a.alt_text ?? "";
+        const captionRaw =
+          targetLang === "en"
+            ? a.metadata?.caption_en ?? a.caption ?? ""
+            : a.caption ?? "";
+        const alt = String(altRaw).replace(/[\[\]]/g, "");
+        const caption = captionRaw ? `\n\n*${captionRaw}*` : "";
         return `![${alt}](${url})${caption}`;
       };
 
@@ -402,6 +381,10 @@ const BlogEditor = () => {
       });
 
       let newContent: string;
+      const trailingHeading =
+        targetLang === "en" ? "## Additional visuals" : "## ภาพประกอบเพิ่มเติม";
+      const fallbackHeading =
+        targetLang === "en" ? "## Visuals" : "## ภาพประกอบในบทความ";
       if (h2Indices.length >= 2) {
         // Insertion slots = positions just before each H2 starting from the 2nd.
         const slots = h2Indices.slice(1);
@@ -416,7 +399,7 @@ const BlogEditor = () => {
         }
         // Any remaining images go under a trailing section.
         if (assetIdx < pending.length) {
-          result.push("", targetLang === "en" ? "## Additional visuals" : "## ภาพประกอบเพิ่มเติม", "");
+          result.push("", trailingHeading, "");
           for (let j = assetIdx; j < pending.length; j++) {
             result.push(buildBlock(pending[j]), "");
           }
@@ -425,8 +408,7 @@ const BlogEditor = () => {
       } else {
         // Fallback: append under a dedicated section.
         const separator = currentContent.endsWith("\n") ? "\n" : "\n\n";
-        const heading = targetLang === "en" ? "## Visuals in this article" : "## ภาพประกอบในบทความ";
-        newContent = `${currentContent}${separator}${heading}\n\n${pending.map(buildBlock).join("\n\n")}\n`;
+        newContent = `${currentContent}${separator}${fallbackHeading}\n\n${pending.map(buildBlock).join("\n\n")}\n`;
       }
 
       const { error: updateErr } = await blogTable()
@@ -436,17 +418,15 @@ const BlogEditor = () => {
 
       set(contentField, newContent);
       queryClient.invalidateQueries({ queryKey: ["blog-article", id] });
-      toast({ title: `แทรกรูปภาพ ${pending.length} รายการสำเร็จ (${targetLang.toUpperCase()})` });
+      toast({
+        title: `แทรกรูปภาพ ${pending.length} รายการสำเร็จ (${targetLang.toUpperCase()})`,
+      });
     } catch (err: any) {
       toast({ title: "แทรกรูปภาพล้มเหลว", description: err.message, variant: "destructive" });
     } finally {
-      if (targetLang === "th") setInsertingVisuals(false);
-      else setInsertingVisualsEn(false);
+      setInsertingVisuals(false);
     }
   };
-
-  const handleInsertVisuals = () => handleInsertVisualsForLang("th");
-  const handleInsertVisualsEn = () => handleInsertVisualsForLang("en");
 
   const handleGenerateCover = async () => {
     if (!form.title_th && !form.title_en) {
@@ -497,20 +477,40 @@ const BlogEditor = () => {
       return;
     }
     if (publish && isSeoAgent) {
+      // Bilingual completeness gate for SEO Agent drafts
+      const thFields: Record<string, string> = {
+        title_th: form.title_th || "",
+        content_th: form.content_th || "",
+        meta_title_th: form.meta_title_th || "",
+        meta_description_th: form.meta_description_th || "",
+        excerpt_th: form.excerpt_th || "",
+      };
+      const enFields: Record<string, string> = {
+        title_en: form.title_en || "",
+        content_en: form.content_en || "",
+        meta_title_en: form.meta_title_en || "",
+        meta_description_en: form.meta_description_en || "",
+        excerpt_en: form.excerpt_en || "",
+      };
+      const missingTh = Object.entries(thFields)
+        .filter(([, v]) => !v.trim())
+        .map(([k]) => k);
+      const missingEn = Object.entries(enFields)
+        .filter(([, v]) => !v.trim())
+        .map(([k]) => k);
+      if (missingTh.length > 0 || missingEn.length > 0) {
+        toast({
+          title: "ข้อมูลสองภาษาไม่ครบ — ไม่สามารถเผยแพร่ได้",
+          description: `Missing TH: ${missingTh.join(", ") || "—"} | Missing EN: ${missingEn.join(", ") || "—"}`,
+          variant: "destructive",
+        });
+        return;
+      }
       const allChecked = APPROVAL_CHECKLIST.every((c) => checklist[c.key]);
       if (!allChecked) {
         toast({
           title: "กรุณาทำรายการตรวจสอบให้ครบก่อนเผยแพร่",
           description: "Approval checklist incomplete",
-          variant: "destructive",
-        });
-        return;
-      }
-      // Bilingual completeness gate: SEO Agent articles must have both TH and EN fields.
-      if (!thComplete || !enComplete) {
-        toast({
-          title: "ข้อมูลสองภาษาไม่ครบ",
-          description: `Missing TH: ${missingTh.join(", ") || "—"} | Missing EN: ${missingEn.join(", ") || "—"}`,
           variant: "destructive",
         });
         return;
@@ -596,9 +596,6 @@ const BlogEditor = () => {
               geo_score: form.geo_score,
               safety_score: form.safety_score,
               checklist,
-              reviewed_th: reviewedTh,
-              reviewed_en: reviewedEn,
-              bilingual_complete: { th: thComplete, en: enComplete },
             },
           });
         } catch (e) {
@@ -684,30 +681,6 @@ const BlogEditor = () => {
         <div className="flex gap-2">
           {autoSaveStatus && (
             <span className="text-[10px] text-muted-foreground self-center animate-pulse">{autoSaveStatus}</span>
-          )}
-          {isSeoAgent && (
-            <div className="flex items-center gap-1.5 self-center">
-              <span
-                className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border ${
-                  thComplete
-                    ? "border-emerald-500/30 text-emerald-700 bg-emerald-500/10"
-                    : "border-amber-500/30 text-amber-700 bg-amber-500/10"
-                }`}
-                title={thComplete ? "TH content complete" : `Missing: ${missingTh.join(", ")}`}
-              >
-                TH {thComplete ? "✓" : `· ${missingTh.length}`}
-              </span>
-              <span
-                className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border ${
-                  enComplete
-                    ? "border-emerald-500/30 text-emerald-700 bg-emerald-500/10"
-                    : "border-amber-500/30 text-amber-700 bg-amber-500/10"
-                }`}
-                title={enComplete ? "EN content complete" : `Missing: ${missingEn.join(", ")}`}
-              >
-                EN {enComplete ? "✓" : `· ${missingEn.length}`}
-              </span>
-            </div>
           )}
           <BlogAiAssistant
             onInsert={(data: BlogInsertData) => {
@@ -945,37 +918,6 @@ const BlogEditor = () => {
               <ScoreBadge label="Safety" value={form.safety_score} />
             </div>
 
-            {/* Bilingual completeness review issues */}
-            {(missingTh.length > 0 || missingEn.length > 0) && (
-              <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-4 space-y-2">
-                <div className="text-xs uppercase tracking-wider text-amber-700 font-medium">
-                  Bilingual completeness
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                  <div>
-                    <div className="font-medium text-foreground mb-1">TH {thComplete ? "✓" : "·"} Missing</div>
-                    {thComplete ? (
-                      <div className="text-emerald-700">All required fields present</div>
-                    ) : (
-                      <ul className="space-y-0.5 text-foreground/80">
-                        {missingTh.map((f) => <li key={f}>• <span className="font-mono">{f}</span></li>)}
-                      </ul>
-                    )}
-                  </div>
-                  <div>
-                    <div className="font-medium text-foreground mb-1">EN {enComplete ? "✓" : "·"} Missing</div>
-                    {enComplete ? (
-                      <div className="text-emerald-700">All required fields present</div>
-                    ) : (
-                      <ul className="space-y-0.5 text-foreground/80">
-                        {missingEn.map((f) => <li key={f}>• <span className="font-mono">{f}</span></li>)}
-                      </ul>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {typeof form.safety_score === "number" && form.safety_score < 80 && (
               <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 flex gap-3">
                 <ShieldAlert className="w-5 h-5 text-destructive shrink-0" />
@@ -1077,18 +1019,34 @@ const BlogEditor = () => {
               <>
                 <div className="flex items-center justify-between gap-3 rounded-lg border border-border bg-muted/20 p-3">
                   <div className="text-xs text-muted-foreground">
-                    แทรกรูปภาพระหว่าง section ของบทความ — ใช้ alt/caption ภาษาไทยสำหรับ
-                    <span className="font-medium text-foreground"> content_th</span> และภาษาอังกฤษ
-                    (<span className="font-mono">metadata.alt_text_en</span> / <span className="font-mono">metadata.caption_en</span>) สำหรับ
-                    <span className="font-medium text-foreground"> content_en</span>
+                    แทรกรูปภาพเป็น Markdown ระหว่างหัวข้อ H2 — แยกตามภาษา
+                    <span className="font-medium text-foreground"> (TH ใช้ alt/caption ภาษาไทย, EN ใช้ค่าใน metadata.alt_text_en / caption_en)</span>
                   </div>
                   <div className="flex gap-1.5 shrink-0">
-                    <Button size="sm" variant="outline" onClick={handleInsertVisuals} disabled={insertingVisuals}>
-                      {insertingVisuals ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleInsertVisuals("th")}
+                      disabled={insertingVisuals}
+                    >
+                      {insertingVisuals ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <ImageIcon className="w-3.5 h-3.5" />
+                      )}
                       Insert (TH)
                     </Button>
-                    <Button size="sm" variant="outline" onClick={handleInsertVisualsEn} disabled={insertingVisualsEn}>
-                      {insertingVisualsEn ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleInsertVisuals("en")}
+                      disabled={insertingVisuals}
+                    >
+                      {insertingVisuals ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <ImageIcon className="w-3.5 h-3.5" />
+                      )}
                       Insert (EN)
                     </Button>
                   </div>
@@ -1134,26 +1092,28 @@ const BlogEditor = () => {
                               />
                             </div>
                             <div>
-                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">alt text (EN)</Label>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                                alt text (EN) — stored in metadata.alt_text_en
+                              </Label>
                               <Input
                                 value={assetEditDraft.alt_text_en}
                                 onChange={(e) => setAssetEditDraft((p) => ({ ...p, alt_text_en: e.target.value }))}
                                 className="text-xs h-8 mt-1"
-                                placeholder="English alt text (stored in metadata.alt_text_en)"
                               />
                             </div>
                             <div>
-                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">caption (EN)</Label>
+                              <Label className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                                caption (EN) — stored in metadata.caption_en
+                              </Label>
                               <Textarea
                                 value={assetEditDraft.caption_en}
                                 onChange={(e) => setAssetEditDraft((p) => ({ ...p, caption_en: e.target.value }))}
                                 rows={2}
                                 className="text-xs mt-1"
-                                placeholder="English caption (stored in metadata.caption_en)"
                               />
                             </div>
                             <div className="flex gap-1.5">
-                              <Button size="sm" variant="default" className="h-7 text-[10px]" onClick={() => saveAssetEdit(a.id, a.metadata)} disabled={savingAsset}>
+                              <Button size="sm" variant="default" className="h-7 text-[10px]" onClick={() => saveAssetEdit(a.id)} disabled={savingAsset}>
                                 {savingAsset ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                                 บันทึก
                               </Button>
@@ -1249,39 +1209,6 @@ const BlogEditor = () => {
                     <span className="text-foreground/80 leading-tight">{item.label}</span>
                   </label>
                 ))}
-              </div>
-            </div>
-
-            {/* Bilingual sign-off (separate TH / EN approval). Optional, audit-only. */}
-            <div className="rounded-lg border border-border p-4 space-y-3">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">Bilingual sign-off</div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <label className={`flex items-start gap-2.5 text-sm cursor-pointer rounded-md border p-3 transition-colors ${reviewedTh ? "border-emerald-500/40 bg-emerald-500/5" : "border-border"}`}>
-                  <Checkbox
-                    checked={reviewedTh}
-                    onCheckedChange={(v) => setReviewedTh(v === true)}
-                    disabled={!thComplete}
-                  />
-                  <span className="text-foreground/80 leading-tight">
-                    <span className="block font-medium">เนื้อหาภาษาไทย (TH) ตรวจสอบแล้ว</span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {thComplete ? "Required fields present" : `Missing: ${missingTh.join(", ")}`}
-                    </span>
-                  </span>
-                </label>
-                <label className={`flex items-start gap-2.5 text-sm cursor-pointer rounded-md border p-3 transition-colors ${reviewedEn ? "border-emerald-500/40 bg-emerald-500/5" : "border-border"}`}>
-                  <Checkbox
-                    checked={reviewedEn}
-                    onCheckedChange={(v) => setReviewedEn(v === true)}
-                    disabled={!enComplete}
-                  />
-                  <span className="text-foreground/80 leading-tight">
-                    <span className="block font-medium">English content (EN) reviewed</span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {enComplete ? "Required fields present" : `Missing: ${missingEn.join(", ")}`}
-                    </span>
-                  </span>
-                </label>
               </div>
             </div>
 

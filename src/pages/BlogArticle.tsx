@@ -466,14 +466,7 @@ const BlogArticle = () => {
   };
 
   const title = article ? (lang === "th" ? article.title_th : (article.title_en || article.title_th)) : "";
-  // Bilingual fallback: if EN content is missing, fall back to TH so we never expose an empty page.
-  const hasEnContent = !!(article && article.content_en && article.content_en.trim().length > 0);
-  const effectiveLang: "th" | "en" = lang === "en" && hasEnContent ? "en" : "th";
-  const content = article
-    ? effectiveLang === "th"
-      ? article.content_th
-      : (article.content_en || article.content_th)
-    : "";
+  const content = article ? (lang === "th" ? article.content_th : (article.content_en || article.content_th)) : "";
   const metaDesc = article ? (lang === "th" ? (article.meta_description_th || "") : (article.meta_description_en || article.meta_description_th || "")) : "";
   const canonicalUrl = `https://claritylaserclinic.com/blog/${slug || ""}`;
 
@@ -538,16 +531,6 @@ const BlogArticle = () => {
     ogType: "article",
     ogImage: article?.cover_image_url || undefined,
     jsonLd: jsonLdData,
-    // Self-referencing hreflang on the canonical URL. Bilingual variants are served by the
-    // same URL via the in-page language toggle, so x-default + th-TH always point to it.
-    // en-US is added only when the article actually has English content.
-    alternates: article
-      ? [
-          { hreflang: "x-default", href: canonicalUrl },
-          { hreflang: "th-TH", href: canonicalUrl },
-          ...(hasEnContent ? [{ hreflang: "en-US", href: canonicalUrl }] : []),
-        ]
-      : undefined,
   });
 
   if (loading) {

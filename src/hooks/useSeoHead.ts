@@ -10,11 +10,6 @@ interface SeoHeadOptions {
   ogType?: string;
   noindex?: boolean;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
-  /**
-   * Optional <link rel="alternate" hreflang> entries.
-   * Use { hreflang: "th-TH" | "en-US" | "x-default", href }.
-   */
-  alternates?: Array<{ hreflang: string; href: string }>;
 }
 
 /**
@@ -54,20 +49,6 @@ export const useSeoHead = (opts: SeoHeadOptions) => {
       }
       canonicalEl.setAttribute("href", opts.canonical);
       managedElements.push(canonicalEl);
-    }
-
-    // hreflang alternates (managed: removed on cleanup so they don't leak across routes)
-    const alternateEls: HTMLLinkElement[] = [];
-    if (opts.alternates && opts.alternates.length > 0) {
-      opts.alternates.forEach((alt) => {
-        const link = document.createElement("link");
-        link.setAttribute("rel", "alternate");
-        link.setAttribute("hreflang", alt.hreflang);
-        link.setAttribute("href", alt.href);
-        link.setAttribute("data-managed-hreflang", "1");
-        document.head.appendChild(link);
-        alternateEls.push(link);
-      });
     }
 
     // Robots
@@ -112,7 +93,6 @@ export const useSeoHead = (opts: SeoHeadOptions) => {
 
     return () => {
       jsonLdScripts.forEach((s) => s.remove());
-      alternateEls.forEach((l) => l.remove());
     };
-  }, [opts.title, opts.description, opts.canonical, opts.ogImage, opts.noindex, JSON.stringify(opts.alternates ?? [])]);
+  }, [opts.title, opts.description, opts.canonical, opts.ogImage, opts.noindex]);
 };
