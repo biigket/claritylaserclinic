@@ -727,8 +727,18 @@ const BlogEditor = () => {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="content" className="space-y-6">
+      <Tabs defaultValue={isSeoAgent ? "review" : "content"} className="space-y-6">
         <TabsList className="bg-muted/50 flex-wrap h-auto">
+          {isSeoAgent && (
+            <TabsTrigger value="review" className="text-xs gap-1">
+              <ClipboardCheck className="w-3 h-3" /> Review
+            </TabsTrigger>
+          )}
+          {isSeoAgent && (
+            <TabsTrigger value="preview" className="text-xs gap-1">
+              <Eye className="w-3 h-3" /> Preview
+            </TabsTrigger>
+          )}
           <TabsTrigger value="content" className="text-xs">เนื้อหา</TabsTrigger>
           <TabsTrigger value="media" className="text-xs">รูปภาพ & Tags</TabsTrigger>
           <TabsTrigger value="seo" className="text-xs">SEO</TabsTrigger>
@@ -738,7 +748,7 @@ const BlogEditor = () => {
                 <Bot className="w-3 h-3" /> SEO Review
               </TabsTrigger>
               <TabsTrigger value="structured" className="text-xs">Structured Data</TabsTrigger>
-              <TabsTrigger value="visuals" className="text-xs">Visual Assets</TabsTrigger>
+              <TabsTrigger value="visuals" className="text-xs text-muted-foreground">Repair tools</TabsTrigger>
               <TabsTrigger value="approval" className="text-xs gap-1">
                 <ClipboardCheck className="w-3 h-3" /> Approval
               </TabsTrigger>
