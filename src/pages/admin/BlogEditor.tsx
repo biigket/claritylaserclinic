@@ -29,8 +29,11 @@ import {
   ImagePlus,
   Check,
   Pencil,
+  AlertTriangle,
 } from "lucide-react";
 import BlogAiAssistant, { type BlogInsertData } from "@/components/admin/BlogAiAssistant";
+import ReviewSummary from "@/components/admin/ReviewSummary";
+import MarkdownPreview from "@/components/admin/MarkdownPreview";
 
 const blogTable = () => supabase.from("blog_articles") as any;
 
@@ -725,8 +728,18 @@ const BlogEditor = () => {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="content" className="space-y-6">
+      <Tabs defaultValue={isSeoAgent ? "review" : "content"} className="space-y-6">
         <TabsList className="bg-muted/50 flex-wrap h-auto">
+          {isSeoAgent && (
+            <TabsTrigger value="review" className="text-xs gap-1">
+              <ClipboardCheck className="w-3 h-3" /> Review
+            </TabsTrigger>
+          )}
+          {isSeoAgent && (
+            <TabsTrigger value="preview" className="text-xs gap-1">
+              <Eye className="w-3 h-3" /> Preview
+            </TabsTrigger>
+          )}
           <TabsTrigger value="content" className="text-xs">เนื้อหา</TabsTrigger>
           <TabsTrigger value="media" className="text-xs">รูปภาพ & Tags</TabsTrigger>
           <TabsTrigger value="seo" className="text-xs">SEO</TabsTrigger>
@@ -736,13 +749,79 @@ const BlogEditor = () => {
                 <Bot className="w-3 h-3" /> SEO Review
               </TabsTrigger>
               <TabsTrigger value="structured" className="text-xs">Structured Data</TabsTrigger>
-              <TabsTrigger value="visuals" className="text-xs">Visual Assets</TabsTrigger>
+              <TabsTrigger value="visuals" className="text-xs text-muted-foreground">Repair tools</TabsTrigger>
               <TabsTrigger value="approval" className="text-xs gap-1">
                 <ClipboardCheck className="w-3 h-3" /> Approval
               </TabsTrigger>
             </>
           )}
         </TabsList>
+
+        {/* Review Tab — primary entry point for SEO Agent drafts */}
+        {isSeoAgent && (
+          <TabsContent value="review" className="space-y-5">
+            <ReviewSummary form={form} visualAssets={visualAssets as any[]} />
+            <div className="rounded-xl border border-border bg-muted/20 p-4 text-xs text-muted-foreground space-y-2">
+              <p>
+                ✅ ถ้าทุกอย่างผ่าน — กดปุ่ม <span className="font-medium text-foreground">"เผยแพร่"</span> ด้านบน
+                ระบบจะให้ตรวจรายการสุดท้ายในแท็บ <span className="font-medium text-foreground">Approval</span> ก่อนเปลี่ยนสถานะเป็น
+                <code className="mx-1 px-1 py-0.5 rounded bg-muted text-[10px]">workflow_status = "published"</code>
+              </p>
+              <p>
+                🛠 ถ้ามีรายการไม่ผ่าน ใช้แท็บ <span className="font-medium text-foreground">Repair tools</span> เพื่อแก้ไขรูปภาพ / alt-caption หรือแทรกรูปด้วยมือ —
+                ปกติบทความจาก SEO Agent MCP จะมี Markdown image ฝังมาเรียบร้อยแล้ว ไม่จำเป็นต้องกดแทรกอีก
+              </p>
+            </div>
+          </TabsContent>
+        )}
+
+        {/* Preview Tab — TH/EN bilingual preview */}
+        {isSeoAgent && (
+          <TabsContent value="preview" className="space-y-5">
+            <Tabs defaultValue="th" className="space-y-4">
+              <TabsList className="bg-muted/50">
+                <TabsTrigger value="th" className="text-xs">🇹🇭 ภาษาไทย</TabsTrigger>
+                <TabsTrigger value="en" className="text-xs">🇬🇧 English</TabsTrigger>
+              </TabsList>
+              <TabsContent value="th" className="space-y-4">
+                {form.cover_image_url && (
+                  <img
+                    src={form.cover_image_url}
+                    alt={form.title_th || ""}
+                    className="w-full max-h-80 object-cover rounded-xl border border-border"
+                  />
+                )}
+                {form.title_th && (
+                  <h1 className="font-display text-2xl text-foreground">{form.title_th}</h1>
+                )}
+                {form.excerpt_th && (
+                  <p className="text-sm text-muted-foreground italic border-l-2 border-primary/30 pl-3">
+                    {form.excerpt_th}
+                  </p>
+                )}
+                <MarkdownPreview content={form.content_th || ""} />
+              </TabsContent>
+              <TabsContent value="en" className="space-y-4">
+                {form.cover_image_url && (
+                  <img
+                    src={form.cover_image_url}
+                    alt={form.title_en || ""}
+                    className="w-full max-h-80 object-cover rounded-xl border border-border"
+                  />
+                )}
+                {form.title_en && (
+                  <h1 className="font-display text-2xl text-foreground">{form.title_en}</h1>
+                )}
+                {form.excerpt_en && (
+                  <p className="text-sm text-muted-foreground italic border-l-2 border-primary/30 pl-3">
+                    {form.excerpt_en}
+                  </p>
+                )}
+                <MarkdownPreview content={form.content_en || ""} />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+        )}
 
         {/* Content Tab */}
         <TabsContent value="content" className="space-y-5">
@@ -1010,6 +1089,16 @@ const BlogEditor = () => {
         {/* Visual Assets Tab */}
         {isSeoAgent && (
           <TabsContent value="visuals" className="space-y-4">
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-foreground/80 flex gap-2 items-start">
+              <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+              <div>
+                <div className="font-medium text-foreground">Repair tools</div>
+                <div className="text-muted-foreground">
+                  ปกติบทความจาก SEO Agent MCP จะมีรูปฝัง Markdown ใน content_th / content_en มาแล้ว — เครื่องมือนี้ใช้สำหรับ
+                  draft เก่า หรือกรณีรูปภาพไม่ถูกแทรกอัตโนมัติ ใช้ปุ่ม Insert / Edit alt / Set as cover ได้ตามต้องการ
+                </div>
+              </div>
+            </div>
             <JsonPreview title="visual_assets_json (raw)" value={(form as any).visual_assets_json} />
             {visualAssets.length === 0 ? (
               <div className="text-xs text-muted-foreground italic flex items-center gap-2">
