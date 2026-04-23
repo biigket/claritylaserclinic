@@ -756,6 +756,72 @@ const BlogEditor = () => {
           )}
         </TabsList>
 
+        {/* Review Tab — primary entry point for SEO Agent drafts */}
+        {isSeoAgent && (
+          <TabsContent value="review" className="space-y-5">
+            <ReviewSummary form={form} visualAssets={visualAssets as any[]} />
+            <div className="rounded-xl border border-border bg-muted/20 p-4 text-xs text-muted-foreground space-y-2">
+              <p>
+                ✅ ถ้าทุกอย่างผ่าน — กดปุ่ม <span className="font-medium text-foreground">"เผยแพร่"</span> ด้านบน
+                ระบบจะให้ตรวจรายการสุดท้ายในแท็บ <span className="font-medium text-foreground">Approval</span> ก่อนเปลี่ยนสถานะเป็น
+                <code className="mx-1 px-1 py-0.5 rounded bg-muted text-[10px]">workflow_status = "published"</code>
+              </p>
+              <p>
+                🛠 ถ้ามีรายการไม่ผ่าน ใช้แท็บ <span className="font-medium text-foreground">Repair tools</span> เพื่อแก้ไขรูปภาพ / alt-caption หรือแทรกรูปด้วยมือ —
+                ปกติบทความจาก SEO Agent MCP จะมี Markdown image ฝังมาเรียบร้อยแล้ว ไม่จำเป็นต้องกดแทรกอีก
+              </p>
+            </div>
+          </TabsContent>
+        )}
+
+        {/* Preview Tab — TH/EN bilingual preview */}
+        {isSeoAgent && (
+          <TabsContent value="preview" className="space-y-5">
+            <Tabs defaultValue="th" className="space-y-4">
+              <TabsList className="bg-muted/50">
+                <TabsTrigger value="th" className="text-xs">🇹🇭 ภาษาไทย</TabsTrigger>
+                <TabsTrigger value="en" className="text-xs">🇬🇧 English</TabsTrigger>
+              </TabsList>
+              <TabsContent value="th" className="space-y-4">
+                {form.cover_image_url && (
+                  <img
+                    src={form.cover_image_url}
+                    alt={form.title_th || ""}
+                    className="w-full max-h-80 object-cover rounded-xl border border-border"
+                  />
+                )}
+                {form.title_th && (
+                  <h1 className="font-display text-2xl text-foreground">{form.title_th}</h1>
+                )}
+                {form.excerpt_th && (
+                  <p className="text-sm text-muted-foreground italic border-l-2 border-primary/30 pl-3">
+                    {form.excerpt_th}
+                  </p>
+                )}
+                <MarkdownPreview content={form.content_th || ""} />
+              </TabsContent>
+              <TabsContent value="en" className="space-y-4">
+                {form.cover_image_url && (
+                  <img
+                    src={form.cover_image_url}
+                    alt={form.title_en || ""}
+                    className="w-full max-h-80 object-cover rounded-xl border border-border"
+                  />
+                )}
+                {form.title_en && (
+                  <h1 className="font-display text-2xl text-foreground">{form.title_en}</h1>
+                )}
+                {form.excerpt_en && (
+                  <p className="text-sm text-muted-foreground italic border-l-2 border-primary/30 pl-3">
+                    {form.excerpt_en}
+                  </p>
+                )}
+                <MarkdownPreview content={form.content_en || ""} />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+        )}
+
         {/* Content Tab */}
         <TabsContent value="content" className="space-y-5">
           <Field label="Slug" sublabel="URL path">
