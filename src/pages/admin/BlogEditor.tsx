@@ -1088,6 +1088,16 @@ const BlogEditor = () => {
         {/* Visual Assets Tab */}
         {isSeoAgent && (
           <TabsContent value="visuals" className="space-y-4">
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 text-xs text-foreground/80 flex gap-2 items-start">
+              <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+              <div>
+                <div className="font-medium text-foreground">Repair tools</div>
+                <div className="text-muted-foreground">
+                  ปกติบทความจาก SEO Agent MCP จะมีรูปฝัง Markdown ใน content_th / content_en มาแล้ว — เครื่องมือนี้ใช้สำหรับ
+                  draft เก่า หรือกรณีรูปภาพไม่ถูกแทรกอัตโนมัติ ใช้ปุ่ม Insert / Edit alt / Set as cover ได้ตามต้องการ
+                </div>
+              </div>
+            </div>
             <JsonPreview title="visual_assets_json (raw)" value={(form as any).visual_assets_json} />
             {visualAssets.length === 0 ? (
               <div className="text-xs text-muted-foreground italic flex items-center gap-2">
