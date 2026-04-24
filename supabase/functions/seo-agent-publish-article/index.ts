@@ -356,6 +356,11 @@ Deno.serve(async (req: Request) => {
     }
 
     const publishedAt = new Date().toISOString();
+    const previousState = {
+      status: article.status,
+      workflow_status: article.workflow_status,
+      published_at: article.published_at,
+    };
     const { data: updated, error: updErr } = await supabase
       .from("blog_articles")
       .update({
@@ -391,6 +396,19 @@ Deno.serve(async (req: Request) => {
 
     if (auditErr) {
       console.error("Audit event insert failed:", auditErr);
+      // Compensation: revert article to its previous state so we never leave
+      // an article publicly published without a corresponding audit row.
+      const { error: revertErr } = await supabase
+        .from("blog_articles")
+        .update({
+          status: previousState.status,
+          workflow_status: previousState.workflow_status,
+          published_at: previousState.published_at,
+        })
+        .eq("id", updated.id);
+      if (revertErr) {
+        console.error("Revert after audit failure failed:", revertErr);
+      }
       return json(
         {
           error: "Failed to publish article",
@@ -573,6 +591,22 @@ Deno.serve(async (req: Request) => {
 
   if (auditErr) {
     console.error("Audit event insert failed:", auditErr);
+    // Compensation: delete any inserted visual asset rows and the article
+    // itself, so we never leave a published article without an audit row.
+    const { error: assetCleanupErr } = await supabase
+      .from("article_visual_assets")
+      .delete()
+      .eq("article_id", inserted.id);
+    if (assetCleanupErr) {
+      console.error("Visual asset cleanup after audit failure failed:", assetCleanupErr);
+    }
+    const { error: articleCleanupErr } = await supabase
+      .from("blog_articles")
+      .delete()
+      .eq("id", inserted.id);
+    if (articleCleanupErr) {
+      console.error("Article cleanup after audit failure failed:", articleCleanupErr);
+    }
     return json(
       {
         error: "Failed to publish article",
