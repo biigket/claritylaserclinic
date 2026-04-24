@@ -107,6 +107,15 @@ function hasNonEmptyJsonArrayOrObject(v: unknown): boolean {
   return false;
 }
 
+function isNonEmptyObjectOrArray(v: unknown): boolean {
+  if (v === null || v === undefined) return false;
+  if (Array.isArray(v)) return v.length > 0;
+  if (typeof v === "object") {
+    return Object.keys(v as Record<string, unknown>).length > 0;
+  }
+  return false;
+}
+
 /**
  * Run all publish gates against an article record + its visual assets.
  * Returns failing checks. Empty array = ready to publish.
@@ -139,6 +148,16 @@ function runPublishChecks(
         details: `${key} is empty`,
       });
     }
+  }
+
+  // Cover image required
+  if (!nonEmptyString(article.cover_image_url)) {
+    failures.push({
+      key: "cover_image_url",
+      label: "Cover image",
+      status: "fail",
+      details: "cover_image_url is required",
+    });
   }
 
   // Visuals: at least one
@@ -189,19 +208,14 @@ function runPublishChecks(
     }
   }
 
-  // schema_jsonld must exist (non-empty object)
-  const schema = article.schema_jsonld;
-  const schemaOk =
-    schema &&
-    typeof schema === "object" &&
-    !Array.isArray(schema) &&
-    Object.keys(schema as Record<string, unknown>).length > 0;
-  if (!schemaOk) {
+  // schema_jsonld must exist (non-empty object OR non-empty array)
+  if (!isNonEmptyObjectOrArray(article.schema_jsonld)) {
     failures.push({
       key: "schema_jsonld",
       label: "Structured data (schema_jsonld)",
       status: "fail",
-      details: "schema_jsonld is required and must be a non-empty object",
+      details:
+        "schema_jsonld is required and must be a non-empty object or array",
     });
   }
 
@@ -298,6 +312,24 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Article not found" }, 404);
     }
 
+    // Idempotent: if already published, return current state BEFORE running gates.
+    // This prevents already-live articles from being blocked by newer/stricter checks.
+    if (article.status === "published") {
+      return json(
+        {
+          ok: true,
+          article: {
+            id: article.id,
+            slug: article.slug,
+            status: article.status,
+            workflow_status: article.workflow_status,
+            published_at: article.published_at,
+          },
+        },
+        200,
+      );
+    }
+
     const { data: visuals, error: visualErr } = await supabase
       .from("article_visual_assets")
       .select("*")
@@ -323,23 +355,6 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Idempotent: if already published, return current state
-    if (article.status === "published") {
-      return json(
-        {
-          ok: true,
-          article: {
-            id: article.id,
-            slug: article.slug,
-            status: article.status,
-            workflow_status: article.workflow_status,
-            published_at: article.published_at,
-          },
-        },
-        200,
-      );
-    }
-
     const publishedAt = new Date().toISOString();
     const { data: updated, error: updErr } = await supabase
       .from("blog_articles")
@@ -360,7 +375,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    await supabase.from("content_approval_events").insert({
+    const { error: auditErr } = await supabase.from("content_approval_events").insert({
       article_id: updated.id,
       event_type: "seo_agent_published_from_chat",
       actor_label: "seo_agent_mcp",
@@ -373,6 +388,17 @@ Deno.serve(async (req: Request) => {
         safety_score: updated.safety_score,
       },
     });
+
+    if (auditErr) {
+      console.error("Audit event insert failed:", auditErr);
+      return json(
+        {
+          error: "Failed to publish article",
+          details: `Audit log insert failed: ${auditErr.message}`,
+        },
+        500,
+      );
+    }
 
     return json(
       {
@@ -432,6 +458,7 @@ Deno.serve(async (req: Request) => {
     meta_title_en: draft.meta_title_en ?? null,
     meta_description_th: draft.meta_description_th ?? null,
     meta_description_en: draft.meta_description_en ?? null,
+    cover_image_url: draft.cover_image_url ?? null,
     schema_jsonld: draft.schema_jsonld ?? null,
     safety_score: draft.safety_score ?? null,
     score_issues_json: draft.score_issues_json ?? null,
@@ -509,10 +536,28 @@ Deno.serve(async (req: Request) => {
     const { error: assetErr } = await supabase
       .from("article_visual_assets")
       .insert(assetRows);
-    if (assetErr) console.error("Visual asset insert failed:", assetErr);
+    if (assetErr) {
+      console.error("Visual asset insert failed:", assetErr);
+      // Rollback: delete the article we just inserted to avoid a published
+      // article without its visual rows.
+      const { error: rollbackErr } = await supabase
+        .from("blog_articles")
+        .delete()
+        .eq("id", inserted.id);
+      if (rollbackErr) {
+        console.error("Rollback delete failed:", rollbackErr);
+      }
+      return json(
+        {
+          error: "Failed to publish article",
+          details: `Visual asset insert failed: ${assetErr.message}`,
+        },
+        500,
+      );
+    }
   }
 
-  await supabase.from("content_approval_events").insert({
+  const { error: auditErr } = await supabase.from("content_approval_events").insert({
     article_id: inserted.id,
     event_type: "seo_agent_published_from_chat",
     actor_label: "seo_agent_mcp",
@@ -525,6 +570,17 @@ Deno.serve(async (req: Request) => {
       safety_score: inserted.safety_score,
     },
   });
+
+  if (auditErr) {
+    console.error("Audit event insert failed:", auditErr);
+    return json(
+      {
+        error: "Failed to publish article",
+        details: `Audit log insert failed: ${auditErr.message}`,
+      },
+      500,
+    );
+  }
 
   return json(
     {
